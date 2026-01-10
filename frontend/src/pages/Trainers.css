@@ -1,0 +1,319 @@
+.trainers-page {
+    background: transparent;
+    min-height: 100vh;
+    color: white;
+    padding-bottom: 4rem;
+}
+
+.trainers-hero {
+    background: linear-gradient(180deg, rgba(0, 230, 118, 0.1), transparent 80%);
+    padding: 4rem 1.5rem;
+    /* Match grid padding side */
+    text-align: left;
+    /* Align Left */
+    display: flex;
+    justify-content: center;
+    /* Center the container max-width */
+}
+
+.hero-content {
+    max-width: 1200px;
+    width: 100%;
+}
+
+.trainers-hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: #aaa;
+    font-size: 1.1rem;
+}
+
+/* Toolbar Section (Matches Community Page Tabs) */
+.toolbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+}
+
+.trainers-toolbar {
+    display: flex;
+    gap: 1.5rem;
+    /* More breathing room */
+    margin-bottom: 2rem;
+    padding: 0 1rem 0.5rem 0;
+    border-bottom: 1px solid #333;
+    width: fit-content;
+    /* Shorten the line */
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    /* Remove border */
+    color: #888;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+    border-bottom: 2px solid transparent;
+    /* Prepare for underline */
+    border-radius: 0;
+    /* Remove pill shape */
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.tab-btn:hover {
+    color: white;
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    /* Underline effect */
+    background: transparent;
+    font-weight: 600;
+    box-shadow: none;
+}
+
+.trainers-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* Coach Card Styles */
+.coach-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.coach-card {
+    background: #181818;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #222;
+    transition: transform 0.3s;
+}
+
+.coach-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.card-header {
+    position: relative;
+    height: 200px;
+}
+
+.coach-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.verified-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: white;
+    color: black;
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.coach-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.sport-tag {
+    color: var(--primary);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.rating {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+.coach-name {
+    font-size: 1.5rem;
+    margin-bottom: 0.2rem;
+}
+
+.experience {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.skill-tag {
+    background: #222;
+    color: #ccc;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.modes-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.mode-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+}
+
+.mode-badge.online {
+    background: rgba(0, 180, 255, 0.1);
+    color: #00b4ff;
+}
+
+.mode-badge.offline {
+    background: rgba(0, 230, 118, 0.1);
+    color: var(--primary);
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #222;
+    padding-top: 1rem;
+}
+
+.price-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.price-info .label {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.price-info .price {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.price-info small {
+    font-size: 0.7rem;
+    font-weight: normal;
+}
+
+.view-profile-btn {
+    background: white;
+    color: black;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.view-profile-btn:hover {
+    background: #ddd;
+}
+
+/* Academy Card Styles */
+.academy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.academy-card {
+    background: #181818;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #222;
+}
+
+.academy-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.academy-info {
+    padding: 1.5rem;
+}
+
+.academy-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.batches-row {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.batch-tag {
+    background: #333;
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.facilities-list {
+    margin-bottom: 1.5rem;
+}
+
+.facility-item {
+    display: flex;
+    gap: 0.5rem;
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+.enroll-btn {
+    width: 100%;
+    background: var(--primary);
+    color: black;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}

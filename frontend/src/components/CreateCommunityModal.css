@@ -1,0 +1,292 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.community-modal {
+    background: #1a1a1a;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid #333;
+    animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    color: white;
+}
+
+@keyframes modalSlideUp {
+    from {
+        transform: translateY(40px) scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 20px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+.close-btn {
+    background: #2a2a2a;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    background: #333;
+    color: white;
+    transform: rotate(90deg);
+}
+
+.community-form .form-group {
+    margin-bottom: 24px;
+}
+
+.community-form label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: #ccc;
+    font-size: 0.95rem;
+}
+
+.community-form input[type="text"],
+.community-form textarea {
+    width: 100%;
+    padding: 14px 16px;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s;
+    font-family: inherit;
+    color: white;
+}
+
+.community-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.community-form input:focus,
+.community-form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(0, 230, 118, 0.1);
+    background: #000;
+}
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    transition: color 0.2s;
+}
+
+.input-with-icon input:focus~svg {
+    color: var(--primary);
+    /* This selector won't work because svg is before input usually in DOM order, need to reorder JSX or use focus-within on parent */
+}
+
+.input-with-icon:focus-within svg {
+    color: var(--primary);
+}
+
+.input-with-icon input {
+    padding-left: 44px !important;
+}
+
+.type-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.type-option {
+    border: 1px solid #333;
+    background: #111;
+    border-radius: 16px;
+    padding: 20px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.type-option input {
+    display: none;
+}
+
+.type-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 16px;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+}
+
+.type-option:hover {
+    background: #1a1a1a;
+    transform: translateY(-2px);
+    border-color: #444;
+}
+
+.type-option.selected {
+    background: rgba(0, 230, 118, 0.05);
+    border-color: var(--primary);
+}
+
+.type-icon {
+    background: #222;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    color: #888;
+    transition: all 0.3s;
+}
+
+.type-option.selected .type-icon {
+    background: var(--primary);
+    color: black;
+    box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+}
+
+.type-info strong {
+    display: block;
+    margin-bottom: 6px;
+    color: white;
+    font-size: 1.05rem;
+}
+
+.type-info span {
+    font-size: 0.8rem;
+    color: #888;
+    line-height: 1.4;
+    display: block;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 35px;
+}
+
+.cancel-btn {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid #333;
+    background: transparent;
+    border-radius: 12px;
+    font-weight: 600;
+    color: #ccc;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+    background: #222;
+    color: white;
+    border-color: #444;
+}
+
+.create-submit-btn {
+    flex: 2;
+    padding: 14px;
+    border: none;
+    background: var(--primary);
+    color: black;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(0, 230, 118, 0.2);
+}
+
+.create-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 230, 118, 0.3);
+    background: #00ff84;
+}
+
+.create-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.error-message {
+    background: rgba(221, 44, 0, 0.1);
+    color: #ff5252;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    border: 1px solid rgba(221, 44, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}

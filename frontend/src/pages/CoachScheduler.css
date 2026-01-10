@@ -1,0 +1,222 @@
+.coach-scheduler-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 2rem;
+    gap: 2rem;
+}
+
+.scheduler-main {
+    flex: 2;
+}
+
+.summary-sidebar {
+    flex: 1;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-title h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.mode-tag {
+    background: #333;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ccc;
+}
+
+.section-block {
+    margin-bottom: 2.5rem;
+}
+
+.section-block h2 {
+    font-size: 1.2rem;
+    color: #eee;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Date Scroller */
+.dates-scroller {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.date-card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 1rem;
+    border-radius: 12px;
+    min-width: 80px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.date-card:hover {
+    border-color: #555;
+}
+
+.date-card.active {
+    background: var(--primary);
+    color: black;
+    border-color: var(--primary);
+}
+
+.date-card.active .day-name,
+.date-card.active .date-num {
+    color: black;
+}
+
+.day-name {
+    display: block;
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 0.2rem;
+}
+
+.date-num {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+/* Slot Grid */
+.slots-group h3 {
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 0.8rem;
+    font-weight: normal;
+}
+
+.slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.slot-btn {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 0.8rem;
+    border-radius: 8px;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.slot-btn:hover {
+    background: #222;
+    color: white;
+}
+
+.slot-btn.active {
+    background: rgba(0, 230, 118, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: bold;
+}
+
+/* Summary Card */
+.summary-card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 2rem;
+    border-radius: 16px;
+    position: sticky;
+    top: 2rem;
+}
+
+.summary-card h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 1rem;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    color: #ccc;
+    font-size: 1rem;
+}
+
+.summary-highlight {
+    background: #222;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    color: var(--primary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    border: 1px dashed #444;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    border-top: 1px solid #333;
+    padding-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.total-price {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white;
+}
+
+.confirm-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--primary);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.note-text {
+    text-align: center;
+    color: #666;
+    font-size: 0.8rem;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+@media (max-width: 900px) {
+    .coach-scheduler-container {
+        flex-direction: column;
+    }
+
+    .summary-card {
+        position: static;
+    }
+}

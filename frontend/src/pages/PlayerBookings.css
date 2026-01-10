@@ -1,0 +1,653 @@
+.player-bookings-page {
+    min-height: 100vh;
+    color: white;
+    padding-bottom: 3rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.bookings-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    color: white;
+    margin: 0;
+}
+
+.page-header p {
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* Tabs */
+.tabs-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
+}
+
+.tab-btn:hover {
+    color: white;
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* Booking List */
+.bookings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.booking-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.booking-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+    border-color: var(--primary);
+}
+
+.booking-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+}
+
+.turf-image {
+    width: 200px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.sport-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(15, 23, 42, 0.9);
+    color: var(--primary);
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.booking-details {
+    flex: 1;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.header-row h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: white;
+}
+
+.status-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-badge.confirmed {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.pending,
+.status-badge.hold {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-badge.cancelled {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-badge.completed {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.status-badge.under_review {
+    background: rgba(234, 179, 8, 0.2);
+    color: #facc15;
+    border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+.price-row {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: white;
+}
+
+.booking-ref {
+    font-family: monospace;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #1e293b;
+    border-radius: 12px;
+    color: #94a3b8;
+    border: 1px dashed #334155;
+}
+
+.empty-state h3 {
+    color: white;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .booking-card {
+        flex-direction: column;
+    }
+
+    .turf-image {
+        width: 100%;
+        height: 150px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Review Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.3s ease;
+    overflow-y: auto;
+    /* Allow overlay itself to scroll */
+    padding: 1rem 0;
+    /* Add vertical breathing room */
+}
+
+.review-modal {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    /* Remove fixed heights/overflows here, let overlay handle it */
+    margin: auto;
+    /* Center in overlay */
+    animation: scaleUp 0.3s ease;
+}
+
+.review-modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.review-modal::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.review-modal::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+.modal-header {
+    background: #0f172a;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    color: white;
+    font-size: 1.25rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
+}
+
+.close-btn:hover {
+    color: white;
+}
+
+.modal-body {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    color: #e2e8f0;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    color: #e2e8f0;
+}
+
+.review-subtitle {
+    margin: 0;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.review-subtitle strong {
+    color: white;
+}
+
+.star-rating {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.star {
+    fill: transparent;
+    stroke: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.star:hover,
+.star.filled {
+    fill: #eab308;
+    stroke: #eab308;
+    transform: scale(1.1);
+}
+
+.review-textarea {
+    width: 100%;
+    min-height: 120px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 1rem;
+    color: white;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.review-textarea:focus {
+    border-color: var(--primary);
+}
+
+.submit-review-btn {
+    background: var(--primary);
+    color: black;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.submit-review-btn:hover {
+    opacity: 0.9;
+}
+
+.review-btn {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.review-btn:hover {
+    background: rgba(0, 230, 118, 0.1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleUp {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Booking Details Modal styles */
+.details-modal {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    /* Center in overlay */
+    animation: scaleUp 0.3s ease;
+}
+
+.details-modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.details-modal::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.details-modal::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+.details-body {
+    padding: 2rem;
+    gap: 2rem;
+}
+
+.ticket-poster {
+    background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+/* "Punch hole" effect for ticket */
+.ticket-poster::before,
+.ticket-poster::after {
+    content: '';
+    position: absolute;
+    top: 55%;
+    width: 20px;
+    height: 20px;
+    background: #1e293b;
+    border-radius: 50%;
+    border: 1px solid #334155;
+}
+
+.ticket-poster::before {
+    left: -12px;
+}
+
+.ticket-poster::after {
+    right: -12px;
+}
+
+.ticket-header {
+    text-align: center;
+    border-bottom: 2px dashed #334155;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.ticket-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: white;
+    /* Default text color */
+}
+
+.ticket-status span {
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.ticket-header h2 {
+    margin: 0;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.ticket-header p {
+    margin: 0.5rem 0 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.ticket-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.ticket-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.ticket-item.full-width {
+    grid-column: 1 / -1;
+    align-items: center;
+    background: #1e293b;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px dashed #334155;
+}
+
+.ticket-item label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.ticket-item span {
+    color: white;
+    font-weight: 500;
+}
+
+.mono {
+    font-family: monospace;
+    font-size: 1.1rem !important;
+    letter-spacing: 2px;
+}
+
+.qr-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.qr-placeholder {
+    width: 140px;
+    height: 140px;
+    background: white;
+    padding: 12px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.qr-placeholder:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 4px var(--primary);
+}
+
+/* Pattern to simulate QR */
+.qr-pattern {
+    width: 100%;
+    height: 100%;
+    background-image:
+        linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000),
+        linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    opacity: 0.8;
+}
+
+.qr-section small {
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+.details-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    transition: opacity 0.2s;
+}
+
+.action-btn:hover {
+    opacity: 0.9;
+}
+
+.action-btn.cancel {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+.action-btn.review {
+    background: var(--primary);
+    color: black;
+}

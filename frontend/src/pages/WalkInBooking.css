@@ -1,0 +1,469 @@
+.walk-in-page {
+    min-height: 100vh;
+    color: #e2e8f0;
+    padding-bottom: 2rem;
+}
+
+.walk-in-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    margin-top: 80px;
+}
+
+/* Header */
+.wb-header-new {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.wb-header-new h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.subtitle {
+    color: #94a3b8;
+    margin-top: 0.5rem;
+}
+
+.wb-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.mode-toggle {
+    display: flex;
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 4px;
+    border: 1px solid #334155;
+}
+
+.mode-toggle button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    background: transparent;
+    color: #94a3b8;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.mode-toggle button.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.mode-toggle button.active.block-mode {
+    background: #ef4444;
+}
+
+.turf-select {
+    padding: 10px 16px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: white;
+    border-radius: 8px;
+    min-width: 200px;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+/* Layout */
+.wb-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+}
+
+@media (max-width: 900px) {
+    .wb-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Main Panel */
+.selection-section {
+    margin-bottom: 2rem;
+}
+
+.game-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 0.5rem;
+}
+
+.game-tab {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    position: relative;
+    font-weight: 500;
+}
+
+.game-tab.active {
+    color: #3b82f6;
+}
+
+.game-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.6rem;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #3b82f6;
+}
+
+.unit-pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.unit-pill-item {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    padding: 0.8rem 1.2rem;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.unit-pill-item:hover {
+    border-color: #475569;
+}
+
+.unit-pill-item.active {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+    color: white;
+}
+
+/* Filter Bar */
+.filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e293b;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.date-input-styled {
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: white;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-family: inherit;
+}
+
+.time-filters {
+    display: flex;
+    gap: 0.5rem;
+    background: #0f172a;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.time-filter-btn {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.time-filter-btn.active {
+    background: #334155;
+    color: white;
+}
+
+/* Slots Grid */
+.slots-grid-area {
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 1.5rem;
+    min-height: 400px;
+}
+
+.slots-grid-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+}
+
+.slot-btn {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 1rem 0.5rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
+    transition: all 0.15s;
+    position: relative;
+}
+
+.slot-btn:hover:not(:disabled) {
+    border-color: #64748b;
+    transform: translateY(-2px);
+}
+
+.slot-time {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+}
+
+.slot-ampm {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.slot-price {
+    font-size: 0.75rem;
+    color: #3b82f6;
+    margin-top: 4px;
+}
+
+/* States */
+.slot-btn.selected {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.slot-btn.selected .slot-time,
+.slot-btn.selected .slot-ampm,
+.slot-btn.selected .slot-price {
+    color: white;
+}
+
+.slot-btn.booked {
+    background: #334155;
+    border-color: #334155;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.slot-btn.booked::after {
+    content: 'BOOKED';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border-radius: 10px;
+}
+
+.slot-btn.blocked {
+    background: #334155;
+    border-color: #334155;
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-image: repeating-linear-gradient(45deg, #333, #333 10px, #444 10px, #444 20px);
+}
+
+/* Sidebar */
+.booking-card-summary {
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #334155;
+    position: sticky;
+    top: 100px;
+}
+
+.booking-card-summary h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+    color: white;
+}
+
+.summary-details {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #334155;
+    margin-bottom: 1rem;
+}
+
+.sd-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.sd-row strong {
+    color: white;
+}
+
+.selected-slots-list {
+    margin-bottom: 1.5rem;
+}
+
+.slot-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.slot-tag {
+    background: #334155;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: white;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #cbd5e1;
+}
+
+.total-row.highlight {
+    color: #3b82f6;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Form Inputs */
+.form-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-grp {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-grp label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.form-grp input {
+    background: #0f172a;
+    border: 1px solid #334155;
+    padding: 0.8rem;
+    border-radius: 8px;
+    color: white;
+    font-family: inherit;
+}
+
+.form-grp input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.toggle-grp {
+    display: flex;
+    background: #0f172a;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.toggle-grp button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.toggle-grp button.active {
+    background: #334155;
+    color: white;
+}
+
+.confirm-btn {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+.no-selection {
+    text-align: center;
+    padding: 2rem 0;
+    color: #64748b;
+    font-style: italic;
+    background: #0f172a;
+    border-radius: 8px;
+    border: 1px dashed #334155;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: #64748b;
+    font-size: 1.1rem;
+}

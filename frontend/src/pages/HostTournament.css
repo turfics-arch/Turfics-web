@@ -1,0 +1,438 @@
+/* Wizard Layout */
+.host-container {
+    display: flex;
+    min-height: calc(100vh - 60px);
+    background: #000;
+}
+
+.wizard-sidebar {
+    width: 250px;
+    background: #111;
+    border-right: 1px solid #333;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.wizard-sidebar h1 {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: var(--primary);
+}
+
+.step-indicator {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #666;
+    transition: all 0.3s;
+}
+
+.step-item.active {
+    color: white;
+    font-weight: bold;
+}
+
+.step-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    border: 1px solid #444;
+}
+
+.step-item.active .step-circle {
+    background: var(--primary);
+    color: black;
+    border-color: var(--primary);
+}
+
+.wizard-content {
+    flex: 1;
+    padding: 3rem 4rem;
+    overflow-y: auto;
+}
+
+.step-content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #333;
+    padding-bottom: 1rem;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 0.8rem;
+    color: white;
+    border-radius: 6px;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--primary);
+}
+
+.form-row {
+    display: flex;
+    gap: 2rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.input-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-wrap svg {
+    position: absolute;
+    left: 10px;
+    color: #666;
+}
+
+.input-icon-wrap input {
+    padding-left: 2.5rem;
+}
+
+/* Turf Selection Grid */
+.turf-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.selection-card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.selection-card:hover {
+    border-color: #666;
+    transform: translateY(-3px);
+}
+
+.selection-card.active {
+    border: 2px solid var(--primary);
+    background: rgba(0, 230, 118, 0.05);
+}
+
+.selection-card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.sel-card-info {
+    padding: 1rem;
+}
+
+.sel-card-info h4 {
+    margin: 0 0 0.3rem 0;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sel-card-info p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.check-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--primary);
+    color: black;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.card-badge-sport {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+}
+
+.price-hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--primary);
+}
+
+.host-search-bar input {
+    width: 100%;
+    background: #222;
+    border: 1px solid #444;
+    padding: 0.8rem 1rem;
+    border-radius: 25px;
+    color: white;
+}
+
+/* Actions */
+.wizard-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #333;
+}
+
+.next-btn,
+.publish-btn {
+    background: var(--primary);
+    color: black;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: transform 0.2s;
+}
+
+.next-btn:hover,
+.publish-btn:hover {
+    transform: translateX(5px);
+}
+
+.back-btn {
+    background: transparent;
+    color: #aaa;
+    border: 1px solid #444;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.back-btn:hover {
+    color: white;
+    border-color: #666;
+}
+
+/* Poster Preview Area */
+.preview-step {
+    display: flex;
+    flex-direction: column;
+}
+
+.poster-generator-layout {
+    display: flex;
+    gap: 3rem;
+    align-items: flex-start;
+}
+
+.poster-controls {
+    flex: 1;
+    max-width: 300px;
+}
+
+.theme-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.theme-btn {
+    background: #222;
+    color: #ccc;
+    border: 1px solid #444;
+    padding: 0.8rem;
+    text-align: left;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.theme-btn.active {
+    background: #333;
+    border-color: var(--primary);
+    color: white;
+}
+
+.poster-canvas {
+    flex: 2;
+    aspect-ratio: 4/5;
+    background: #111;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2rem;
+    border: 1px solid #333;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Neon Theme */
+.poster-canvas.theme-neon {
+    background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+    border: 2px solid #00e676;
+    box-shadow: 0 0 20px rgba(0, 230, 118, 0.2);
+}
+
+.theme-neon h1 {
+    font-size: 3rem;
+    text-transform: uppercase;
+    font-weight: 900;
+    line-height: 1.1;
+    background: linear-gradient(to right, #fff, #aaa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 1rem 0;
+}
+
+.theme-neon .p-sport-tag {
+    background: #00e676;
+    color: black;
+    padding: 5px 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    display: inline-block;
+}
+
+.theme-neon .p-venue {
+    color: #888;
+}
+
+.theme-neon .p-huge-prize .label {
+    color: #00e676;
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+}
+
+.theme-neon .p-huge-prize .val {
+    font-size: 4rem;
+    color: white;
+    display: block;
+    line-height: 1;
+}
+
+.p-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    border-top: 1px solid #333;
+    padding-top: 1.5rem;
+}
+
+.p-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.p-item .lbl {
+    font-size: 0.7rem;
+    color: #666;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+}
+
+.p-item .txt {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ddd;
+}
+
+.poster-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: auto;
+}
+
+.qr-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.qr-img {
+    width: 80px;
+    height: 80px;
+    background: white;
+    padding: 5px;
+}
+
+/* Gold Theme */
+.poster-canvas.theme-gold {
+    background: linear-gradient(to bottom, #1a1200, #000);
+    border: 2px solid #ffd700;
+}
+
+.theme-gold h1 {
+    background: linear-gradient(to right, #ffd700, #ffaa00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.theme-gold .p-sport-tag {
+    background: #ffd700;
+    color: black;
+}
+
+.theme-gold .p-huge-prize .label {
+    color: #ffd700;
+}

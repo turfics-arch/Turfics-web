@@ -1,0 +1,134 @@
+:root {
+  --primary: #00E676;
+  /* Vibrant Green */
+  --primary-dark: #00B359;
+  --secondary: #2979FF;
+  /* Electric Blue */
+  --accent: #FF3D00;
+  /* Deep Orange */
+  --background: #0A0A0A;
+  /* Near Black */
+  --surface: #1E1E1E;
+  /* Dark Gray */
+  --surface-light: #2C2C2C;
+  --text-main: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  --glass: rgba(30, 30, 30, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --success: #00C853;
+  --warning: #FFD600;
+  --error: #DD2C00;
+
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: #020617;
+  /* Very dark slate */
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 0% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 35%),
+    radial-gradient(circle at 100% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 35%);
+  background-attachment: fixed;
+  color: var(--text-main);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* Sports Field Pattern Overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    /* Vertical field lines */
+    repeating-linear-gradient(90deg,
+      transparent,
+      transparent 80px,
+      rgba(0, 230, 118, 0.02) 80px,
+      rgba(0, 230, 118, 0.02) 81px),
+    /* Horizontal field lines */
+    repeating-linear-gradient(0deg,
+      transparent,
+      transparent 80px,
+      rgba(0, 230, 118, 0.015) 80px,
+      rgba(0, 230, 118, 0.015) 81px),
+    /* Diagonal accent lines */
+    repeating-linear-gradient(45deg,
+      transparent,
+      transparent 120px,
+      rgba(41, 121, 255, 0.01) 120px,
+      rgba(41, 121, 255, 0.01) 121px);
+  opacity: 0.4;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.3s ease;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animations included in index.css as base utilities */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Glassmorphism Utility */
+.glass-panel {
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}

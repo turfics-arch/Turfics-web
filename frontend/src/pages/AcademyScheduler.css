@@ -1,0 +1,378 @@
+.scheduler-page {
+    background: #0f0f0f;
+    min-height: 100vh;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.scheduler-header {
+    background: #1a1a1a;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.back-btn-scheduler {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.venue-info {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.venue-thumb {
+    width: 50px;
+    height: 50px;
+    background: #333;
+    border-radius: 8px;
+}
+
+.venue-info h1 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.location-text {
+    color: #888;
+    font-size: 0.9rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* Layout */
+.scheduler-layout {
+    display: flex;
+    flex: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Sidebar Filters */
+.filters-panel {
+    width: 300px;
+    background: #161616;
+    border-right: 1px solid #333;
+    padding: 2rem;
+}
+
+.filter-group {
+    margin-bottom: 2rem;
+}
+
+.filter-group label {
+    display: block;
+    font-size: 0.75rem;
+    color: #666;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+}
+
+.chip-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.chip {
+    background: #222;
+    border: 1px solid #333;
+    color: #aaa;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.chip.active {
+    background: rgba(0, 230, 118, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.month-scroller {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+}
+
+.month-btn {
+    background: #222;
+    border: 1px solid #333;
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    min-width: 80px;
+    text-align: center;
+}
+
+.month-btn.active {
+    border-color: var(--primary);
+    background: #1a1a1a;
+}
+
+.m-name {
+    display: block;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 0.2rem;
+}
+
+.m-year {
+    display: block;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+/* Main Content */
+.batches-content {
+    flex: 1;
+    padding: 2rem;
+}
+
+.batches-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.batches-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.batches-header span {
+    color: #888;
+}
+
+.batches-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.batch-full-card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 16px;
+    display: flex;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.batch-full-card:hover {
+    border-color: #444;
+    transform: translateY(-2px);
+}
+
+.batch-main-info {
+    flex: 1;
+    padding: 1.5rem;
+    border-right: 1px solid #333;
+}
+
+.time-section {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.time-text {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: white;
+}
+
+.icon-gold {
+    color: var(--primary);
+}
+
+.days-display {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.week-days {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.day-letter {
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    color: #444;
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.day-letter.active {
+    background: #333;
+    color: white;
+    border: 1px solid #555;
+}
+
+.meta-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.spots-badge {
+    color: #ff4757;
+    font-size: 0.8rem;
+    font-weight: bold;
+    background: rgba(255, 71, 87, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.gender-info {
+    color: #888;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.batch-desc {
+    color: #888;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.read-more {
+    color: var(--primary);
+    cursor: pointer;
+    margin-left: 0.5rem;
+}
+
+/* Action Sidebar in Card */
+.batch-action-sidebar {
+    width: 250px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #1f1f1f;
+    align-items: center;
+    text-align: center;
+}
+
+.batch-tag {
+    background: #333;
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+}
+
+.sessions-count {
+    display: block;
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 0.2rem;
+}
+
+.price-val {
+    display: block;
+    color: white;
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.join-btn {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary);
+    color: black;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.join-btn:hover {
+    opacity: 0.9;
+}
+
+@media (max-width: 900px) {
+    .scheduler-layout {
+        flex-direction: column;
+    }
+
+    .filters-panel {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #333;
+    }
+
+    .batch-full-card {
+        flex-direction: column;
+    }
+
+    .batch-main-info {
+        border-right: none;
+        border-bottom: 1px solid #333;
+    }
+
+    .batch-action-sidebar {
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .pricing {
+        text-align: left;
+    }
+
+    .join-btn {
+        width: auto;
+        padding: 0.8rem 2rem;
+    }
+}

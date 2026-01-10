@@ -1,0 +1,100 @@
+.admin-dashboard-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: var(--text-main);
+}
+
+.admin-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 1rem;
+}
+
+.admin-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.users-table-container {
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.users-table th {
+    background: rgba(0, 230, 118, 0.1);
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.users-table tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.role-badge.admin {
+    background: rgba(255, 99, 71, 0.2);
+    color: tomato;
+}
+
+.role-badge.owner {
+    background: rgba(255, 215, 0, 0.2);
+    color: gold;
+}
+
+.role-badge.coach {
+    background: rgba(147, 112, 219, 0.2);
+    color: mediumpurple;
+}
+
+.role-badge.academy {
+    background: rgba(64, 224, 208, 0.2);
+    color: turquoise;
+}
+
+.role-badge.user {
+    background: rgba(100, 149, 237, 0.2);
+    color: cornflowerblue;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+}
+
+.error-container {
+    background: rgba(221, 44, 0, 0.1);
+    border: 1px solid var(--error);
+    padding: 1rem;
+    border-radius: 8px;
+    color: var(--error);
+    margin-bottom: 1rem;
+}

@@ -1,0 +1,271 @@
+.profile-container {
+    background: #0f0f0f;
+    min-height: 100vh;
+    padding: 2rem;
+    color: white;
+}
+
+.back-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+.back-btn:hover {
+    color: white;
+}
+
+/* Header Card */
+.profile-header-card {
+    background: #1a1a1a;
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    border: 1px solid #333;
+}
+
+.profile-image-section {
+    position: relative;
+}
+
+.profile-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary);
+}
+
+.verified-status {
+    position: absolute;
+    bottom: -1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    color: black;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+    width: max-content;
+}
+
+.profile-info-section {
+    flex: 1;
+}
+
+.profile-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.sport-badge {
+    color: var(--primary);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.rating-box {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: bold;
+}
+
+.coach-name {
+    font-size: 2.5rem;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.coach-title {
+    color: #aaa;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.quick-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat strong {
+    display: block;
+    color: white;
+    font-size: 1.1rem;
+}
+
+.stat {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.tags-section {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tag {
+    background: #333;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #ddd;
+}
+
+/* Layout Grid */
+.profile-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    max-width: 1200px;
+}
+
+.section-card {
+    background: #1a1a1a;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid #333;
+}
+
+.section-card h2 {
+    margin-bottom: 1.5rem;
+    color: white;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.5rem;
+}
+
+.bio-text {
+    line-height: 1.6;
+    color: #ccc;
+    margin-bottom: 1.5rem;
+}
+
+.cert-list {
+    list-style: none;
+    padding: 0;
+}
+
+.cert-list li {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    color: #ddd;
+}
+
+/* Booking Widget */
+.booking-card {
+    background: #222;
+    border-radius: 20px;
+    padding: 2rem;
+    position: sticky;
+    top: 2rem;
+    border: 1px solid #444;
+}
+
+.booking-tabs {
+    display: flex;
+    background: #111;
+    padding: 0.3rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.booking-tabs button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 0.6rem;
+    cursor: pointer;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.booking-tabs button.active {
+    background: #333;
+    color: white;
+}
+
+.price-display {
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.currency {
+    font-size: 1.5rem;
+    vertical-align: top;
+}
+
+.amount {
+    font-size: 3rem;
+    font-weight: bold;
+    color: white;
+}
+
+.unit {
+    color: #888;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+.features-list li {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    color: #ccc;
+    align-items: center;
+}
+
+.book-btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--primary);
+    color: black;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
+.guarantee-text {
+    text-align: center;
+    color: #666;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 900px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-header-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}

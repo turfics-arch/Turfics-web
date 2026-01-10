@@ -1,0 +1,64 @@
+Traceback (most recent call last):
+Seeding full academy flow...
+Actors found: Academy(Elite Academy), Coach(coach_demo), Player(Player Test 1)
+Profiles: Academy(Elite Sports Academy), Coach(Coach Demo)
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedTable: relation "academy_programs" does not exist
+LINE 2: FROM academy_programs 
+             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\seed_full_academy_flow.py", line 51, in <module>
+    program = AcademyProgram.query.filter_by(academy_id=academy_profile.id, sport="Cricket").first()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2759, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\orm\query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Turfics\Turfics-webapp\Turfics-webapp\backend\venv\Lib\site-packages\sqlalchemy\engine\default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedTable) relation "academy_programs" does not exist
+LINE 2: FROM academy_programs 
+             ^
+
+[SQL: SELECT academy_programs.id AS academy_programs_id, academy_programs.academy_id AS academy_programs_academy_id, academy_programs.sport AS academy_programs_sport, academy_programs.description AS academy_programs_description, academy_programs.head_coach_id AS academy_programs_head_coach_id, academy_programs.is_active AS academy_programs_is_active, academy_programs.created_at AS academy_programs_created_at 
+FROM academy_programs 
+WHERE academy_programs.academy_id = %(academy_id_1)s AND academy_programs.sport = %(sport_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'academy_id_1': 3, 'sport_1': 'Cricket', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)

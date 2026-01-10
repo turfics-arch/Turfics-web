@@ -1,0 +1,299 @@
+.app-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.app-navbar.scrolled {
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #222;
+    padding: 0.8rem 2rem;
+}
+
+.nav-brand h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+    margin: 0;
+    cursor: pointer;
+    letter-spacing: -1px;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-menu span {
+    color: #aaa;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s;
+    font-size: 0.95rem;
+}
+
+.nav-menu span:hover,
+.nav-menu span.active {
+    color: var(--primary);
+}
+
+.nav-auth {
+    .user-menu-group {
+        display: flex;
+        align-items: center;
+    }
+
+    .auth-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .login-btn {
+        background: #ffffff;
+        border: none;
+        padding: 0.6rem 2rem;
+        border-radius: 9999px !important;
+        /* Force pill shape */
+        color: #000000;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+        letter-spacing: 0.5px;
+    }
+
+    .login-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .signup-btn {
+        background: var(--primary);
+        border: none;
+        color: black;
+        padding: 0.6rem 2rem;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: transform 0.2s;
+        letter-spacing: 0.5px;
+    }
+
+    .signup-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .user-menu {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #ccc;
+        cursor: pointer;
+        background: #222;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        border: 1px solid #333;
+    }
+
+    .user-menu:hover {
+        border-color: #555;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .nav-menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .app-navbar {
+            padding: 1rem;
+        }
+    }
+
+    /* Nav Icon Button (for Community/Messages) */
+    .nav-icon-btn {
+        position: relative;
+        cursor: pointer;
+        color: #888;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        border-radius: 50%;
+    }
+
+    .nav-icon-btn:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .active-icon {
+        color: var(--primary) !important;
+    }
+
+    .nav-badge {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        background: #ff3d00;
+        /* Notification Red */
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        min-width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 1px solid #1a1a1a;
+        animation: bounce 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes bounce {
+        0% {
+            transform: scale(0);
+        }
+
+        80% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Ensure user menu group spacing */
+    display: flex;
+    align-items: center;
+}
+
+/* ============================
+   MOBILE RESPONSIVE NAVBAR
+   ============================ */
+
+.mobile-toggle-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    z-index: 1001;
+    /* Above overlay */
+    padding: 0.5rem;
+}
+
+.mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 320px;
+    height: 100vh;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(20px);
+    z-index: 1000;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-menu-overlay.open {
+    right: 0;
+}
+
+.mobile-menu-content {
+    padding: 6rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+}
+
+.mobile-menu-content span {
+    color: #ccc;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 0.8rem;
+    transition: color 0.3s, padding-left 0.3s;
+}
+
+.mobile-menu-content span:hover {
+    color: var(--primary);
+    padding-left: 10px;
+}
+
+.mobile-auth-section {
+    margin-top: 2rem;
+}
+
+.mobile-auth-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mobile-auth-btns button {
+    width: 100%;
+    justify-content: center;
+}
+
+.mobile-logout {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: #222;
+    color: white;
+    border: 1px solid #333;
+    padding: 1rem;
+    width: 100%;
+    border-radius: 12px;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* Key Responsive Breakpoint */
+@media (max-width: 900px) {
+
+    /* Hide Desktop Elements */
+    .nav-menu,
+    .nav-auth.desktop-only {
+        display: none !important;
+    }
+
+    .mobile-hidden {
+        display: none !important;
+    }
+
+    /* Show Mobile Toggle */
+    .mobile-toggle-btn {
+        display: block;
+    }
+
+    .app-navbar {
+        padding: 0.8rem 1.5rem;
+    }
+
+    /* Adjust brand size if needed */
+    .nav-brand h1 {
+        font-size: 1.3rem;
+    }
+}

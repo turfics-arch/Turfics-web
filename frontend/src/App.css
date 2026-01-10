@@ -1,0 +1,7 @@
+/* App.css cleared to prevent layout constraints on #root */
+
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}

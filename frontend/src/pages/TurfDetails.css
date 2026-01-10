@@ -1,0 +1,317 @@
+/* TurfDetails.css - Premium Update */
+.turf-details-page {
+    min-height: 100vh;
+    color: var(--text-primary);
+    background: var(--bg-dark);
+    padding-bottom: 80px;
+    /* Space for mobile footer */
+}
+
+/* Header & Hero */
+.turf-header {
+    height: 35vh;
+    min-height: 250px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    margin-top: 60px;
+}
+
+.header-overlay {
+    background: linear-gradient(to top, var(--bg-dark), rgba(15, 23, 42, 0.4), transparent);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 2rem;
+    backdrop-filter: blur(2px);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    width: 100%;
+}
+
+.turf-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.turf-header .location {
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.2rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.badge.star {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: rgba(255, 215, 0, 0.4);
+    color: #fbbf24;
+}
+
+/* Layout */
+.content-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    padding: 2rem 1.5rem;
+}
+
+.section {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.section h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Tabs & Pills */
+.tab-btn {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.tab-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
+}
+
+.unit-pills {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+}
+
+.unit-pill {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.unit-pill:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--text-secondary);
+}
+
+.unit-pill.active {
+    border-color: var(--accent-primary);
+    background: rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+.unit-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.unit-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Slots Grid */
+.slots-grid-sidebar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+@media (max-width: 1200px) {
+    .slots-grid-sidebar {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Maps & Gallery */
+.map-container-large {
+    filter: invert(90%) hue-rotate(180deg);
+    /* Dark mode map trick */
+}
+
+/* Unit Gallery */
+.catalog-hero {
+    height: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--glass-border);
+}
+
+.catalog-thumbnails {
+    margin-top: 1rem;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+}
+
+.thumb-item {
+    width: 80px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    opacity: 0.6;
+    cursor: pointer;
+    transition: 0.2s;
+    border: 2px solid transparent;
+}
+
+.thumb-item.active {
+    opacity: 1;
+    border-color: var(--accent-primary);
+}
+
+.thumb-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Mobile Sticky Footer */
+.mobile-booking-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--glass-border);
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    animation: slideUp 0.3s ease-out;
+}
+
+.mbf-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.mbf-time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.mbf-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+.mbf-btn {
+    background: var(--accent-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.mbf-btn:disabled {
+    opacity: 0.7;
+    filter: grayscale(0.5);
+}
+
+/* Responsive Media Queries */
+@media (max-width: 900px) {
+    .content-layout {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .turf-header {
+        height: 250px;
+    }
+
+    .turf-header h1 {
+        font-size: 1.8rem;
+    }
+
+    /* Hide the sidebar booking card on mobile if selectedSlots > 0 to avoid clutter? 
+       Actually, keeping it is fine, but maybe redundant. 
+       Let's keep it but ensure it doesn't look broken. 
+    */
+    .sidebar {
+        order: -1;
+        /* Move booking to top on mobile? Or keep bottom? */
+        /* Keeping at bottom is standard for "content first", but booking is important.
+           Using order: -1 might push it to top. 
+           Let's leave it natural flow (bottom) because we have the Sticky Footer now! 
+        */
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 1rem;
+    }
+
+    .slots-grid-sidebar {
+        grid-template-columns: repeat(4, 1fr);
+        /* 4 cols fit on small screens usually for time slots */
+    }
+
+    .mobile-booking-footer {
+        padding: 0.75rem 1rem;
+    }
+
+    .mbf-btn {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+    }
+}
