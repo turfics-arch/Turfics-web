@@ -75,6 +75,16 @@ if raw_db_url:
     # 1. Clean whitespace and quotes
     clean_url = raw_db_url.strip().strip("'").strip('"').strip()
     
+    # NEW FIX: Remove accidental 'psql ' prefix copy-pasted from Neon dashboard
+    if clean_url.startswith("psql '") or clean_url.startswith('psql "') or clean_url.startswith('psql '):
+       # user copied the full command "psql 'postgres://...'"
+       # Find first instance of postgres and take from there
+       start_idx = clean_url.find("postgres")
+       if start_idx != -1:
+           clean_url = clean_url[start_idx:]
+           # Also strip trailing quote if it was '...'
+           clean_url = clean_url.strip("'").strip('"')
+
     # 2. Fix Protocol
     # SQLAlchemy requires 'postgresql://', but some providers give 'postgres://'
     if clean_url.startswith("postgres://"):
