@@ -69,26 +69,51 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # Configuration
 # Configuration
 raw_db_url = os.getenv('DATABASE_URL')
-print(f"DEBUG: DATABASE_URL is set? {bool(raw_db_url)}")
+print(f"DEBUG: Raw DATABASE_URL length: {len(raw_db_url) if raw_db_url else 0}")
 
 if raw_db_url:
-    # Fix common copy-paste issues: quotes and whitespace
-    raw_db_url = raw_db_url.strip().strip("'").strip('"')
+    # 1. Clean whitespace and quotes
+    clean_url = raw_db_url.strip().strip("'").strip('"').strip()
     
-    # Fix protocol for SQLAlchemy
-    if raw_db_url.startswith("postgres://"):
-        raw_db_url = raw_db_url.replace("postgres://", "postgresql://", 1)
-        
-    app.config['SQLALCHEMY_DATABASE_URI'] = raw_db_url
+    # 2. Fix Protocol
+    # SQLAlchemy requires 'postgresql://', but some providers give 'postgres://'
+    if clean_url.startswith("postgres://"):
+        clean_url = clean_url.replace("postgres://", "postgresql://", 1)
+    
+    # 3. Validation / Fallback
+    # Check if it looks like a valid URL (has scheme and @)
+    if "://" not in clean_url:
+        print(f"CRITICAL ERROR: DATABASE_URL does not look like a URL. First 10 chars: {clean_url[:10]}")
+        # Fallback to prevent crash during import, allowing partial startup for logs
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///error_fallback.db'
+    else:
+        # Mask password for logs: scheme://user:***@host...
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(clean_url)
+            safe_netloc = f"{parsed.username}:******@{parsed.hostname}" if parsed.username else parsed.netloc
+            print(f"DEBUG: Using DB URL: {parsed.scheme}://{safe_netloc}{parsed.path}")
+        except Exception:
+            print("DEBUG: Could not parse URL for logging (might be malformed)")
+            
+        app.config['SQLALCHEMY_DATABASE_URI'] = clean_url
 else:
-    print("WARNING: DATABASE_URL not found in environment variables.")
-    # Fallback to sqlite for testing so it doesn't crash immediately on boot (optional)
+    print("WARNING: DATABASE_URL not found. Using local SQLite.")
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///local.db'
+
+# Universal config
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'turfics-secret-key-v2') # Changed to invalidate old tokens
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'turfics-secret-key-v2') 
 
 # Initialize Extensions
-db.init_app(app)
+try:
+    db.init_app(app)
+except Exception as e:
+    print(f"CRITICAL: db.init_app failed: {e}")
+    # Do not raise here if you want the app to at least boot and show this error in /health
+    # But usually better to crash hard if DB is critical. 
+    # Re-raising to show in logs
+    raise e
 bcrypt.init_app(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
