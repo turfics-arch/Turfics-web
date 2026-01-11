@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import API_URL from '../config';
 import { Calendar, Clock, User, Phone, CheckCircle, CreditCard, X, MapPin, Zap, AlertCircle } from 'lucide-react';
 import './WalkInBooking.css';
 
@@ -53,7 +54,7 @@ const WalkInBooking = () => {
     const fetchTurfs = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/turfs/my-turfs', {
+            const res = await fetch(`${API_URL}/api/turfs/my-turfs`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -67,7 +68,7 @@ const WalkInBooking = () => {
     const fetchTurfDetails = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/turfs/${selectedTurf.id}/games`, {
+            const res = await fetch(`${API_URL}/api/turfs/${selectedTurf.id}/games`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -87,7 +88,7 @@ const WalkInBooking = () => {
         setLoadingSlots(true);
         try {
             // Using the same endpoint as Discovery Page for consistency
-            const res = await fetch(`http://localhost:5000/api/units/${selectedUnit.id}/slots?date=${date}`);
+            const res = await fetch(`${API_URL}/api/units/${selectedUnit.id}/slots?date=${date}`);
             if (res.ok) {
                 const data = await res.json();
                 setSlots(data);
@@ -162,7 +163,7 @@ const WalkInBooking = () => {
                 const durationMins = block.length * 30; // Assuming 30min slots
                 const blockPrice = block.reduce((sum, s) => sum + s.price, 0);
 
-                let url = 'http://localhost:5000/api/owner/bookings/walk-in';
+                let url = `${API_URL}/api/owner/bookings/walk-in`;
                 let payload = {
                     turf_id: selectedTurf.id,
                     unit_id: selectedUnit.id,
@@ -171,7 +172,7 @@ const WalkInBooking = () => {
                 };
 
                 if (mode === 'block') {
-                    url = 'http://localhost:5000/api/owner/bookings/block';
+                    url = `${API_URL}/api/owner/bookings/block`;
                     payload.reason = formData.guest_name || 'Maintenance';
                 } else {
                     payload.guest_name = formData.guest_name || 'Walk-In';

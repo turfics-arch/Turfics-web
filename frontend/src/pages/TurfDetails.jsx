@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import API_URL from '../config';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -51,7 +52,7 @@ const TurfDetails = () => {
     useEffect(() => {
         const fetchTurf = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/api/turfs/${id}/full`);
+                const res = await fetch(`${API_URL}/api/turfs/${id}/full`);
                 if (res.ok) {
                     const data = await res.json();
                     setTurfData(data);
@@ -80,7 +81,7 @@ const TurfDetails = () => {
             setSlots([]); // Clear prev slots
             const fetchSlots = async () => {
                 try {
-                    const res = await fetch(`http://localhost:5000/api/units/${selectedUnit.id}/slots?date=${selectedDate}`);
+                    const res = await fetch(`${API_URL}/api/units/${selectedUnit.id}/slots?date=${selectedDate}`);
                     if (res.ok) {
                         const data = await res.json();
                         setSlots(data);
@@ -176,7 +177,7 @@ const TurfDetails = () => {
                 const end = batch[batch.length - 1].end_iso;
                 const batchPrice = batch.reduce((a, s) => a + s.price, 0);
 
-                const response = await fetch('http://localhost:5000/api/bookings', {
+                const response = await fetch(`${API_URL}/api/bookings`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -218,7 +219,7 @@ const TurfDetails = () => {
                 setBookingStatus('error');
                 alert(`All holds failed.\nErrors: ${errors.join(', ')}`);
                 // Refresh slots
-                const slotRes = await fetch(`http://localhost:5000/api/units/${selectedUnit.id}/slots?date=${selectedDate}`);
+                const slotRes = await fetch(`${API_URL}/api/units/${selectedUnit.id}/slots?date=${selectedDate}`);
                 const slotData = await slotRes.json();
                 setSlots(slotData);
             }

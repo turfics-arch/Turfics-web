@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config';
 import { Calendar, MapPin, Users, Trophy, Shield, CheckCircle, Clock, Info, Megaphone, Activity } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import './TournamentDetails.css';
@@ -19,7 +20,7 @@ const TournamentDetails = () => {
     const fetchTournament = async () => {
         try {
             // Use API
-            const res = await axios.get(`http://localhost:5000/api/tournaments/${id}`);
+            const res = await axios.get(`${API_URL}/api/tournaments/${id}`);
             setTournament(res.data);
             setLoading(false);
         } catch (err) {
@@ -37,7 +38,7 @@ const TournamentDetails = () => {
             const token = localStorage.getItem('token');
             if (!token) return navigate('/login');
 
-            await axios.post(`http://localhost:5000/api/tournaments/${id}/register`,
+            await axios.post(`${API_URL}/api/tournaments/${id}/register`,
                 { team_name: teamName },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

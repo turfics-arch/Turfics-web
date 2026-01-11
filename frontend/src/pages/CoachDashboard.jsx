@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
+import API_URL from '../config';
 import { User, Calendar, Check, X, Edit, DollarSign, MapPin, Clock } from 'lucide-react';
 import './CoachDashboard.css';
 
@@ -28,7 +29,7 @@ const CoachDashboard = () => {
         const token = localStorage.getItem('token');
         try {
             // Fetch Profile
-            const pRes = await fetch('http://localhost:5000/api/coach/me', {
+            const pRes = await fetch(`${API_URL}/api/coach/me`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -43,13 +44,13 @@ const CoachDashboard = () => {
             }
 
             // Fetch Bookings
-            const bRes = await fetch('http://localhost:5000/api/coach/bookings', {
+            const bRes = await fetch(`${API_URL}/api/coach/bookings`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (bRes.ok) setBookings(await bRes.json());
 
             // Fetch Batches
-            const batchRes = await fetch('http://localhost:5000/api/coach/batches', {
+            const batchRes = await fetch(`${API_URL}/api/coach/batches`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (batchRes.ok) setBatches(await batchRes.json());
@@ -65,7 +66,7 @@ const CoachDashboard = () => {
         e.preventDefault();
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch('http://localhost:5000/api/coach/batches', {
+            const res = await fetch(`${API_URL}/api/coach/batches`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -83,7 +84,7 @@ const CoachDashboard = () => {
 
     const fetchBatchStudents = async (batchId) => {
         const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:5000/api/coach/batches/${batchId}/students`, {
+        const res = await fetch(`${API_URL}/api/coach/batches/${batchId}/students`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) setBatchStudents(await res.json());
@@ -98,7 +99,7 @@ const CoachDashboard = () => {
         e.preventDefault();
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch('http://localhost:5000/api/coach/profile', {
+            const res = await fetch(`${API_URL}/api/coach/profile`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -121,7 +122,7 @@ const CoachDashboard = () => {
     const handleBookingAction = async (id, action) => {
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`http://localhost:5000/api/coach/bookings/${id}/action`, {
+            const res = await fetch(`${API_URL}/api/coach/bookings/${id}/action`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

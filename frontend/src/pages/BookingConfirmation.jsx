@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Clock, Users, Check, Share2, Download, Search } from 'lucide-react';
+import API_URL from '../config';
 import './TurfDetails.css'; // Reuse existing styles or create new
 
 const BookingConfirmation = () => {
@@ -39,7 +40,7 @@ const BookingConfirmation = () => {
             // Use the first booking ID for the match
             const bookingId = bookingIds[0];
 
-            await fetch('http://localhost:5000/api/matches', {
+            await fetch(`${API_URL}/api/matches`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -87,7 +88,7 @@ const BookingConfirmation = () => {
         }
         const delayDebounce = setTimeout(async () => {
             try {
-                const res = await fetch(`http://localhost:5000/api/users/search?q=${searchQuery}`);
+                const res = await fetch(`${API_URL}/api/users/search?q=${searchQuery}`);
                 const data = await res.json();
                 setSearchResults(data);
             } catch (err) {
@@ -107,7 +108,7 @@ const BookingConfirmation = () => {
 
         for (const bookingId of bookingIds) {
             try {
-                const res = await fetch('http://localhost:5000/api/bookings/confirm', {
+                const res = await fetch(`${API_URL}/api/bookings/confirm`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

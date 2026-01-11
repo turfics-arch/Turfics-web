@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
+import API_URL from '../config';
 import { Check, X, Bell, Calendar, Clock, DollarSign, Filter, Search, ChevronRight, XCircle, Lock } from 'lucide-react';
 import './OwnerBookings.css';
 
@@ -21,9 +22,9 @@ const OwnerBookings = () => {
 
         try {
             const [bRes, sRes, tRes] = await Promise.all([
-                fetch('http://localhost:5000/api/owner/bookings', { headers: { 'Authorization': `Bearer ${token} ` } }),
-                fetch('http://localhost:5000/api/owner/stats', { headers: { 'Authorization': `Bearer ${token} ` } }),
-                fetch('http://localhost:5000/api/turfs/my-turfs', { headers: { 'Authorization': `Bearer ${token} ` } })
+                fetch(`${API_URL}/api/owner/bookings`, { headers: { 'Authorization': `Bearer ${token} ` } }),
+                fetch(`${API_URL}/api/owner/stats`, { headers: { 'Authorization': `Bearer ${token} ` } }),
+                fetch(`${API_URL}/api/turfs/my-turfs`, { headers: { 'Authorization': `Bearer ${token} ` } })
             ]);
 
             if (bRes.ok && sRes.ok) {
@@ -52,7 +53,7 @@ const OwnerBookings = () => {
     const handleConfirm = async (id) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/bookings/confirm', {
+            const res = await fetch(`${API_URL}/api/bookings/confirm`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token} `,
@@ -80,7 +81,7 @@ const OwnerBookings = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/bookings/${id}`, {
+            const res = await fetch(`${API_URL}/api/bookings/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -110,7 +111,7 @@ const OwnerBookings = () => {
         if (!turfId || turfId === 'all') return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/turfs/${turfId}/games`, {
+            const res = await fetch(`${API_URL}/api/turfs/${turfId}/games`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -211,7 +212,7 @@ const OwnerBookings = () => {
             // selectedSlot.iso is reliable
             const startTimeStr = selectedSlot.iso;
 
-            let url = 'http://localhost:5000/api/owner/bookings/walk-in';
+            let url = `${API_URL}/api/owner/bookings/walk-in`;
             let method = 'POST';
             let body = {};
 
@@ -227,7 +228,7 @@ const OwnerBookings = () => {
                     payment_status: 'paid'
                 };
             } else if (slotAction === 'block') {
-                url = 'http://localhost:5000/api/owner/bookings/block';
+                url = `${API_URL}/api/owner/bookings/block`;
                 body = {
                     turf_id: parseInt(slotForm.turf_id),
                     unit_id: parseInt(slotForm.unit_id),
@@ -237,7 +238,7 @@ const OwnerBookings = () => {
                 };
             } else if (slotAction.startsWith('edit-')) {
                 // Update Entry
-                url = `http://localhost:5000/api/owner/bookings/${selectedSlot.booking.booking_id}`;
+                url = `${API_URL}/api/owner/bookings/${selectedSlot.booking.booking_id}`;
                 method = 'PUT';
                 body = {
                     guest_name: slotAction === 'edit-block' ? `Blocked: ${slotForm.reason}` : slotForm.guest_name,

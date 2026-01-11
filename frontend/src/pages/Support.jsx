@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Navbar from '../components/Navbar';
+import API_URL from '../config';
 import { Send, MessageSquare, Headphones, CreditCard, LifeBuoy, AlertTriangle } from 'lucide-react';
 import './Support.css';
 
@@ -29,7 +30,7 @@ const Support = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/support/chat', {
+            const res = await fetch(`${API_URL}/api/support/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

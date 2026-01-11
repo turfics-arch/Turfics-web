@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, DollarSign, Clock, Users, MapPin, Star, Trophy, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell, ScatterChart, Scatter, ZAxis } from 'recharts';
+import API_URL from '../config';
 import Navbar from '../components/Navbar';
 import './Dashboard.css'; // Reusing dashboard styles
 
@@ -30,7 +31,7 @@ const OwnerAnalytics = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            let url = `http://localhost:5000/api/owner/analytics/detailed?range=${timeRange}`;
+            let url = `${API_URL}/api/owner/analytics/detailed?range=${timeRange}`;
 
             if (timeRange === 'custom' && customStart && customEnd) {
                 url += `&start_date=${customStart}&end_date=${customEnd}`;

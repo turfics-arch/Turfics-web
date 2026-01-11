@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
+import API_URL from '../config';
 import { User, Calendar, Check, X, Edit, MapPin, Clock, Plus, Trash2, Users, Trophy } from 'lucide-react';
 import './CoachDashboard.css'; // Reusing existing styles
 
@@ -36,7 +37,7 @@ const AcademyDashboard = () => {
 
         try {
             // Profile
-            const pRes = await fetch('http://localhost:5000/api/academy/me', { headers });
+            const pRes = await fetch(`${API_URL}/api/academy/me`, { headers });
             if (pRes.ok) {
                 const data = await pRes.json();
                 setProfile(data);
@@ -47,19 +48,19 @@ const AcademyDashboard = () => {
             }
 
             // Stats
-            const sRes = await fetch('http://localhost:5000/api/academy/stats', { headers });
+            const sRes = await fetch(`${API_URL}/api/academy/stats`, { headers });
             if (sRes.ok) setStats(await sRes.json());
 
             // Programs
-            const prRes = await fetch('http://localhost:5000/api/academy/programs', { headers });
+            const prRes = await fetch(`${API_URL}/api/academy/programs`, { headers });
             if (prRes.ok) setPrograms(await prRes.json());
 
             // Batches
-            const bRes = await fetch('http://localhost:5000/api/academy/batches', { headers });
+            const bRes = await fetch(`${API_URL}/api/academy/batches`, { headers });
             if (bRes.ok) setBatches(await bRes.json());
 
             // Enrollments
-            const eRes = await fetch('http://localhost:5000/api/academy/enrollments', { headers });
+            const eRes = await fetch(`${API_URL}/api/academy/enrollments`, { headers });
             if (eRes.ok) setEnrollments(await eRes.json());
 
         } catch (err) {
@@ -74,7 +75,7 @@ const AcademyDashboard = () => {
     const handleProfileUpdate = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5000/api/academy/profile', {
+        const res = await fetch(`${API_URL}/api/academy/profile`, {
             method: 'PUT',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(profileForm)
@@ -89,7 +90,7 @@ const AcademyDashboard = () => {
     const handleCreateProgram = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5000/api/academy/programs', {
+        const res = await fetch(`${API_URL}/api/academy/programs`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(newProgram)
@@ -105,7 +106,7 @@ const AcademyDashboard = () => {
     const handleDeleteProgram = async (id) => {
         if (!window.confirm('Delete this program? This will also delete all associated batches.')) return;
         const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:5000/api/academy/programs/${id}`, {
+        const res = await fetch(`${API_URL}/api/academy/programs/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -115,7 +116,7 @@ const AcademyDashboard = () => {
     const handleCreateBatch = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5000/api/academy/batches', {
+        const res = await fetch(`${API_URL}/api/academy/batches`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(newBatch)
@@ -130,7 +131,7 @@ const AcademyDashboard = () => {
 
     const handleEnrollmentAction = async (id, action) => {
         const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:5000/api/academy/enrollments/${id}/action`, {
+        const res = await fetch(`${API_URL}/api/academy/enrollments/${id}/action`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ action })
@@ -141,7 +142,7 @@ const AcademyDashboard = () => {
     const viewStudents = async (batch) => {
         setSelectedBatch(batch);
         const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:5000/api/academy/batches/${batch.id}/students`, {
+        const res = await fetch(`${API_URL}/api/academy/batches/${batch.id}/students`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {

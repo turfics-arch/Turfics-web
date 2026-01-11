@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config';
 import Navbar from '../components/Navbar';
 import './TournamentManage.css';
 
@@ -21,7 +22,7 @@ const TournamentManage = () => {
 
     const fetchTournamentData = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/tournaments/${id}`);
+            const res = await axios.get(`${API_URL}/api/tournaments/${id}`);
             setTournament(res.data);
             setLoading(false);
         } catch (err) {
@@ -34,7 +35,7 @@ const TournamentManage = () => {
     const handleUpdateScore = async (matchId, score1, score2, status) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`http://localhost:5000/api/tournaments/matches/${matchId}/score`,
+            await axios.put(`${API_URL}/api/tournaments/matches/${matchId}/score`,
                 { score1, score2, status },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -48,7 +49,7 @@ const TournamentManage = () => {
         if (!newMatch.team1 || !newMatch.team2) return alert('Enter teams');
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:5000/api/tournaments/${id}/matches`,
+            await axios.post(`${API_URL}/api/tournaments/${id}/matches`,
                 newMatch,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -63,7 +64,7 @@ const TournamentManage = () => {
         if (!announcement) return;
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:5000/api/tournaments/${id}/announcements`,
+            await axios.post(`${API_URL}/api/tournaments/${id}/announcements`,
                 { content: announcement },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -244,7 +245,7 @@ const TournamentManage = () => {
                                                                     onClick={async () => {
                                                                         try {
                                                                             const token = localStorage.getItem('token');
-                                                                            await axios.put(`http://localhost:5000/api/tournaments/registrations/${reg.id}`,
+                                                                            await axios.put(`${API_URL}/api/tournaments/registrations/${reg.id}`,
                                                                                 { status: 'approved' },
                                                                                 { headers: { Authorization: `Bearer ${token}` } }
                                                                             );
@@ -262,7 +263,7 @@ const TournamentManage = () => {
                                                                     onClick={async () => {
                                                                         try {
                                                                             const token = localStorage.getItem('token');
-                                                                            await axios.put(`http://localhost:5000/api/tournaments/registrations/${reg.id}`,
+                                                                            await axios.put(`${API_URL}/api/tournaments/registrations/${reg.id}`,
                                                                                 { payment_status: 'paid' },
                                                                                 { headers: { Authorization: `Bearer ${token}` } }
                                                                             );
@@ -279,7 +280,7 @@ const TournamentManage = () => {
                                                                 onClick={async () => {
                                                                     try {
                                                                         const token = localStorage.getItem('token');
-                                                                        await axios.put(`http://localhost:5000/api/tournaments/registrations/${reg.id}`,
+                                                                        await axios.put(`${API_URL}/api/tournaments/registrations/${reg.id}`,
                                                                             { status: 'rejected' },
                                                                             { headers: { Authorization: `Bearer ${token}` } }
                                                                         );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config';
 import { Trophy, Calendar, MapPin, DollarSign, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import './HostTournament.css';
@@ -45,14 +46,14 @@ const HostTournament = () => {
 
             // 1. Fetch My Turfs if owner
             if (role === 'owner') {
-                const res = await axios.get('http://localhost:5000/api/turfs/my-turfs', {
+                const res = await axios.get(`${API_URL}/api/turfs/my-turfs`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setMyTurfs(res.data);
             }
 
             // 2. Fetch All Active Turfs for "External" selection
-            const resExt = await axios.get('http://localhost:5000/api/turfs');
+            const resExt = await axios.get(`${API_URL}/api/turfs`);
             setExternalTurfs(resExt.data);
 
         } catch (err) {
@@ -117,7 +118,7 @@ const HostTournament = () => {
                 daily_end_time: formData.dailyEndTime
             };
 
-            await axios.post('http://localhost:5000/api/tournaments', dataToSend, {
+            await axios.post(`${API_URL}/api/tournaments`, dataToSend, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 

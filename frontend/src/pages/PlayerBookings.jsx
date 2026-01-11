@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
+import API_URL from '../config';
 import { Calendar, Clock, MapPin, CreditCard, AlertCircle, Star, PenTool, CheckCircle, X } from 'lucide-react';
 import './PlayerBookings.css';
 
@@ -21,7 +22,7 @@ const PlayerBookings = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/my-bookings?filter=${activeTab}`, {
+            const res = await fetch(`${API_URL}/api/my-bookings?filter=${activeTab}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -55,7 +56,7 @@ const PlayerBookings = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/bookings/${selectedBookingDetails.id}/cancel`, {
+            const res = await fetch(`${API_URL}/api/bookings/${selectedBookingDetails.id}/cancel`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -79,7 +80,7 @@ const PlayerBookings = () => {
         if (!rating) return alert("Please select a rating");
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/turfs/${selectedBookingForReview.turf_id}/reviews`, { // Assuming turf_id is available
+            const res = await fetch(`${API_URL}/api/turfs/${selectedBookingForReview.turf_id}/reviews`, { // Assuming turf_id is available
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

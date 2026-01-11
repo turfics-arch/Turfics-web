@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config';
 import Navbar from '../components/Navbar';
 import { Plus, LayoutDashboard, Wallet, Users, Trophy, Calendar } from 'lucide-react';
 import './OrganizerHub.css';
@@ -18,7 +19,7 @@ const OrganizerHub = () => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/organizer/tournaments', {
+            const res = await axios.get(`${API_URL}/api/organizer/tournaments`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTournaments(res.data);

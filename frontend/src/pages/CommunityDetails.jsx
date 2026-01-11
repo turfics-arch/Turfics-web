@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Users, MessageSquare, Settings, Lock, Globe, Send, Radio, MoreVertical, Check, X, Shield, ShieldAlert, Link as LinkIcon } from 'lucide-react';
 import axios from 'axios';
+import API_URL from '../config';
 import './CommunityDetails.css';
 
 const CommunityDetails = () => {
@@ -56,7 +57,7 @@ const CommunityDetails = () => {
     const fetchDetails = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://127.0.0.1:5000/api/communities/${id}`, {
+            const res = await axios.get(`${API_URL}/api/communities/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setCommunity(res.data);
@@ -70,7 +71,7 @@ const CommunityDetails = () => {
     const fetchMessages = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://127.0.0.1:5000/api/communities/${id}/messages`, {
+            const res = await axios.get(`${API_URL}/api/communities/${id}/messages`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMessages(res.data);
@@ -82,7 +83,7 @@ const CommunityDetails = () => {
     const fetchMembers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://127.0.0.1:5000/api/communities/${id}/members`, {
+            const res = await axios.get(`${API_URL}/api/communities/${id}/members`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMembers(res.data);
@@ -94,7 +95,7 @@ const CommunityDetails = () => {
     const handleJoin = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post(`http://127.0.0.1:5000/api/communities/${id}/join`, {}, {
+            const res = await axios.post(`${API_URL}/api/communities/${id}/join`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchDetails(); // Refresh status
@@ -110,7 +111,7 @@ const CommunityDetails = () => {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`http://127.0.0.1:5000/api/communities/${id}/messages`, {
+            await axios.post(`${API_URL}/api/communities/${id}/messages`, {
                 content: newMessage,
                 is_broadcast: isBroadcast
             }, {
@@ -127,7 +128,7 @@ const CommunityDetails = () => {
         if (!window.confirm(`Are you sure you want to ${action} this user?`)) return;
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`http://127.0.0.1:5000/api/communities/${id}/members/action`, {
+            await axios.post(`${API_URL}/api/communities/${id}/members/action`, {
                 user_id: userId,
                 action: action
             }, {

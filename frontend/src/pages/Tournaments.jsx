@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API_URL from '../config';
 import { Search, Trophy, Calendar, MapPin, Users, Filter, Plus, Smartphone, Award, Share2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import './Tournaments.css';
@@ -16,7 +17,7 @@ const Tournaments = () => {
     useEffect(() => {
         const fetchTournaments = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/tournaments');
+                const res = await fetch(`${API_URL}/api/tournaments`);
                 if (res.ok) {
                     const data = await res.json();
                     setTournaments(data);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, MapPin, Edit, Trash2, Clock, DollarSign, Users, X, Trophy, BarChart2 } from 'lucide-react';
+import API_URL from '../config';
 import Navbar from '../components/Navbar';
 import LocationPicker from '../components/LocationPicker';
 import './TurfManagement.css';
@@ -31,7 +32,7 @@ const TurfManagement = () => {
     const fetchTurfs = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/turfs/my-turfs', {
+            const res = await fetch(`${API_URL}/api/turfs/my-turfs`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -53,8 +54,8 @@ const TurfManagement = () => {
         try {
             const token = localStorage.getItem('token');
             const url = editingTurf
-                ? `http://localhost:5000/api/turfs/${editingTurf.id}`
-                : 'http://localhost:5000/api/turfs/create';
+                ? `${API_URL}/api/turfs/${editingTurf.id}`
+                : `${API_URL}/api/turfs/create`;
 
             const method = editingTurf ? 'PUT' : 'POST';
 
@@ -97,7 +98,7 @@ const TurfManagement = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/turfs/${id}`, {
+            const res = await fetch(`${API_URL}/api/turfs/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

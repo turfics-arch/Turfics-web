@@ -4,6 +4,7 @@ import CreateCommunityModal from '../components/CreateCommunityModal';
 import { Search, Plus, Users, Radio, Globe, Lock, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config';
 import './Community.css';
 
 const Community = () => {
@@ -26,8 +27,8 @@ const Community = () => {
 
             // Parallel fetch
             const [myRes, publicRes] = await Promise.all([
-                axios.get('http://127.0.0.1:5000/api/communities/my', { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get('http://127.0.0.1:5000/api/communities', { headers: { Authorization: `Bearer ${token}` } })
+                axios.get(`${API_URL}/api/communities/my`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${API_URL}/api/communities`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
 
             setMyCommunities(myRes.data.map(c => ({
@@ -51,7 +52,7 @@ const Community = () => {
         setSearchTerm(e.target.value);
         if (e.target.value.length > 2) {
             try {
-                const res = await axios.get(`http://127.0.0.1:5000/api/communities?q=${e.target.value}`);
+                const res = await axios.get(`${API_URL}/api/communities?q=${e.target.value}`);
                 setPublicCommunities(res.data);
                 if (activeTab !== 'discover') setActiveTab('discover');
             } catch (err) {
@@ -60,7 +61,7 @@ const Community = () => {
         } else if (e.target.value.length === 0) {
             // Reset
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://127.0.0.1:5000/api/communities', { headers: { Authorization: `Bearer ${token}` } });
+            const res = await axios.get(`${API_URL}/api/communities`, { headers: { Authorization: `Bearer ${token}` } });
             setPublicCommunities(res.data);
         }
     };

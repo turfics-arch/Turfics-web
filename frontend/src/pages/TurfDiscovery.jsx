@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import './TurfDiscovery.css';
 import L from 'leaflet';
+import API_URL from '../config';
 import Navbar from '../components/Navbar';
 
 // Fix for default marker icon in React Leaflet
@@ -140,7 +141,7 @@ const TurfDiscovery = () => {
     useEffect(() => {
         const fetchTurfs = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/turfs');
+                const res = await fetch(`${API_URL}/api/turfs`);
                 if (res.ok) {
                     const data = await res.json();
                     const formattedData = data.map(t => ({
