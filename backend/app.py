@@ -147,6 +147,20 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     return response
 
+# HEALTH CHECK & DEBUG ROUTES
+@app.route('/')
+def home():
+    return jsonify({
+        "status": "online",
+        "message": "Turfics Backend is Live",
+        "database": "connected" if db.session.execute(text('SELECT 1')) else "error"
+    }), 200
+
+@app.route('/health')
+@app.route('/api/health')
+def health_check():
+    return jsonify({"status": "healthy"}), 200
+
 @jwt.invalid_token_loader
 def invalid_token_callback(error):
     print(f"JWT INVALID: {error}")
