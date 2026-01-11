@@ -64,7 +64,18 @@ load_dotenv()
 
 app = Flask(__name__)
 # Allow CORS for all domains for development
-CORS(app, resources={r"/*": {"origins": "*"}})
+# Robust CORS Configuration for Production
+# We explicitly allow the Vercel domain and localhost
+CORS(app, resources={r"/*": {
+    "origins": [
+        "https://turfics-web.vercel.app", 
+        "http://localhost:5173", 
+        "http://localhost:3000",
+        "*"  # Fallback to allow everything if the list fails
+    ],
+    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "allow_headers": ["Content-Type", "Authorization"]
+}})
 
 # Configuration
 # Configuration
