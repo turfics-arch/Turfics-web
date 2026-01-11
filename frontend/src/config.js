@@ -1,7 +1,7 @@
 
 // centralized API configuration
 
-const LIVE_BACKEND = "https://turfics-backend.onrender.com";
+const LIVE_BACKEND = "https://turfics-web.onrender.com";
 const LOCAL_BACKEND = "http://localhost:5000";
 
 let API_URL = LOCAL_BACKEND;
