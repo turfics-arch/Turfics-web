@@ -234,7 +234,7 @@ def get_current_user():
 
 # Auth Routes
 @app.route('/api/auth/register', methods=['POST'])
-def register():
+def user_register():
     data = request.get_json()
     username = data.get('username')
     email = data.get('email')
@@ -286,7 +286,7 @@ def create_admin():
         return jsonify({"message": "Access denied"}), 403
     
     # Reuse register logic or create specific logic
-    return register()
+    return user_register()
 
 @app.route('/api/admin/users', methods=['GET'])
 @jwt_required()
