@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Smartphone, Star, Users, Shield, Trophy, Lock, ArrowUpRight, Menu, X } from 'lucide-react';
 import './LandingPage.css';
+import API_URL from '../config';
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -32,8 +33,7 @@ const LandingPage = () => {
 
         const fetchTurfs = async () => {
             try {
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-                const response = await fetch(`${apiUrl}/api/turfs`);
+                const response = await fetch(`${API_URL}/api/turfs`);
                 if (response.ok) {
                     let data = await response.json();
 

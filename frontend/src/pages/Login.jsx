@@ -4,7 +4,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Shield, Lock, User, Users } from 'lucide-react';
-import './Auth.css'; // We will create this
+import './Auth.css';
+import API_URL from '../config';
 
 const Login = () => {
     const location = useLocation();
@@ -33,8 +34,7 @@ const Login = () => {
         try {
 
             if (isLogin) {
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-                const res = await axios.post(`${apiUrl}/api/auth/login`, {
+                const res = await axios.post(`${API_URL}/api/auth/login`, {
                     username: formData.username,
                     password: formData.password
                 });
@@ -53,8 +53,7 @@ const Login = () => {
                     navigate('/dashboard');
                 }
             } else {
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-                await axios.post(`${apiUrl}/api/auth/register`, {
+                await axios.post(`${API_URL}/api/auth/register`, {
                     username: formData.username,
                     password: formData.password,
                     email: formData.email,
