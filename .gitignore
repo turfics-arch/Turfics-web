@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.env
+
+# JavaScript
+node_modules/
+dist/
+.DS_Store
+
+# Temporary Scripts (Contain Secrets)
+backend/create_admin.py
+backend/setup_remote_db.py
+backend/migrate_to_cloud.py
+backend/reset_password_remote.py
+backend/check_data_counts.py
+backend/test_connection.py
+backend/activate_remote_data.py
