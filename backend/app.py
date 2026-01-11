@@ -124,6 +124,22 @@ else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///local.db'
 
 # Universal config
+# Fix for "SSL connection closed unexpectedly" on Neon/Render
+# 1. Disable connection pooling (Neon has its own pooler) OR set stricter keepalives
+# We will use NullPool (disable pooling) which is recommended for serverless/pgbouncer setups
+from sqlalchemy.pool import NullPool
+
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'poolclass': NullPool,
+    'connect_args': {
+        'sslmode': 'require',
+        'keepalives': 1,
+        'keepalives_idle': 30,
+        'keepalives_interval': 10,
+        'keepalives_count': 5
+    }
+}
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'turfics-secret-key-v2') 
 
