@@ -11,8 +11,11 @@ from models import db, bcrypt, User, Turf, TurfGame, TurfUnit, UnitImage, Team, 
 import google.generativeai as genai
 
 # --- GEMINI SETUP ---
-GEMINI_API_KEY = "AIzaSyCLxC5EUl_ceAWNF3yEPQhVwyGoBZoGdIY"
-genai.configure(api_key=GEMINI_API_KEY)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+else:
+    print("WARNING: GEMINI_API_KEY not found in environment")
 
 # Initialize model globally to restart only on app reload
 try:
@@ -42,13 +45,11 @@ load_dotenv()
 app = Flask(__name__)
 # Allow CORS for all domains for development
 # Robust CORS Configuration for Production
-# We explicitly allow the Vercel domain and localhost
 CORS(app, resources={r"/*": {
     "origins": [
         "https://turfics-web.vercel.app", 
         "http://localhost:5173", 
-        "http://localhost:3000",
-        "*"  # Fallback to allow everything if the list fails
+        "http://localhost:3000"
     ],
     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     "allow_headers": ["Content-Type", "Authorization"]
@@ -132,10 +133,18 @@ bcrypt.init_app(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
 
-# MANUAL CORS OVERRIDE (The "Nuclear Option")
+# MANUAL CORS OVERRIDE
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    origin = request.headers.get('Origin')
+    allowed_origins = [
+        "https://turfics-web.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000"
+    ]
+    if origin in allowed_origins:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+    
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     return response
