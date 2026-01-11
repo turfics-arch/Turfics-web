@@ -164,6 +164,19 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     return response
 
+# GLOBAL ERROR HANDLERS (DEBUGGING)
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({"error": "Not Found", "message": "The requested URL was not found on the server."}), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return jsonify({"error": "Method Not Allowed", "message": "The method is not allowed for the requested URL."}), 405
+
 # HEALTH CHECK & DEBUG ROUTES
 @app.route('/')
 def home():
