@@ -1,5 +1,6 @@
 import os
 from flask import Flask, jsonify, request
+from sqlalchemy import text
 from flask_cors import CORS
 from dotenv import load_dotenv
 from flask_migrate import Migrate
