@@ -150,10 +150,20 @@ def after_request(response):
 # HEALTH CHECK & DEBUG ROUTES
 @app.route('/')
 def home():
+    db_status = "unknown"
+    error_msg = None
+    try:
+        db.session.execute(text('SELECT 1'))
+        db_status = "connected"
+    except Exception as e:
+        db_status = "error"
+        error_msg = str(e)
+        
     return jsonify({
         "status": "online",
         "message": "Turfics Backend is Live",
-        "database": "connected" if db.session.execute(text('SELECT 1')) else "error"
+        "database": db_status,
+        "db_error": error_msg # This will show us WHY it failed in the browser
     }), 200
 
 @app.route('/health')
