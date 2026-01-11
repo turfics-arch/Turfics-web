@@ -34,31 +34,7 @@ try:
 except Exception as e:
     print(f"Gemini Init Error: {e}")
     chat_model = None
-import google.generativeai as genai
 
-# --- GEMINI SETUP ---
-GEMINI_API_KEY = "AIzaSyCLxC5EUl_ceAWNF3yEPQhVwyGoBZoGdIY"
-genai.configure(api_key=GEMINI_API_KEY)
-# Initialize model globally to restart only on app reload
-try:
-    SYSTEM_PROMPT = """You are Alex, the Senior Service Team Lead at Turfics.
-    Turfics is a sports venue booking and management platform.
-    Your Persona: Professional, empathetic, efficient, and authoritative.
-    You deal with booking issues, payments, registration, and general "how-to" questions.
-    
-    KEY INFO:
-    - Users: Players, Owners, Coaches, Academies.
-    - Bookings: Discovery -> Slot -> Payment -> QR Code.
-    - Matches: Users host/join pick-up games.
-    - Payments: We simulate payments (Razorpay mock). Refunds: >24h full, <24h 50%.
-    - Support: You are the top tier support.
-    
-    If you don't know, ask clarifying questions. Keep responses concise."""
-    
-    chat_model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=SYSTEM_PROMPT)
-except Exception as e:
-    print(f"Gemini Init Error: {e}")
-    chat_model = None
 
 
 load_dotenv()
