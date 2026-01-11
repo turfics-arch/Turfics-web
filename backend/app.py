@@ -167,10 +167,21 @@ def home():
         
     return jsonify({
         "status": "online",
-        "message": "Turfics Backend is Live",
+        "message": "Turfics Backend v2 (Debug Mode)",
         "database": db_status,
-        "db_error": error_msg # This will show us WHY it failed in the browser
+        "db_error": error_msg 
     }), 200
+
+@app.route('/debug/routes')
+def debug_routes():
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            "endpoint": rule.endpoint,
+            "methods": list(rule.methods),
+            "rule": rule.rule
+        })
+    return jsonify(routes), 200
 
 @app.route('/health')
 @app.route('/api/health')
