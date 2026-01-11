@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import API_URL from '../config';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -11,6 +10,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import './TurfDetails.css';
+import API_URL from '../config';
 
 // Fix Leaflet Default Icon
 let DefaultIcon = L.icon({

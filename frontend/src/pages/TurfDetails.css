@@ -1,156 +1,147 @@
-/* TurfDetails.css - Premium Update */
 .turf-details-page {
     min-height: 100vh;
-    color: var(--text-primary);
-    background: var(--bg-dark);
-    padding-bottom: 80px;
-    /* Space for mobile footer */
+    color: var(--text);
 }
 
-/* Header & Hero */
 .turf-header {
-    height: 35vh;
-    min-height: 250px;
+    height: 200px;
     background-size: cover;
     background-position: center;
     position: relative;
     margin-top: 60px;
+    /* Navbar height */
 }
 
 .header-overlay {
-    background: linear-gradient(to top, var(--bg-dark), rgba(15, 23, 42, 0.4), transparent);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
     width: 100%;
     height: 100%;
     display: flex;
     align-items: flex-end;
     padding-bottom: 2rem;
-    backdrop-filter: blur(2px);
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 1.5rem;
+    padding: 0 1rem;
     width: 100%;
 }
 
 .turf-header h1 {
     font-size: 2.5rem;
-    font-weight: 800;
     color: white;
     margin-bottom: 0.5rem;
-    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 .turf-header .location {
-    color: #cbd5e1;
+    color: #ccc;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1rem;
 }
 
 .badges {
     display: flex;
     gap: 0.5rem;
     margin-top: 1rem;
-    flex-wrap: wrap;
 }
 
 .badge {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 0.2rem 0.8rem;
-    border-radius: 50px;
+    background: var(--primary);
+    color: black;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
     font-size: 0.8rem;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .badge.star {
-    background: rgba(255, 215, 0, 0.2);
-    border-color: rgba(255, 215, 0, 0.4);
-    color: #fbbf24;
+    background: #FFD700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 /* Layout */
 .content-layout {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
-    padding: 2rem 1.5rem;
+    grid-template-columns: 65% 35%;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+@media (max-width: 768px) {
+    .content-layout {
+        grid-template-columns: 1fr;
+    }
 }
 
 .section {
-    background: var(--bg-card);
-    border-radius: 16px;
+    background: var(--card-bg);
+    border-radius: 12px;
     padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
 }
 
 .section h3 {
-    color: var(--text-primary);
+    color: var(--primary);
     margin-bottom: 1rem;
-    font-size: 1.25rem;
-    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
 }
 
-/* Tabs & Pills */
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
 .tab-btn {
     background: transparent;
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border);
     color: var(--text-secondary);
     padding: 0.5rem 1.5rem;
-    border-radius: 8px;
+    border-radius: 20px;
     cursor: pointer;
-    transition: all 0.2s;
-    font-weight: 500;
-}
-
-.tab-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);
+    transition: all 0.3s ease;
 }
 
 .tab-btn.active {
-    background: var(--accent-primary);
-    border-color: var(--accent-primary);
-    color: white;
+    background: var(--primary);
+    color: black;
+    border-color: var(--primary);
+    font-weight: bold;
 }
 
+/* Unit Pills */
 .unit-pills {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 1rem;
 }
 
 .unit-pill {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
     padding: 1rem;
-    border-radius: 12px;
+    border-radius: 8px;
     text-align: left;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s;
 }
 
-.unit-pill:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--text-secondary);
-}
-
+.unit-pill:hover,
 .unit-pill.active {
-    border-color: var(--accent-primary);
-    background: rgba(59, 130, 246, 0.1);
-    box-shadow: 0 0 0 1px var(--accent-primary);
+    border-color: var(--primary);
+    background: rgba(0, 230, 118, 0.1);
 }
 
 .unit-name {
-    font-weight: 600;
-    color: var(--text-primary);
+    font-weight: bold;
+    color: var(--text);
     margin-bottom: 0.25rem;
 }
 
@@ -159,55 +150,306 @@
     color: var(--text-secondary);
 }
 
-/* Slots Grid */
-.slots-grid-sidebar {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
+.tag {
+    display: inline-block;
+    background: #333;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 0.5rem;
 }
 
-@media (max-width: 1200px) {
-    .slots-grid-sidebar {
-        grid-template-columns: repeat(3, 1fr);
+/* Slots */
+.date-picker-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+input[type=date] {
+    background: #333;
+    border: 1px solid #555;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 6px;
+}
+
+.slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.8rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.slot-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    padding: 0.8rem 0.5rem;
+    border-radius: 50px;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    transition: all 0.2s;
+}
+
+.slot-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+}
+
+.slot-btn.selected {
+    background: var(--primary);
+    color: black;
+    border-color: var(--primary);
+}
+
+.slot-btn.booked {
+    background: rgba(255, 0, 0, 0.1);
+    border-color: transparent;
+    color: #666;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.slot-price {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+/* Booking Action */
+.booking-action {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(0, 230, 118, 0.1);
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.booking-action .summary {
+    color: var(--text);
+}
+
+.booking-action .price {
+    color: var(--primary);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.book-btn {
+    background: var(--primary);
+    color: black;
+    border: none;
+    padding: 0.8rem 2rem;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.book-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+/* Sidebar */
+.sidebar .map-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    height: auto;
+}
+
+.map-container {
+    width: 80px;
+    height: 80px;
+    margin: 1rem 0;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--border);
+}
+
+/* Selection Row Layout */
+.selection-row {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1rem;
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+@media (max-width: 768px) {
+    .selection-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .sports-col {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1rem;
     }
 }
 
-/* Maps & Gallery */
-.map-container-large {
-    filter: invert(90%) hue-rotate(180deg);
-    /* Dark mode map trick */
+.sports-col {
+    flex: 0 0 140px;
+    border-right: 1px solid var(--border);
+    padding-right: 1.5rem;
 }
 
-/* Unit Gallery */
+.sports-col h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+
+.units-col {
+    flex: 1;
+}
+
+.units-col h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+
+.vertical-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Override tab-btn for vertical if needed, but flex-col handles it */
+.vertical-tabs .tab-btn {
+    width: 100%;
+    text-align: left;
+    border-radius: 8px;
+}
+
+
+
+.directions-btn {
+    display: none;
+    width: 100%;
+    text-align: center;
+    background: #333;
+    color: white;
+    padding: 0.8rem;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-top: 1rem;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ccc;
+}
+
+/* Unit Gallery Catalog */
+.unit-gallery-catalog h3 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+}
+
 .catalog-hero {
-    height: 400px;
-    border-radius: 12px;
-    overflow: hidden;
     position: relative;
-    border: 1px solid var(--glass-border);
+    width: 100%;
+    height: 300px;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 0.8rem;
+    border: 1px solid var(--border);
+}
+
+.catalog-hero .hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 1rem;
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: background 0.2s;
+    z-index: 2;
+}
+
+.nav-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.nav-btn.prev {
+    left: 0;
+}
+
+.nav-btn.next {
+    right: 0;
+}
+
+.hero-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    padding: 1rem;
+    font-size: 0.9rem;
+    pointer-events: none;
 }
 
 .catalog-thumbnails {
-    margin-top: 1rem;
     display: flex;
-    gap: 10px;
+    gap: 0.5rem;
     overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: thin;
 }
 
 .thumb-item {
-    width: 80px;
+    flex: 0 0 80px;
     height: 60px;
-    border-radius: 8px;
-    overflow: hidden;
-    opacity: 0.6;
     cursor: pointer;
-    transition: 0.2s;
+    border-radius: 4px;
+    overflow: hidden;
+    opacity: 0.5;
+    transition: all 0.2s;
     border: 2px solid transparent;
+}
+
+.thumb-item:hover {
+    opacity: 0.8;
 }
 
 .thumb-item.active {
     opacity: 1;
-    border-color: var(--accent-primary);
+    border-color: var(--primary);
 }
 
 .thumb-item img {
@@ -216,102 +458,13 @@
     object-fit: cover;
 }
 
-/* Mobile Sticky Footer */
-.mobile-booking-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(12px);
-    border-top: 1px solid var(--glass-border);
-    padding: 1rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 1000;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
-    animation: slideUp 0.3s ease-out;
-}
-
-.mbf-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.mbf-time {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-.mbf-price {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--accent-primary);
-}
-
-.mbf-btn {
-    background: var(--accent-primary);
-    color: white;
-    border: none;
-    padding: 0.75rem 2rem;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-}
-
-.mbf-btn:disabled {
-    opacity: 0.7;
-    filter: grayscale(0.5);
-}
-
-/* Responsive Media Queries */
-@media (max-width: 900px) {
-    .content-layout {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+@media (min-width: 768px) {
+    .catalog-hero {
+        height: 400px;
     }
 
-    .turf-header {
-        height: 250px;
-    }
-
-    .turf-header h1 {
-        font-size: 1.8rem;
-    }
-
-    /* Hide the sidebar booking card on mobile if selectedSlots > 0 to avoid clutter? 
-       Actually, keeping it is fine, but maybe redundant. 
-       Let's keep it but ensure it doesn't look broken. 
-    */
-    .sidebar {
-        order: -1;
-        /* Move booking to top on mobile? Or keep bottom? */
-        /* Keeping at bottom is standard for "content first", but booking is important.
-           Using order: -1 might push it to top. 
-           Let's leave it natural flow (bottom) because we have the Sticky Footer now! 
-        */
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
-        padding: 0 1rem;
-    }
-
-    .slots-grid-sidebar {
-        grid-template-columns: repeat(4, 1fr);
-        /* 4 cols fit on small screens usually for time slots */
-    }
-
-    .mobile-booking-footer {
-        padding: 0.75rem 1rem;
-    }
-
-    .mbf-btn {
-        padding: 0.6rem 1.5rem;
-        font-size: 0.9rem;
+    .thumb-item {
+        flex: 0 0 100px;
+        height: 75px;
     }
 }
