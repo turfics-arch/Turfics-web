@@ -39,6 +39,7 @@ import SamplePage from './pages/SamplePage';
 import AboutUs from './pages/AboutUs';
 import Support from './pages/Support';
 import './App.css';
+import { Analytics } from '@vercel/analytics/react';
 
 // Guard Component
 const PrivateRoute = ({ children }) => {
@@ -115,6 +116,7 @@ function App() {
           <Route path="/" element={<Navigate to="/login" />} />
         </Routes>
       </div>
+      <Analytics />
     </Router>
   );
 }
