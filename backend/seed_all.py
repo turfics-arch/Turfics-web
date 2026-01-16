@@ -1,4 +1,5 @@
 import datetime
+import os
 from app import app, db
 from models import (
     User, Turf, TurfGame, TurfUnit, Academy, Coach, 
@@ -9,8 +10,13 @@ from models import (
 
 def seed_all():
     with app.app_context():
+        if os.getenv('CLEAN_RESET') == 'true':
+            print("Dropping all existing tables for a clean sync...")
+            db.drop_all()
+        
+        print("Ensuring tables are created...")
+        db.create_all()
         print("Starting master database seeding...")
-        # ... (rest of the code remains the same inside function)
 
         # 1. USERS
         users_data = [

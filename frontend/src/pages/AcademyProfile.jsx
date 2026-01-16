@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Star, CheckCircle, Clock, Calendar, ChevronRight, Check } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { showSuccess, showError, showConfirm } from '../utils/SwalUtils';
+import { API_URL } from '../utils/api';
 import './AcademyProfile.css';
 
 const AcademyProfile = () => {
@@ -17,7 +18,7 @@ const AcademyProfile = () => {
         const fetchData = async () => {
             try {
                 // Fetch Academy Details
-                const accRes = await fetch(`http://localhost:5000/api/academies/${id}`);
+                const accRes = await fetch(`${API_URL}/api/academies/${id}`);
                 if (accRes.ok) {
                     const accData = await accRes.json();
                     // Inject mock facilities if missing
@@ -26,7 +27,7 @@ const AcademyProfile = () => {
                 }
 
                 // Fetch Programs
-                const progRes = await fetch(`http://localhost:5000/api/academies/${id}/programs`);
+                const progRes = await fetch(`${API_URL}/api/academies/${id}/programs`);
                 if (progRes.ok) {
                     const progData = await progRes.json();
                     setPrograms(progData);
@@ -52,7 +53,7 @@ const AcademyProfile = () => {
         if (!confirmed) return;
 
         try {
-            const res = await fetch('http://localhost:5000/api/academies/enroll', {
+            const res = await fetch(`${API_URL}/api/academies/enroll`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

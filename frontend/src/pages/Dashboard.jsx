@@ -4,6 +4,7 @@ import { LogOut, MapPin, Award, Calendar, Wallet, TrendingUp, Users, Activity, C
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Navbar from '../components/Navbar';
 import { showConfirm } from '../utils/SwalUtils';
+import { API_URL } from '../utils/api';
 import './Dashboard.css';
 
 const RADIAN = Math.PI / 180;
@@ -45,8 +46,8 @@ const Dashboard = () => {
             const headers = { 'Authorization': `Bearer ${token}` };
 
             const endpoint = currentRole === 'owner'
-                ? 'http://localhost:5000/api/owner/stats'
-                : 'http://localhost:5000/api/activity';
+                ? `${API_URL}/api/owner/stats`
+                : `${API_URL}/api/activity`;
 
             const res = await fetch(endpoint, { headers });
             const data = await res.json();
@@ -54,7 +55,7 @@ const Dashboard = () => {
 
             // If Owner and has pending items, fetch the details immediately
             if (currentRole === 'owner' && data.bookings_breakdown?.pending > 0) {
-                const bookingRes = await fetch('http://localhost:5000/api/owner/bookings', { headers });
+                const bookingRes = await fetch(`${API_URL}/api/owner/bookings`, { headers });
                 if (bookingRes.ok) {
                     const allBookings = await bookingRes.json();
                     const pending = allBookings.filter(b => b.status === 'pending');
@@ -73,7 +74,7 @@ const Dashboard = () => {
     const handleConfirmBooking = async (id) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/bookings/confirm', {
+            const res = await fetch(`${API_URL}/api/bookings/confirm`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -107,7 +108,7 @@ const Dashboard = () => {
         if (!confirmed) return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/bookings/${id}`, {
+            const res = await fetch(`${API_URL}/api/bookings/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

@@ -5,6 +5,7 @@ import Loader from '../components/Loader';
 import { showSuccess, showError, showConfirm, showWarning } from '../utils/SwalUtils';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { API_URL } from '../utils/api';
 import './PlayerBookings.css';
 import './BookingConfirmation.css'; // Reuse invoice styles
 
@@ -27,7 +28,7 @@ const PlayerBookings = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/my-bookings?filter=${activeTab}`, {
+            const res = await fetch(`${API_URL}/api/my-bookings?filter=${activeTab}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -68,7 +69,7 @@ const PlayerBookings = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/bookings/${selectedBookingDetails.id}/cancel`, {
+            const res = await fetch(`${API_URL}/api/bookings/${selectedBookingDetails.id}/cancel`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -92,7 +93,7 @@ const PlayerBookings = () => {
         if (!rating) return showWarning('Rating Required', "Please select a rating");
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/turfs/${selectedBookingForReview.turf_id}/reviews`, { // Assuming turf_id is available
+            const res = await fetch(`${API_URL}/api/turfs/${selectedBookingForReview.turf_id}/reviews`, { // Assuming turf_id is available
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

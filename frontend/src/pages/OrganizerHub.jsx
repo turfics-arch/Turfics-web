@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import { Plus, LayoutDashboard, Wallet, Users, Trophy, Calendar, Trash2 } from 'lucide-react';
 import Loader from '../components/Loader';
 import { showConfirm, showSuccess, showError, showToast } from '../utils/SwalUtils';
+import { API_URL } from '../utils/api';
 import './OrganizerHub.css';
 
 const OrganizerHub = () => {
@@ -20,7 +21,7 @@ const OrganizerHub = () => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/organizer/tournaments', {
+            const res = await axios.get(`${API_URL}/api/organizer/tournaments`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTournaments(res.data);

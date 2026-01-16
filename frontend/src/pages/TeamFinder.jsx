@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Users, Search, PlusCircle, Shield, Zap, Calendar, Check } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { showSuccess, showError, showToast, showWarning } from '../utils/SwalUtils';
+import { API_URL } from '../utils/api';
 import './TeamFinder.css';
 
 const TeamFinder = () => {
@@ -21,7 +22,7 @@ const TeamFinder = () => {
     const fetchMatches = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/matches');
+            const res = await axios.get(`${API_URL}/api/matches`);
             setMatches(res.data);
         } catch (err) {
             console.error(err);
@@ -31,7 +32,7 @@ const TeamFinder = () => {
     const fetchMyActivity = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/matches/my', {
+            const res = await axios.get(`${API_URL}/api/matches/my`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMyActivity(res.data);
@@ -50,7 +51,7 @@ const TeamFinder = () => {
         if (!token) { showWarning('Login Required', "Please login to join matches"); return; }
 
         try {
-            await axios.post(`http://localhost:5000/api/matches/${matchId}/join`, {}, {
+            await axios.post(`${API_URL}/api/matches/${matchId}/join`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             showSuccess('Request Sent', "Join Request Sent! Waiting for host approval.");
@@ -63,7 +64,7 @@ const TeamFinder = () => {
     const handleAction = async (reqId, action) => {
         const token = localStorage.getItem('token');
         try {
-            await axios.post(`http://localhost:5000/api/matches/join-requests/${reqId}/action`, { action }, {
+            await axios.post(`${API_URL}/api/matches/join-requests/${reqId}/action`, { action }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchMyActivity();
@@ -75,7 +76,7 @@ const TeamFinder = () => {
     const handlePay = async (reqId) => {
         const token = localStorage.getItem('token');
         try {
-            await axios.post(`http://localhost:5000/api/matches/join-requests/${reqId}/pay`, {}, {
+            await axios.post(`${API_URL}/api/matches/join-requests/${reqId}/pay`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             showSuccess('Paid!', "Payment Successful!");

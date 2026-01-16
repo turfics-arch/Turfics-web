@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Smartphone, Star, Users, Shield, Trophy, Lock, ArrowUpRight, Menu, X } from 'lucide-react';
 import './LandingPage.css';
 import Loader from '../components/Loader';
+import { API_URL } from '../utils/api';
 
 import logo from '../assets/turfics_logo.png';
 
@@ -36,7 +37,7 @@ const LandingPage = () => {
 
         const fetchTurfs = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/turfs');
+                const response = await fetch(`${API_URL}/api/turfs`);
                 if (response.ok) {
                     let data = await response.json();
 

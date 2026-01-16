@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import { Calendar, MapPin, Trophy } from 'lucide-react';
+import { API_URL } from '../utils/api';
 import './MyTournaments.css';
 
 const MyTournaments = () => {
@@ -18,7 +19,7 @@ const MyTournaments = () => {
     const fetchMyRegistrations = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/tournaments/my-registrations', {
+            const res = await axios.get(`${API_URL}/api/tournaments/my-registrations`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setRegistrations(res.data);
