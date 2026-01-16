@@ -38,6 +38,8 @@ const Tournaments = () => {
             } catch (error) {
                 console.error("Failed to fetch tournaments", error);
                 setError(error.message);
+            } finally {
+                setLoading(false);
             }
         };
         fetchTournaments();

@@ -71,8 +71,7 @@ const LandingPage = () => {
             } catch (error) {
                 console.error("Failed to fetch turfs", error);
             } finally {
-                // Short delay for effect
-                setTimeout(() => setLoading(false), 1500);
+                setLoading(false);
             }
         };
 
