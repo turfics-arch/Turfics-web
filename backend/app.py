@@ -188,16 +188,25 @@ def login():
     
     if user:
         print(f"DEBUG LOGIN: Found user '{user.username}' (ID: {user.id})")
-        if user.check_password(password):
-            print("DEBUG LOGIN: Password check PASSED")
-            # Create token with user ID as subject (string) and additional claims
-            access_token = create_access_token(
-                identity=str(user.id),
-                additional_claims={'role': user.role, 'username': user.username}
-            )
-            return jsonify({'access_token': access_token, 'role': user.role, 'user_id': user.id}), 200
-        else:
-            print("DEBUG LOGIN: Password check FAILED")
+        print(f"DEBUG LOGIN: Stored Hash: {user.password_hash[:15]}... (Len: {len(user.password_hash)})")
+        print(f"DEBUG LOGIN: Input Password Type: {type(password)}, Len: {len(password) if password else 'None'}")
+        
+        try:
+            is_valid = user.check_password(password)
+            print(f"DEBUG LOGIN: Check Result: {is_valid}")
+            
+            if is_valid:
+                print("DEBUG LOGIN: Password check PASSED")
+                # Create token with user ID as subject (string) and additional claims
+                access_token = create_access_token(
+                    identity=str(user.id),
+                    additional_claims={'role': user.role, 'username': user.username}
+                )
+                return jsonify({'access_token': access_token, 'role': user.role, 'user_id': user.id}), 200
+            else:
+                print("DEBUG LOGIN: Password check FAILED")
+        except Exception as e:
+            print(f"DEBUG LOGIN ERROR: {str(e)}")
     else:
         print(f"DEBUG LOGIN: User '{username}' NOT FOUND")
     
