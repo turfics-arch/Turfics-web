@@ -16,8 +16,12 @@ import google.generativeai as genai
 otp_store = {}
 
 # --- GEMINI SETUP ---
-GEMINI_API_KEY = "AIzaSyCsi2y63IwP6aAZLcKCujAzpvmPL8vBs4o"
-genai.configure(api_key=GEMINI_API_KEY)
+# WARNING: Do NOT hardcode API keys. Use environment variables.
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+else:
+    print("WARNING: GEMINI_API_KEY not found in environment variables.")
 
 # Initialize model globally to restart only on app reload
 try:
