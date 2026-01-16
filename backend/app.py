@@ -57,11 +57,22 @@ def page_not_found(e):
     print(f"DEBUG 404: {request.url}")
     return jsonify({"error": "Path not found", "path": request.url}), 404
 
+import re
+
 # Configuration
 db_url = os.getenv('DATABASE_URL')
 print(f"DEBUG: DATABASE_URL exists: {db_url is not None}")
 
 if db_url:
+    # Common fix for copy-paste errors (e.g. "psql 'postgresql://...'")
+    if "psql" in db_url or "'" in db_url:
+        print("DEBUG: Cleaning up potential copy-paste error in DATABASE_URL")
+        # Extract standard postgres/postgresql URL
+        match = re.search(r"(postgres(?:ql)?://[^\s'\"]+)", db_url)
+        if match:
+            db_url = match.group(1)
+            print(f"DEBUG: Extracted URL: {db_url[:15]}...")
+
     if db_url.startswith("postgres://"):
         print("DEBUG: Correcting postgres:// prefix to postgresql://")
         db_url = db_url.replace("postgres://", "postgresql://", 1)
