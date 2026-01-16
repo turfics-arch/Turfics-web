@@ -55,8 +55,20 @@ def page_not_found(e):
 
 # Configuration
 db_url = os.getenv('DATABASE_URL')
-if db_url and db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
+print(f"DEBUG: DATABASE_URL exists: {db_url is not None}")
+
+if db_url:
+    if db_url.startswith("postgres://"):
+        print("DEBUG: Correcting postgres:// prefix to postgresql://")
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    
+    # Basic validation
+    if not db_url.startswith("postgresql://") and not db_url.startswith("sqlite://"):
+        print(f"DEBUG: Potentially invalid URL format: {db_url[:15]}...")
+else:
+    print("ERROR: DATABASE_URL is not set!")
+    # Fallback to local sqlite for build phase if necessary, or just let it fail with a better message
+    db_url = "sqlite:///fallback.db" 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
