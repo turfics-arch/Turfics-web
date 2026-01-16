@@ -183,14 +183,23 @@ def login():
     password = data.get('password')
 
     # Allow login with either username or email
+    print(f"DEBUG LOGIN: Attempting login for '{username}'")
     user = User.query.filter((User.username == username) | (User.email == username)).first()
-    if user and user.check_password(password):
-        # Create token with user ID as subject (string) and additional claims
-        access_token = create_access_token(
-            identity=str(user.id),
-            additional_claims={'role': user.role, 'username': user.username}
-        )
-        return jsonify({'access_token': access_token, 'role': user.role, 'user_id': user.id}), 200
+    
+    if user:
+        print(f"DEBUG LOGIN: Found user '{user.username}' (ID: {user.id})")
+        if user.check_password(password):
+            print("DEBUG LOGIN: Password check PASSED")
+            # Create token with user ID as subject (string) and additional claims
+            access_token = create_access_token(
+                identity=str(user.id),
+                additional_claims={'role': user.role, 'username': user.username}
+            )
+            return jsonify({'access_token': access_token, 'role': user.role, 'user_id': user.id}), 200
+        else:
+            print("DEBUG LOGIN: Password check FAILED")
+    else:
+        print(f"DEBUG LOGIN: User '{username}' NOT FOUND")
     
     return jsonify({"message": "Invalid credentials"}), 401
 
