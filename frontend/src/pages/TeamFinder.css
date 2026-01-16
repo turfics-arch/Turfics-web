@@ -1,8 +1,407 @@
+/* =========================================
+   TEAM FINDER / PLAY WITH OTHERS - PREMIUM THEME
+   ========================================= */
+
+:root {
+    --tf-bg-dark: #050505;
+    --tf-glass: rgba(255, 255, 255, 0.03);
+    --tf-glass-border: rgba(255, 255, 255, 0.08);
+    --tf-neon: #00E676;
+    --tf-neon-dim: rgba(0, 230, 118, 0.15);
+    --tf-text-main: #ffffff;
+    --tf-text-muted: #888888;
+    --tf-card-bg: #121212;
+}
+
 .team-finder-container {
     min-height: 100vh;
-    padding-bottom: 2rem;
-    background: #0f0f0f;
-    /* Fallback */
+    background-color: var(--tf-bg-dark);
+    padding-bottom: 4rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--tf-text-main);
+}
+
+/* --- HERO SECTION --- */
+/* --- HERO SECTION --- */
+.tf-hero {
+    position: relative;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* Center horizontally */
+    text-align: center;
+    /* Center text */
+    padding: 0 4rem;
+    margin-bottom: 2rem;
+    background: radial-gradient(circle at center, rgba(0, 230, 118, 0.08) 0%, transparent 60%),
+        linear-gradient(to bottom, #000, #0a0a0a);
+    border-bottom: 1px solid var(--tf-glass-border);
+}
+
+.tf-hero-content {
+    max-width: 800px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Ensure button inside is centered */
+}
+
+.tf-hero h1 {
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+}
+
+.tf-hero p {
+    font-size: 1.3rem;
+    color: var(--tf-text-muted);
+    max-width: 600px;
+    margin-bottom: 2.5rem;
+}
+
+.tf-cta-btn {
+    background: transparent;
+    color: var(--tf-neon);
+    font-weight: 800;
+    padding: 16px 40px;
+    border-radius: 100px;
+    border: 2px solid var(--tf-neon);
+    font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 230, 118, 0.1), inset 0 0 15px rgba(0, 230, 118, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.tf-cta-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--tf-neon);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: -1;
+}
+
+.tf-cta-btn:hover {
+    color: black;
+    transform: translateY(-3px);
+    box-shadow: 0 0 50px rgba(0, 230, 118, 0.6);
+    background: var(--tf-neon);
+}
+
+.tf-cta-btn:hover::before {
+    opacity: 1;
+}
+
+/* --- CONTROLS BAR (Tabs & Filters) --- */
+.tf-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4rem;
+    margin-bottom: 2rem;
+}
+
+.tf-tabs {
+    display: flex;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    /* Glass border */
+}
+
+.tf-tab {
+    background: transparent;
+    color: #666;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 40px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tf-tab:hover {
+    color: #fff;
+}
+
+.tf-tab.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tf-filters {
+    display: flex;
+    gap: 10px;
+}
+
+.tf-filter-btn {
+    background: transparent;
+    border: 1px solid var(--tf-glass-border);
+    color: var(--tf-text-muted);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tf-filter-btn:hover,
+.tf-filter-btn.active {
+    border-color: var(--tf-neon);
+    color: var(--tf-neon);
+    background: var(--tf-neon-dim);
+}
+
+/* --- GRID LAYOUT --- */
+.tf-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 25px;
+    padding: 0 4rem;
+}
+
+/* --- MATCH CARD (Ticket Style) --- */
+.tf-match-card {
+    background: var(--tf-card-bg);
+    border: 1px solid var(--tf-glass-border);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tf-match-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.tf-match-header {
+    height: 140px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.tf-match-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent, #121212);
+}
+
+.tf-sport-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2;
+}
+
+.tf-card-body {
+    padding: 20px;
+}
+
+.tf-card-body h3 {
+    font-size: 1.3rem;
+    margin: 0 0 5px 0;
+}
+
+.tf-location {
+    color: var(--tf-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tf-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.tf-meta-item {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.tf-meta-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--tf-text-muted);
+    margin-bottom: 4px;
+}
+
+.tf-meta-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: white;
+}
+
+.tf-join-btn {
+    width: 100%;
+    background: white;
+    color: black;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.tf-join-btn:hover {
+    background: var(--tf-neon);
+}
+
+/* --- TEAM CARD --- */
+.tf-team-card {
+    background: linear-gradient(145deg, #1a1a1a, #121212);
+    border: 1px solid var(--tf-glass-border);
+    border-radius: 24px;
+    padding: 25px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.tf-team-card:hover {
+    border-color: var(--tf-neon);
+    box-shadow: 0 0 20px rgba(0, 230, 118, 0.1);
+}
+
+.tf-team-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px;
+    background: #222;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--tf-neon);
+    border: 1px solid var(--tf-glass-border);
+}
+
+.tf-team-card h3 {
+    margin: 0 0 5px 0;
+}
+
+.tf-skill-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #ccc;
+    margin-bottom: 15px;
+}
+
+.tf-team-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: var(--tf-text-muted);
+}
+
+.tf-team-action {
+    background: transparent;
+    border: 1px solid var(--tf-glass-border);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 50px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tf-team-action:hover {
+    background: var(--tf-neon-dim);
+    border-color: var(--tf-neon);
+    color: var(--tf-neon);
+}
+
+/* --- Empty state --- */
+.tf-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem;
+    color: var(--tf-text-muted);
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .tf-hero {
+        padding: 0 20px;
+        height: auto;
+        min-height: 300px;
+        text-align: center;
+    }
+
+    .tf-hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .tf-controls {
+        flex-direction: column;
+        gap: 20px;
+        padding: 0 20px;
+    }
+
+    .tf-tabs {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .tf-tab {
+        flex: 1;
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+
+    .tf-grid {
+        padding: 0 20px;
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Page Header */

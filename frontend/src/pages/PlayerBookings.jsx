@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import API_URL from '../config';
-import { Calendar, Clock, MapPin, CreditCard, AlertCircle, Star, PenTool, CheckCircle, X } from 'lucide-react';
+import { Calendar, Clock, MapPin, CreditCard, AlertCircle, Star, PenTool, CheckCircle, X, Download, Share2 } from 'lucide-react';
+import Loader from '../components/Loader';
+import { showSuccess, showError, showConfirm, showWarning } from '../utils/SwalUtils';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import './PlayerBookings.css';
+import './BookingConfirmation.css'; // Reuse invoice styles
 
 const PlayerBookings = () => {
     const [activeTab, setActiveTab] = useState('upcoming');
@@ -17,12 +21,13 @@ const PlayerBookings = () => {
 
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [selectedBookingDetails, setSelectedBookingDetails] = useState(null);
+    const invoiceRef = React.useRef(null);
 
     const fetchBookings = async () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/my-bookings?filter=${activeTab}`, {
+            const res = await fetch(`http://localhost:5000/api/my-bookings?filter=${activeTab}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -52,11 +57,18 @@ const PlayerBookings = () => {
 
     const handleCancelBooking = async () => {
         if (!selectedBookingDetails) return;
-        if (!window.confirm("Are you sure you want to cancel this booking? This action cannot be undone.")) return;
+
+        const result = await showConfirm(
+            'Cancel Booking?',
+            'Are you sure you want to cancel this booking? This action cannot be undone.',
+            'Yes, Cancel it'
+        );
+
+        if (!result.isConfirmed) return;
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/bookings/${selectedBookingDetails.id}/cancel`, {
+            const res = await fetch(`http://localhost:5000/api/bookings/${selectedBookingDetails.id}/cancel`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -64,12 +76,12 @@ const PlayerBookings = () => {
             });
 
             if (res.ok) {
-                alert("Booking cancelled successfully.");
+                showSuccess('Cancelled', 'Booking cancelled successfully.');
                 setShowDetailsModal(false);
                 fetchBookings(); // Refresh list
             } else {
                 const data = await res.json();
-                alert(data.message || "Failed to cancel booking.");
+                showError('Cancellation Failed', data.message || "Failed to cancel booking.");
             }
         } catch (error) {
             console.error("Error cancelling booking:", error);
@@ -77,10 +89,10 @@ const PlayerBookings = () => {
     };
 
     const submitReview = async () => {
-        if (!rating) return alert("Please select a rating");
+        if (!rating) return showWarning('Rating Required', "Please select a rating");
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/turfs/${selectedBookingForReview.turf_id}/reviews`, { // Assuming turf_id is available
+            const res = await fetch(`http://localhost:5000/api/turfs/${selectedBookingForReview.turf_id}/reviews`, { // Assuming turf_id is available
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -94,14 +106,64 @@ const PlayerBookings = () => {
             });
 
             if (res.ok) {
-                alert("Review submitted successfully! Thank you for your feedback.");
+                showSuccess('Thank You!', "Review submitted successfully! Thank you for your feedback.");
                 setShowReviewModal(false);
                 fetchBookings();
             } else {
-                alert("Failed to submit review");
+                showError('Submission Failed', "Failed to submit review");
             }
         } catch (error) {
             console.error("Error submitting review:", error);
+        }
+    };
+
+    const handleDownloadPDF = async () => {
+        const element = invoiceRef.current;
+        if (!element) return;
+        try {
+            const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`Invoice_Turfics_${selectedBookingDetails?.booking_id || 'booking'}.pdf`);
+            showSuccess('Downloaded', 'Invoice saved to your device.');
+        } catch (error) {
+            console.error(error);
+            showError('Download Failed', 'Could not generate PDF.');
+        }
+    };
+
+    const handleShareInvoice = async () => {
+        const element = invoiceRef.current;
+        if (!element) return;
+        try {
+            const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            const file = new File([blob], 'invoice.png', { type: 'image/png' });
+
+            const shareData = {
+                title: 'Game On at Turfics!',
+                text: `I just booked a game at ${selectedBookingDetails?.turf_name}! Join me!`,
+                url: window.location.href,
+                files: [file]
+            };
+
+            if (navigator.share && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(`${shareData.text}`);
+                const link = document.createElement('a');
+                link.download = 'invoice.png';
+                link.href = canvas.toDataURL();
+                link.click();
+                showSuccess('Shared', 'Text copied and image downloaded!');
+            }
+        } catch (error) {
+            console.error(error);
+            showError('Share Failed', 'Could not share invoice.');
         }
     };
 
@@ -133,11 +195,17 @@ const PlayerBookings = () => {
                     >
                         History
                     </button>
+                    <button
+                        className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('all')}
+                    >
+                        All
+                    </button>
                 </div>
 
                 <div className="bookings-list">
                     {loading ? (
-                        <div style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>Loading bookings...</div>
+                        <Loader text="Checking Schedule..." />
                     ) : bookings.length > 0 ? (
                         bookings.map(booking => (
                             <div
@@ -243,53 +311,82 @@ const PlayerBookings = () => {
                         </div>
                         <div className="modal-body details-body">
 
-                            {/* Ticket / Poster Section */}
-                            <div className="ticket-poster">
-                                <div className="ticket-header">
-                                    <div className="ticket-status">
-                                        {selectedBookingDetails.status === 'confirmed' && <CheckCircle size={40} color="#10b981" />}
-                                        {(selectedBookingDetails.status === 'pending' || selectedBookingDetails.status === 'under_review') && <Clock size={40} color="#fbbf24" />}
-                                        {selectedBookingDetails.status === 'cancelled' && <X size={40} color="#ef4444" />}
-                                        <span>{selectedBookingDetails.status.replace('_', ' ').toUpperCase()}</span>
-                                    </div>
-                                    <h2>{selectedBookingDetails.turf_name}</h2>
-                                    <p>{selectedBookingDetails.location}</p>
+                            {/* Professional Invoice Section */}
+                            <div className="invoice-container-professional" ref={invoiceRef} style={{ margin: 0, boxShadow: 'none', border: '1px solid #e2e8f0' }}>
+                                <div className="inv-header">
+                                    <div className="inv-logo">TURFICS</div>
+                                    <div className="inv-title">BOOKING RECEIPT</div>
                                 </div>
 
-                                <div className="ticket-grid">
-                                    <div className="ticket-item">
+                                <div className="inv-details-grid">
+                                    <div className="inv-item">
+                                        <label>Booking ID</label>
+                                        <span>#{selectedBookingDetails.booking_id}</span>
+                                    </div>
+                                    <div className="inv-item">
                                         <label>Date</label>
                                         <span>{selectedBookingDetails.date}</span>
                                     </div>
-                                    <div className="ticket-item">
-                                        <label>Time</label>
-                                        <span>{selectedBookingDetails.start_time} - {selectedBookingDetails.end_time}</span>
-                                    </div>
-                                    <div className="ticket-item">
-                                        <label>Sport</label>
-                                        <span>{selectedBookingDetails.sport}</span>
-                                    </div>
-                                    <div className="ticket-item">
-                                        <label>Court</label>
-                                        <span>{selectedBookingDetails.unit_name}</span>
-                                    </div>
-                                    <div className="ticket-item full-width">
-                                        <label>Booking Ref</label>
-                                        <span className="mono">{selectedBookingDetails.booking_id}</span>
+                                    <div className="inv-item">
+                                        <label>Venue</label>
+                                        <span>{selectedBookingDetails.turf_name}</span>
                                     </div>
                                 </div>
 
-                                <div className="qr-section">
-                                    <div className="qr-placeholder">
-                                        {/* Mock QR Code Pattern */}
-                                        <div className="qr-pattern"></div>
+                                <div className="inv-slots-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Details</th>
+                                                <th>Time</th>
+                                                <th className="text-right">Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>{selectedBookingDetails.sport} ({selectedBookingDetails.unit_name})</td>
+                                                <td>{selectedBookingDetails.start_time} - {selectedBookingDetails.end_time}</td>
+                                                <td className="text-right">₹{selectedBookingDetails.price}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div className="inv-summary-box">
+                                    <div className="summary-row">
+                                        <span>Status</span>
+                                        <span className={`status-badge ${selectedBookingDetails.status}`}>{selectedBookingDetails.status}</span>
                                     </div>
-                                    <small>Scan at entry</small>
+                                    <div className="summary-row big-total">
+                                        <span>Total Amount</span>
+                                        <span>₹{selectedBookingDetails.price}</span>
+                                    </div>
+                                </div>
+
+                                <div className="inv-footer">
+                                    <div className="inv-qr">
+                                        <div style={{ background: 'white', padding: '5px' }}>
+                                            <div style={{ width: '80px', height: '80px', background: 'black' }}></div>
+                                        </div>
+                                    </div>
+                                    <div className="inv-thankyou">
+                                        <h4>Game On!</h4>
+                                        <p>{selectedBookingDetails.location}</p>
+                                        <small>Show at entry</small>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Actions Section */}
                             <div className="details-actions">
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button className="action-btn" style={{ background: '#334155', color: 'white' }} onClick={handleDownloadPDF}>
+                                        <Download size={18} /> PDF
+                                    </button>
+                                    <button className="action-btn" style={{ background: 'var(--primary)', color: 'black' }} onClick={handleShareInvoice}>
+                                        <Share2 size={18} /> Share
+                                    </button>
+                                </div>
+
                                 {activeTab === 'history' && selectedBookingDetails.status === 'completed' && (
                                     <button className="action-btn review" onClick={() => {
                                         setShowDetailsModal(false);
@@ -299,7 +396,7 @@ const PlayerBookings = () => {
                                     </button>
                                 )}
 
-                                {activeTab === 'upcoming' && selectedBookingDetails.status !== 'cancelled' && (
+                                {activeTab === 'upcoming' && (selectedBookingDetails.status === 'pending' || selectedBookingDetails.status === 'confirmed') && (
                                     <button className="action-btn cancel" onClick={handleCancelBooking}>
                                         Cancel Booking
                                     </button>

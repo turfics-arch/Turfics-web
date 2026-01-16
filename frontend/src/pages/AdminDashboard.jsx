@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import API_URL from '../config';
 import { Users, Shield, Trophy } from 'lucide-react';
 import './AdminDashboard.css';
 
@@ -18,7 +17,7 @@ const AdminDashboard = () => {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${API_URL}/api/admin/users`, {
+            const response = await axios.get('http://localhost:5000/api/admin/users', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUsers(response.data);

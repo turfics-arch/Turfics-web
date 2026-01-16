@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ChevronLeft, Calendar as CalIcon, Clock, Video, MapPin, CheckCircle } from 'lucide-react';
+import { showWarning } from '../utils/SwalUtils';
 import './CoachScheduler.css';
 
 const CoachScheduler = () => {
@@ -39,7 +40,7 @@ const CoachScheduler = () => {
 
     const handleConfirm = () => {
         if (!selectedDate || !selectedSlot) {
-            alert("Please select a date and time slot.");
+            showWarning('Selection Required', "Please select a date and time slot.");
             return;
         }
         navigate('/booking-confirmation', {

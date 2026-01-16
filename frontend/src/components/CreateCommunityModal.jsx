@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { X, Upload, Globe, Lock } from 'lucide-react';
 import axios from 'axios';
-import API_URL from '../config';
 import './CreateCommunityModal.css';
 
 const CreateCommunityModal = ({ onClose, onCreated }) => {
@@ -21,7 +20,7 @@ const CreateCommunityModal = ({ onClose, onCreated }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post(`${API_URL}/api/communities`, formData, {
+            const response = await axios.post('http://127.0.0.1:5000/api/communities', formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             onCreated(response.data);

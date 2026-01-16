@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import API_URL from '../config';
 import Navbar from '../components/Navbar';
-import { Plus, LayoutDashboard, Wallet, Users, Trophy, Calendar } from 'lucide-react';
+import { Plus, LayoutDashboard, Wallet, Users, Trophy, Calendar, Trash2 } from 'lucide-react';
+import Loader from '../components/Loader';
+import { showConfirm, showSuccess, showError, showToast } from '../utils/SwalUtils';
 import './OrganizerHub.css';
 
 const OrganizerHub = () => {
@@ -19,7 +20,7 @@ const OrganizerHub = () => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_URL}/api/organizer/tournaments`, {
+            const res = await axios.get('http://localhost:5000/api/organizer/tournaments', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTournaments(res.data);
@@ -83,7 +84,7 @@ const OrganizerHub = () => {
                     </button>
                 </div>
 
-                {loading ? <p>Loading...</p> : (
+                {loading ? <Loader text="Setting Fixtures..." /> : (
                     <div className="tournaments-list">
                         {tournaments.length === 0 && (
                             <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', background: '#1a1a1a', borderRadius: '12px' }}>

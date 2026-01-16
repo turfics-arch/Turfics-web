@@ -7,4 +7,3 @@ flask-migrate
 flask-jwt-extended
 flask-bcrypt
 gunicorn
-google-generativeai

@@ -4,6 +4,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, User, MessageSquare, Menu, X } from 'lucide-react';
 import './Navbar.css';
 
+import logo from '../assets/turfics_logo.png';
+
 const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -11,6 +13,18 @@ const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [notificationCount, setNotificationCount] = useState(0);
+
+    // Simulate fetching real-time notifications
+    useEffect(() => {
+        // In a real app, this would be a socket listener or polling API
+        // Simulating a scenario with unread messages
+        const fetchNotifications = () => {
+            // Example: mocking 0 unread messages to test hidden state
+            setNotificationCount(0);
+        };
+        fetchNotifications();
+    }, [isLoggedIn]);
 
     useEffect(() => {
         const checkAuth = () => {
@@ -46,7 +60,7 @@ const Navbar = () => {
     return (
         <nav className={`app-navbar ${scrolled ? 'scrolled' : ''}`}>
             <div className="nav-brand" onClick={() => navigate(role === 'owner' ? '/dashboard' : '/')}>
-                <h1>Turfics.</h1>
+                <img src={logo} alt="Turfics" style={{ height: '65px', objectFit: 'contain' }} />
             </div>
 
             <div className={`nav-menu ${isMobileMenuOpen ? 'mobile-hidden' : ''}`}>
@@ -104,8 +118,11 @@ const Navbar = () => {
                             title="Community & Messages"
                         >
                             <MessageSquare size={22} className={location.pathname.includes('/community') ? 'active-icon' : ''} />
-                            {/* Simulator for unread count - in real app, fetch from context/API */}
-                            <span className="nav-badge">3</span>
+                            {notificationCount > 0 && (
+                                <span className="nav-badge">
+                                    {notificationCount > 99 ? '99+' : notificationCount}
+                                </span>
+                            )}
                         </div>
 
                         <div

@@ -1,0 +1,171 @@
+.loader-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    /* Dark overlay to focus on loader */
+    backdrop-filter: blur(5px);
+    /* Nice blur effect */
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.sports-ball {
+    width: 45px;
+    /* Reduced size */
+    height: 45px;
+    border-radius: 50%;
+    background-color: #fff;
+    /* Sharper, more realistic classic football pattern */
+    background-image:
+        radial-gradient(circle at 50% 120%, rgba(0, 0, 0, 0.5) 20%, transparent 50%),
+        /* Bottom shadow depth */
+        radial-gradient(circle at 50% 50%, #202020 18%, transparent 20%),
+        /* Center Pentagon */
+        radial-gradient(circle at 15% 15%, #202020 12%, transparent 14%),
+        /* TL Patch */
+        radial-gradient(circle at 85% 15%, #202020 12%, transparent 14%),
+        /* TR Patch */
+        radial-gradient(circle at 15% 85%, #202020 12%, transparent 14%),
+        /* BL Patch */
+        radial-gradient(circle at 85% 85%, #202020 12%, transparent 14%),
+        /* BR Patch */
+        linear-gradient(135deg, #ffffff 0%, #eeeeee 100%);
+    /* Clean white base */
+    background-size: 100% 100%;
+    position: relative;
+    /* Crisp borders for 3D effect */
+    box-shadow:
+        inset -4px -4px 10px rgba(0, 0, 0, 0.2),
+        inset 3px 3px 8px rgba(255, 255, 255, 1),
+        0 4px 8px rgba(0, 0, 0, 0.15);
+
+    animation: roll-bounce 2.2s infinite ease-in-out;
+    z-index: 10;
+}
+
+.loader-shadow {
+    width: 40px;
+    /* Reduced shadow width */
+    height: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    margin-top: 6px;
+    animation: shadow-pulse 2.2s infinite ease-in-out;
+    filter: blur(3px);
+}
+
+.loader-text-wrapper {
+    margin-top: 1.2rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.loader-text {
+    font-size: 0.9rem;
+    /* Smaller, sharper text */
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    text-shadow: none;
+    /* Removed glow for cleaner look */
+}
+
+.loading-line-container {
+    width: 100px;
+    /* Fixed smaller width to match ball scale */
+    height: 2px;
+    /* Thinner line */
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.loading-line-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 30%;
+    background: var(--primary);
+    box-shadow: 0 0 6px var(--primary);
+    animation: line-drag 2.2s infinite ease-in-out;
+}
+
+@keyframes roll-bounce {
+    0% {
+        transform: translateX(-35px) rotate(-180deg);
+    }
+
+    25% {
+        transform: translateX(0px) translateY(-12px) rotate(0deg);
+        /* Smaller jump */
+    }
+
+    50% {
+        transform: translateX(35px) rotate(180deg);
+    }
+
+    75% {
+        transform: translateX(0px) translateY(-12px) rotate(360deg);
+    }
+
+    100% {
+        transform: translateX(-35px) rotate(540deg);
+    }
+}
+
+@keyframes shadow-pulse {
+    0% {
+        transform: translateX(-35px) scale(0.9);
+        opacity: 0.5;
+    }
+
+    25% {
+        transform: translateX(0px) scale(0.6);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: translateX(35px) scale(0.9);
+        opacity: 0.5;
+    }
+
+    75% {
+        transform: translateX(0px) scale(0.6);
+        opacity: 0.3;
+    }
+
+    100% {
+        transform: translateX(-35px) scale(0.9);
+        opacity: 0.5;
+    }
+}
+
+@keyframes line-drag {
+    0% {
+        left: 0%;
+        width: 25%;
+    }
+
+    50% {
+        left: 75%;
+        width: 25%;
+    }
+
+    100% {
+        left: 0%;
+        width: 25%;
+    }
+}

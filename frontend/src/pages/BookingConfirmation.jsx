@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Clock, Users, Check, Share2, Download, Search } from 'lucide-react';
-import API_URL from '../config';
-import './TurfDetails.css'; // Reuse existing styles or create new
+import { Clock, Users, Check, Share2, Download, Search, MapPin, Calendar, CreditCard } from 'lucide-react';
+import { showError, showSuccess, showConfirm } from '../utils/SwalUtils';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import './TurfDetails.css';
+import './BookingConfirmation.css';
 
 const BookingConfirmation = () => {
+    const invoiceRef = useRef(null);
     const location = useLocation();
     const navigate = useNavigate();
     const { bookingIds, totalPrice, bookingsInfo } = location.state || {}; // Expecting array of bookings
@@ -40,7 +44,7 @@ const BookingConfirmation = () => {
             // Use the first booking ID for the match
             const bookingId = bookingIds[0];
 
-            await fetch(`${API_URL}/api/matches`, {
+            await fetch('http://localhost:5000/api/matches', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -54,7 +58,7 @@ const BookingConfirmation = () => {
             setShowHostForm(false);
             setShowHostResult(true);
         } catch (err) {
-            alert("Failed to create match");
+            showError('Error', "Failed to create match");
         }
     };
 
@@ -88,7 +92,7 @@ const BookingConfirmation = () => {
         }
         const delayDebounce = setTimeout(async () => {
             try {
-                const res = await fetch(`${API_URL}/api/users/search?q=${searchQuery}`);
+                const res = await fetch(`http://localhost:5000/api/users/search?q=${searchQuery}`);
                 const data = await res.json();
                 setSearchResults(data);
             } catch (err) {
@@ -108,7 +112,7 @@ const BookingConfirmation = () => {
 
         for (const bookingId of bookingIds) {
             try {
-                const res = await fetch(`${API_URL}/api/bookings/confirm`, {
+                const res = await fetch('http://localhost:5000/api/bookings/confirm', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -136,6 +140,57 @@ const BookingConfirmation = () => {
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
         return `${m}:${s < 10 ? '0' : ''}${s}`;
+    };
+
+    const handleDownloadPDF = async () => {
+        const element = invoiceRef.current;
+        if (!element) return;
+        try {
+            const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`Invoice_Turfics_${Math.floor(Math.random() * 10000)}.pdf`);
+            showSuccess('Downloaded', 'Invoice saved to your device.');
+        } catch (error) {
+            console.error(error);
+            showError('Download Failed', 'Could not generate PDF.');
+        }
+    };
+
+    const handleShareInvoice = async () => {
+        const element = invoiceRef.current;
+        if (!element) return;
+        try {
+            const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            const file = new File([blob], 'invoice.png', { type: 'image/png' });
+
+            const shareData = {
+                title: 'Game On at Turfics!',
+                text: `I just booked a game at ${bookingsInfo?.[0]?.turf_name || 'Turfics'}! Join me!`,
+                url: window.location.href, // Or a dedicated booking link
+                files: [file]
+            };
+
+            if (navigator.share && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+            } else {
+                // Fallback: Copy Link
+                await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+                const link = document.createElement('a');
+                link.download = 'invoice.png';
+                link.href = canvas.toDataURL();
+                link.click();
+                showSuccess('Shared', 'Link copied and image downloaded!');
+            }
+        } catch (error) {
+            console.error(error);
+            showError('Share Failed', 'Could not share invoice.');
+        }
     };
 
     if (!bookingIds) return <div style={{ padding: '2rem', color: 'white' }}>No booking found.</div>;
@@ -228,34 +283,88 @@ const BookingConfirmation = () => {
                         </div>
                     )}
 
-                    <div className="invoice-preview" style={{ background: 'white', color: 'black', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem', textAlign: 'left' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                            <strong>INVOICE #TRF-{Math.floor(Math.random() * 10000)}</strong>
-                            <span>{new Date().toLocaleDateString()}</span>
+                    <div className="invoice-container-professional" ref={invoiceRef}>
+                        <div className="inv-header">
+                            <div className="inv-logo">TURFICS</div>
+                            <div className="inv-title">BOOKING CONFIRMATION</div>
                         </div>
-                        <div style={{ marginBottom: '1rem' }}>
-                            {bookingsInfo && bookingsInfo.map((b, i) => (
-                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                                    <span>Slot {i + 1}</span>
-                                    <span>{b.start_time} - {b.end_time}</span>
+
+                        <div className="inv-details-grid">
+                            <div className="inv-item">
+                                <label>Booking ID</label>
+                                <span>#{bookingIds?.[0] || 'PENDING'}</span>
+                            </div>
+                            <div className="inv-item">
+                                <label>Date Issued</label>
+                                <span>{new Date().toLocaleDateString()}</span>
+                            </div>
+                            <div className="inv-item">
+                                <label>Venue</label>
+                                <span>{bookingsInfo?.[0]?.turf_name || 'Turfics Arena'}</span>
+                            </div>
+                        </div>
+
+                        <div className="inv-slots-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Slot</th>
+                                        <th>Time</th>
+                                        <th className="text-right">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {bookingsInfo && bookingsInfo.map((b, i) => (
+                                        <tr key={i}>
+                                            <td>Slot {i + 1}</td>
+                                            <td>{new Date(b.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(b.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                                            <td className="text-right">₹{b.total_price}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="inv-summary-box">
+                            <div className="summary-row">
+                                <span>Subtotal</span>
+                                <span>₹{totalAmount}</span>
+                            </div>
+                            <div className="summary-row big-total">
+                                <span>Total Paid</span>
+                                <span>₹{payNowAmount}</span>
+                            </div>
+                            {paymentMode === 'partial' && (
+                                <div className="summary-row balance-due">
+                                    <span>Balance Due @ Venue</span>
+                                    <span>₹{balanceAmount}</span>
                                 </div>
-                            ))}
+                            )}
                         </div>
-                        <div style={{ borderTop: '1px dashed #ccc', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
-                            <span>Total Paid</span>
-                            <span>₹{payNowAmount}</span>
-                        </div>
-                        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-                            <div style={{ background: 'black', width: '120px', height: '120px', margin: '0 auto' }}></div>
-                            <small>Scan at venue</small>
+
+                        <div className="inv-footer">
+                            <div className="inv-qr">
+                                {/* Placeholder QR */}
+                                <div style={{ background: 'white', padding: '5px' }}>
+                                    <div style={{ width: '80px', height: '80px', background: 'black' }}></div>
+                                </div>
+                            </div>
+                            <div className="inv-thankyou">
+                                <h4>Thank You!</h4>
+                                <p>Please show this ticket at the counter.</p>
+                                <small>support@turfics.com</small>
+                            </div>
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button style={{ flex: 1, padding: '1rem', background: '#333', color: 'white', border: 'none', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                    <div className="inv-actions">
+                        <button className="action-btn-secondary" onClick={handleDownloadPDF}>
+                            <Download size={18} /> PDF
+                        </button>
+                        <button className="action-btn-primary" onClick={handleShareInvoice}>
                             <Share2 size={18} /> Share
                         </button>
-                        <button onClick={() => navigate('/teams')} style={{ flex: 1, padding: '1rem', background: 'var(--primary)', color: 'black', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+                        <button className="action-btn-text" onClick={() => navigate('/teams')}>
                             View Matches
                         </button>
                     </div>
@@ -265,24 +374,24 @@ const BookingConfirmation = () => {
     }
 
     return (
-        <div className="confirm-page" style={{ background: 'black', minHeight: '100vh', padding: '2rem', color: 'white' }}>
-            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div className="confirmation-page">
+            <div className="confirm-container">
+                <div className="confirm-header">
                     <h1>Confirm Booking</h1>
-                    <div style={{ background: 'rgba(255, 100, 100, 0.2)', color: '#ff6b6b', padding: '0.5rem 1rem', borderRadius: '50px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div className="timer-badge">
                         <Clock size={18} />
-                        <span style={{ fontWeight: 'bold', fontFamily: 'monospace', fontSize: '1.2rem' }}>{formatTime(timeLeft)}</span>
+                        <span>{formatTime(timeLeft)}</span>
                     </div>
                 </div>
 
-                <div className="confirm-grid" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
+                <div className="confirm-grid">
                     {/* Left: Payment & Friends */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         {/* Payment Mode */}
-                        <div className="section" style={{ background: '#1a1a1a', padding: '1.5rem', borderRadius: '16px' }}>
+                        <div className="section-card">
                             <h3 style={{ marginBottom: '1rem' }}>Payment Options</h3>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: paymentMode === 'full' ? '#333' : 'rgba(255,255,255,0.05)', borderRadius: '12px', cursor: 'pointer', border: paymentMode === 'full' ? '1px solid var(--primary)' : '1px solid transparent' }}>
+                                <label className={`payment-option-label ${paymentMode === 'full' ? 'active' : ''}`}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                         <input type="radio" checked={paymentMode === 'full'} onChange={() => setPaymentMode('full')} />
                                         <div>
@@ -293,7 +402,7 @@ const BookingConfirmation = () => {
                                     <span style={{ fontWeight: 'bold' }}>₹{totalAmount}</span>
                                 </label>
 
-                                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: paymentMode === 'partial' ? '#333' : 'rgba(255,255,255,0.05)', borderRadius: '12px', cursor: 'pointer', border: paymentMode === 'partial' ? '1px solid var(--primary)' : '1px solid transparent' }}>
+                                <label className={`payment-option-label ${paymentMode === 'partial' ? 'active' : ''}`}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                         <input type="radio" checked={paymentMode === 'partial'} onChange={() => setPaymentMode('partial')} />
                                         <div>
@@ -308,7 +417,7 @@ const BookingConfirmation = () => {
 
                         {/* Split Friends (Only if Partial) */}
                         {paymentMode === 'partial' && (
-                            <div className="section" style={{ background: '#1a1a1a', padding: '1.5rem', borderRadius: '16px' }}>
+                            <div className="section-card">
                                 <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <Users size={20} /> Split Bill
                                 </h3>
@@ -343,7 +452,7 @@ const BookingConfirmation = () => {
 
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                                     {selectedFriends.map(f => (
-                                        <div key={f.id} style={{ background: 'var(--primary)', color: 'black', padding: '0.4rem 0.8rem', borderRadius: '20px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                        <div key={f.id} className="friend-pill">
                                             {f.username}
                                             <button onClick={() => setSelectedFriends(selectedFriends.filter(x => x.id !== f.id))} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>×</button>
                                         </div>
@@ -360,7 +469,7 @@ const BookingConfirmation = () => {
                     </div>
 
                     {/* Right: Summary */}
-                    <div style={{ background: '#1a1a1a', padding: '1.5rem', borderRadius: '16px', height: 'fit-content' }}>
+                    <div className="section-card" style={{ height: 'fit-content' }}>
                         <h3 style={{ marginBottom: '1rem' }}>Summary</h3>
                         <div style={{ marginBottom: '1.5rem', color: '#ccc' }}>
                             Booking {bookingIds.length} slot(s)
@@ -372,16 +481,16 @@ const BookingConfirmation = () => {
                         </div>
 
                         <div style={{ borderTop: '1px solid #333', borderBottom: '1px solid #333', padding: '1rem 0', marginBottom: '1.5rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                            <div className="summary-row">
                                 <span>Total Price</span>
                                 <span>₹{totalAmount}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                            <div className="summary-row">
                                 <span>To Pay Now</span>
                                 <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>₹{payNowAmount}</span>
                             </div>
                             {paymentMode === 'partial' && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#aaa' }}>
+                                <div className="summary-row" style={{ fontSize: '0.9rem', color: '#aaa' }}>
                                     <span>Balance</span>
                                     <span>₹{balanceAmount}</span>
                                 </div>
@@ -391,7 +500,7 @@ const BookingConfirmation = () => {
                         <button
                             onClick={handleConfirm}
                             disabled={status === 'processing'}
-                            style={{ width: '100%', padding: '1rem', borderRadius: '12px', background: 'var(--primary)', color: 'black', fontWeight: 'bold', border: 'none', cursor: 'pointer', fontSize: '1.1rem' }}
+                            className="pay-btn"
                         >
                             {status === 'processing' ? 'Processing...' : `Pay ₹${payNowAmount} & Confirm`}
                         </button>

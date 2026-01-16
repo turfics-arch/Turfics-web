@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import API_URL from '../config';
 import { Calendar, Clock, User, Phone, CheckCircle, CreditCard, X, MapPin, Zap, AlertCircle } from 'lucide-react';
+import { showSuccess, showError, showWarning } from '../utils/SwalUtils';
 import './WalkInBooking.css';
 
 const WalkInBooking = () => {
@@ -54,7 +54,7 @@ const WalkInBooking = () => {
     const fetchTurfs = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/turfs/my-turfs`, {
+            const res = await fetch('http://localhost:5000/api/turfs/my-turfs', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -68,7 +68,7 @@ const WalkInBooking = () => {
     const fetchTurfDetails = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/turfs/${selectedTurf.id}/games`, {
+            const res = await fetch(`http://localhost:5000/api/turfs/${selectedTurf.id}/games`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -88,7 +88,7 @@ const WalkInBooking = () => {
         setLoadingSlots(true);
         try {
             // Using the same endpoint as Discovery Page for consistency
-            const res = await fetch(`${API_URL}/api/units/${selectedUnit.id}/slots?date=${date}`);
+            const res = await fetch(`http://localhost:5000/api/units/${selectedUnit.id}/slots?date=${date}`);
             if (res.ok) {
                 const data = await res.json();
                 setSlots(data);
@@ -151,7 +151,7 @@ const WalkInBooking = () => {
         if (mode === 'book') {
             const invalidBlocks = blocks.filter(b => b.length < 2);
             if (invalidBlocks.length > 0) {
-                alert("Minimum booking duration is 1 hour (2 slots) per continuous block.");
+                showWarning('Invalid Duration', "Minimum booking duration is 1 hour (2 slots) per continuous block.");
                 return;
             }
         }
@@ -163,7 +163,7 @@ const WalkInBooking = () => {
                 const durationMins = block.length * 30; // Assuming 30min slots
                 const blockPrice = block.reduce((sum, s) => sum + s.price, 0);
 
-                let url = `${API_URL}/api/owner/bookings/walk-in`;
+                let url = 'http://localhost:5000/api/owner/bookings/walk-in';
                 let payload = {
                     turf_id: selectedTurf.id,
                     unit_id: selectedUnit.id,
@@ -172,7 +172,7 @@ const WalkInBooking = () => {
                 };
 
                 if (mode === 'block') {
-                    url = `${API_URL}/api/owner/bookings/block`;
+                    url = 'http://localhost:5000/api/owner/bookings/block';
                     payload.reason = formData.guest_name || 'Maintenance';
                 } else {
                     payload.guest_name = formData.guest_name || 'Walk-In';
@@ -200,13 +200,15 @@ const WalkInBooking = () => {
 
             await Promise.all(promises);
 
-            alert(mode === 'block' ? 'Slots Blocked Successfully' : 'Bookings Confirmed');
+            await Promise.all(promises);
+
+            showSuccess(mode === 'block' ? 'Blocked' : 'Confirmed', mode === 'block' ? 'Slots Blocked Successfully' : 'Bookings Confirmed');
             setFormData({ ...formData, guest_name: '', guest_phone: '' });
             fetchSlots(); // Refresh grid
 
         } catch (e) {
             console.error(e);
-            alert('Failed to process: ' + e.message);
+            showError('Process Failed', 'Failed to process: ' + e.message);
         }
     };
 

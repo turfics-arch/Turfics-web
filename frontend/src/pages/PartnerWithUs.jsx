@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import { TrendingUp, Users, Calendar, Shield, ArrowRight, BarChart, CheckCircle } from 'lucide-react';
+import { showSuccess } from '../utils/SwalUtils';
 import './PartnerWithUs.css';
 
 const PartnerWithUs = () => {
@@ -14,7 +15,7 @@ const PartnerWithUs = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        alert("Thank you for your interest! Our team will contact you shortly.");
+        showSuccess('Application Submitted', "Thank you for your interest! Our team will contact you shortly.");
         setFormData({ name: '', email: '', phone: '', turfName: '' });
     };
 

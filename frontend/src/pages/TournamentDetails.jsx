@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import API_URL from '../config';
 import { Calendar, MapPin, Users, Trophy, Shield, CheckCircle, Clock, Info, Megaphone, Activity } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import { showSuccess, showError, showInput, showWarning } from '../utils/SwalUtils';
 import './TournamentDetails.css';
 
 const TournamentDetails = () => {
@@ -20,7 +20,7 @@ const TournamentDetails = () => {
     const fetchTournament = async () => {
         try {
             // Use API
-            const res = await axios.get(`${API_URL}/api/tournaments/${id}`);
+            const res = await axios.get(`http://localhost:5000/api/tournaments/${id}`);
             setTournament(res.data);
             setLoading(false);
         } catch (err) {
@@ -31,22 +31,27 @@ const TournamentDetails = () => {
 
     const handleJoin = async () => {
         // Simple registration Flow
-        const teamName = prompt("Enter your Team Name:");
-        if (!teamName) return;
+        const result = await showInput("Register Team", "Enter your Team Name:", "e.g. Thunder Strikers");
+        if (!result.isConfirmed || !result.value) return;
+
+        const teamName = result.value;
 
         try {
             const token = localStorage.getItem('token');
-            if (!token) return navigate('/login');
+            if (!token) {
+                showWarning('Login Required', 'Please login to join tournaments.');
+                return navigate('/login');
+            }
 
-            await axios.post(`${API_URL}/api/tournaments/${id}/register`,
+            await axios.post(`http://localhost:5000/api/tournaments/${id}/register`,
                 { team_name: teamName },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            alert('Registered Successfully!');
+            showSuccess('Registered Successfully!', `Team ${teamName} has been registered.`);
             fetchTournament(); // Refresh
         } catch (err) {
-            alert(err.response?.data?.message || 'Registration failed');
+            showError('Registration Failed', err.response?.data?.message || 'Registration failed');
         }
     };
 

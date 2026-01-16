@@ -1,21 +1,23 @@
 import os
+import requests
+import string
+import random
 from flask import Flask, jsonify, request
-from sqlalchemy import text
 from flask_cors import CORS
 from dotenv import load_dotenv
 from flask_migrate import Migrate
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, set_access_cookies
 from datetime import datetime, timedelta
 
 from models import db, bcrypt, User, Turf, TurfGame, TurfUnit, UnitImage, Team, Booking, team_members, Coach, CoachBatch, CoachBooking, Academy, AcademyProgram, AcademyBatch, AcademyEnrollment, Tournament, TournamentRegistration, Review, Community, CommunityMember, CommunityMessage, MatchRequest, MatchJoinRequest
 import google.generativeai as genai
 
+# OTP Store (In-memory for demo purposes)
+otp_store = {}
+
 # --- GEMINI SETUP ---
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-else:
-    print("WARNING: GEMINI_API_KEY not found in environment")
+GEMINI_API_KEY = "AIzaSyCsi2y63IwP6aAZLcKCujAzpvmPL8vBs4o"
+genai.configure(api_key=GEMINI_API_KEY)
 
 # Initialize model globally to restart only on app reload
 try:
@@ -33,7 +35,7 @@ try:
     
     If you don't know, ask clarifying questions. Keep responses concise."""
     
-    chat_model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=SYSTEM_PROMPT)
+    chat_model = genai.GenerativeModel('gemini-2.5-flash-lite', system_instruction=SYSTEM_PROMPT)
 except Exception as e:
     print(f"Gemini Init Error: {e}")
     chat_model = None
@@ -44,158 +46,23 @@ load_dotenv()
 
 app = Flask(__name__)
 # Allow CORS for all domains for development
-# Robust CORS Configuration for Production
-CORS(app, resources={r"/*": {
-    "origins": [
-        "https://turfics-web.vercel.app", 
-        "http://localhost:5173", 
-        "http://localhost:3000"
-    ],
-    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    "allow_headers": ["Content-Type", "Authorization"]
-}})
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+@app.errorhandler(404)
+def page_not_found(e):
+    print(f"DEBUG 404: {request.url}")
+    return jsonify({"error": "Path not found", "path": request.url}), 404
 
 # Configuration
-# Configuration
-raw_db_url = os.getenv('DATABASE_URL')
-print(f"DEBUG: Raw DATABASE_URL length: {len(raw_db_url) if raw_db_url else 0}")
-
-if raw_db_url:
-    # 1. Clean whitespace and quotes
-    clean_url = raw_db_url.strip().strip("'").strip('"').strip()
-    
-    # NEW FIX: Remove accidental 'psql ' prefix copy-pasted from Neon dashboard
-    if clean_url.startswith("psql '") or clean_url.startswith('psql "') or clean_url.startswith('psql '):
-       # user copied the full command "psql 'postgres://...'"
-       # Find first instance of postgres and take from there
-       start_idx = clean_url.find("postgres")
-       if start_idx != -1:
-           clean_url = clean_url[start_idx:]
-           # Also strip trailing quote if it was '...'
-           clean_url = clean_url.strip("'").strip('"')
-
-    # 2. Fix Protocol
-    # SQLAlchemy requires 'postgresql://', but some providers give 'postgres://'
-    if clean_url.startswith("postgres://"):
-        clean_url = clean_url.replace("postgres://", "postgresql://", 1)
-    
-    # 3. Validation / Fallback
-    # Check if it looks like a valid URL (has scheme and @)
-    if "://" not in clean_url:
-        print(f"CRITICAL ERROR: DATABASE_URL does not look like a URL. First 10 chars: {clean_url[:10]}")
-        # Fallback to prevent crash during import, allowing partial startup for logs
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///error_fallback.db'
-    else:
-        # Mask password for logs: scheme://user:***@host...
-        try:
-            from urllib.parse import urlparse
-            parsed = urlparse(clean_url)
-            safe_netloc = f"{parsed.username}:******@{parsed.hostname}" if parsed.username else parsed.netloc
-            print(f"DEBUG: Using DB URL: {parsed.scheme}://{safe_netloc}{parsed.path}")
-        except Exception:
-            print("DEBUG: Could not parse URL for logging (might be malformed)")
-            
-        app.config['SQLALCHEMY_DATABASE_URI'] = clean_url
-else:
-    print("WARNING: DATABASE_URL not found. Using local SQLite.")
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///local.db'
-
-# Universal config
-# Fix for "SSL connection closed unexpectedly" on Neon/Render
-# 1. Disable connection pooling (Neon has its own pooler) OR set stricter keepalives
-# We will use NullPool (disable pooling) which is recommended for serverless/pgbouncer setups
-from sqlalchemy.pool import NullPool
-
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'poolclass': NullPool,
-    'connect_args': {
-        'sslmode': 'require',
-        'keepalives': 1,
-        'keepalives_idle': 30,
-        'keepalives_interval': 10,
-        'keepalives_count': 5
-    }
-}
-
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'turfics-secret-key-v2') 
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'turfics-secret-key-v2') # Changed to invalidate old tokens
 
 # Initialize Extensions
-try:
-    db.init_app(app)
-except Exception as e:
-    print(f"CRITICAL: db.init_app failed: {e}")
-    # Do not raise here if you want the app to at least boot and show this error in /health
-    # But usually better to crash hard if DB is critical. 
-    # Re-raising to show in logs
-    raise e
+db.init_app(app)
 bcrypt.init_app(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
-
-# MANUAL CORS OVERRIDE
-@app.after_request
-def after_request(response):
-    origin = request.headers.get('Origin')
-    allowed_origins = [
-        "https://turfics-web.vercel.app",
-        "http://localhost:5173",
-        "http://localhost:3000"
-    ]
-    if origin in allowed_origins:
-        response.headers.add('Access-Control-Allow-Origin', origin)
-    
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    return response
-
-# GLOBAL ERROR HANDLERS (DEBUGGING)
-@app.errorhandler(404)
-def not_found(e):
-    return jsonify({"error": "Not Found", "message": "The requested URL was not found on the server."}), 404
-
-@app.errorhandler(500)
-def internal_error(e):
-    return jsonify({"error": "Internal Server Error", "message": str(e)}), 500
-
-@app.errorhandler(405)
-def method_not_allowed(e):
-    return jsonify({"error": "Method Not Allowed", "message": "The method is not allowed for the requested URL."}), 405
-
-# HEALTH CHECK & DEBUG ROUTES
-@app.route('/')
-def home():
-    db_status = "unknown"
-    error_msg = None
-    try:
-        db.session.execute(text('SELECT 1'))
-        db_status = "connected"
-    except Exception as e:
-        db_status = "error"
-        error_msg = str(e)
-        
-    return jsonify({
-        "status": "online",
-        "message": "Turfics Backend v2 (Debug Mode)",
-        "database": db_status,
-        "db_error": error_msg 
-    }), 200
-
-@app.route('/debug/routes')
-def debug_routes():
-    routes = []
-    for rule in app.url_map.iter_rules():
-        routes.append({
-            "endpoint": rule.endpoint,
-            "methods": list(rule.methods),
-            "rule": rule.rule
-        })
-    return jsonify(routes), 200
-
-@app.route('/health')
-@app.route('/api/health')
-def health_check():
-    return jsonify({"status": "healthy"}), 200
 
 @jwt.invalid_token_loader
 def invalid_token_callback(error):
@@ -224,13 +91,21 @@ def get_current_user():
         'username': claims.get('username')
     }
 
+@app.route('/')
+def home():
+    return jsonify({"message": "Welcome to Turfics Backend API"})
 
-
-
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    try:
+        db.session.execute(db.text('SELECT 1'))
+        return jsonify({"status": "healthy", "database": "connected"}), 200
+    except Exception as e:
+        return jsonify({"status": "unhealthy", "database": str(e)}), 500
 
 # Auth Routes
 @app.route('/api/auth/register', methods=['POST'])
-def user_register():
+def register():
     data = request.get_json()
     username = data.get('username')
     email = data.get('email')
@@ -273,6 +148,153 @@ def login():
     
     return jsonify({"message": "Invalid credentials"}), 401
 
+@app.route('/api/auth/otp/send', methods=['POST'])
+def send_otp():
+    data = request.get_json()
+    phone = data.get('phone_number')
+    
+    if not phone:
+        return jsonify({"message": "Phone number is required"}), 400
+        
+    # Generate 6-digit OTP
+    otp = ''.join(random.choices(string.digits, k=6))
+    otp_store[phone] = {
+        'otp': otp,
+        'expires': datetime.utcnow() + timedelta(minutes=5)
+    }
+    
+    # Mocking SMS sending
+    print(f"DEBUG: Sent OTP {otp} to {phone}")
+    
+    return jsonify({"message": "OTP sent successfully", "otp": otp}), 200
+
+@app.route('/api/auth/otp/verify', methods=['POST'])
+def verify_otp():
+    data = request.get_json()
+    phone = data.get('phone_number')
+    otp_provided = data.get('otp')
+    role = data.get('role', 'user') # New users default to 'user' (Player)
+    
+    if not phone or not otp_provided:
+        return jsonify({"message": "Phone and OTP are required"}), 400
+        
+    otp_data = otp_store.get(phone)
+    if not otp_data:
+        return jsonify({"message": "No OTP sent for this number"}), 400
+        
+    if datetime.utcnow() > otp_data['expires']:
+        del otp_store[phone]
+        return jsonify({"message": "OTP expired"}), 400
+        
+    if otp_data['otp'] != otp_provided:
+        return jsonify({"message": "Invalid OTP"}), 400
+        
+    # OTP is valid, clear it
+    del otp_store[phone]
+    
+    # Check if user exists
+    user = User.query.filter_by(phone_number=phone).first()
+    
+    if not user:
+        # Create a placeholder user
+        username = f"user_{phone[-4:]}_{random.randint(100, 999)}"
+        # Ensure unique username
+        while User.query.filter_by(username=username).first():
+            username = f"user_{phone[-4:]}_{random.randint(100, 999)}"
+            
+        dummy_email = f"{phone}@turfics.com"
+        dummy_password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+        
+        user = User(
+            username=username,
+            email=dummy_email,
+            phone_number=phone,
+            role=role
+        )
+        user.set_password(dummy_password)
+        db.session.add(user)
+        db.session.commit()
+        
+    # Create token
+    access_token = create_access_token(
+        identity=str(user.id),
+        additional_claims={'role': user.role, 'username': user.username}
+    )
+    
+    return jsonify({
+        'access_token': access_token, 
+        'role': user.role, 
+        'user_id': user.id,
+        'username': user.username
+    }), 200
+
+@app.route('/api/auth/google', methods=['POST'])
+def google_auth():
+    data = request.get_json()
+    google_access_token = data.get('token')
+    
+    if not google_access_token:
+        return jsonify({"message": "Token is required"}), 400
+        
+    # Verify token with Google
+    try:
+        user_info_url = "https://www.googleapis.com/oauth2/v3/userinfo"
+        headers = {'Authorization': f'Bearer {google_access_token}'}
+        response = requests.get(user_info_url, headers=headers)
+        
+        if response.status_code != 200:
+            return jsonify({"message": "Invalid Google token"}), 401
+            
+        google_user = response.json()
+        email = google_user.get('email')
+        name = google_user.get('name')
+        picture = google_user.get('picture')
+        
+        if not email:
+            return jsonify({"message": "Email not provided by Google"}), 400
+            
+        # Check if user exists
+        user = User.query.filter_by(email=email).first()
+        
+        if not user:
+            # Create new user
+            username = email.split('@')[0]
+            # Handle potential username collision
+            base_username = username
+            count = 1
+            while User.query.filter_by(username=username).first():
+                username = f"{base_username}{count}"
+                count += 1
+            
+            # Generate random password for non-password users
+            dummy_password = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
+            
+            user = User(
+                username=username,
+                email=email,
+                role='user' # Default to player
+            )
+            user.set_password(dummy_password)
+            db.session.add(user)
+            db.session.commit()
+            
+        # Create token
+        access_token = create_access_token(
+            identity=str(user.id),
+            additional_claims={'role': user.role, 'username': user.username}
+        )
+        
+        return jsonify({
+            'access_token': access_token, 
+            'role': user.role, 
+            'user_id': user.id,
+            'username': user.username
+        }), 200
+        
+    except Exception as e:
+        print(f"Google Auth Error: {e}")
+        return jsonify({"message": "Server error during Google auth"}), 500
+
 # Admin Routes (Example)
 @app.route('/api/admin/create-admin', methods=['POST'])
 @jwt_required()
@@ -282,7 +304,7 @@ def create_admin():
         return jsonify({"message": "Access denied"}), 403
     
     # Reuse register logic or create specific logic
-    return user_register()
+    return register()
 
 @app.route('/api/admin/users', methods=['GET'])
 @jwt_required()
@@ -777,22 +799,27 @@ def get_slots(turf_id):
         return jsonify({'message': 'Invalid date format'}), 400
 
     # Find bookings that overlap with this day
-    # Robust query using joins
-    start_of_day = datetime.combine(query_date, datetime.min.time())
-    end_of_day = datetime.combine(query_date, datetime.max.time())
+    try:
+        start_of_day = datetime.combine(query_date, datetime.min.time())
+        end_of_day = datetime.combine(query_date, datetime.max.time())
+        
+        existing_bookings = Booking.query\
+            .join(TurfUnit, Booking.turf_unit_id == TurfUnit.id)\
+            .join(TurfGame, TurfUnit.turf_game_id == TurfGame.id)\
+            .join(Turf, TurfGame.turf_id == Turf.id)\
+            .filter(
+                Turf.id == turf_id,
+                Booking.start_time >= start_of_day,
+                Booking.start_time <= end_of_day,
+                Booking.status.in_(['confirmed', 'held'])
+            ).all()
+        
+        booked_hours = [b.start_time.hour for b in existing_bookings]
+    except Exception as e:
+        print(f"DB Error in get_slots: {e}")
+        return jsonify({'message': f'Database error: {str(e)}'}), 500
     
-    existing_bookings = Booking.query\
-        .join(TurfUnit, Booking.turf_unit_id == TurfUnit.id)\
-        .join(TurfGame, TurfUnit.turf_game_id == TurfGame.id)\
-        .join(Turf, TurfGame.turf_id == Turf.id)\
-        .filter(
-            Turf.id == turf_id,
-            Booking.start_time >= start_of_day,
-            Booking.start_time <= end_of_day,
-            Booking.status.in_(['confirmed', 'held'])
-        ).all()
-    
-    booked_hours = [b.start_time.hour for b in existing_bookings]
+
 
     for hour in range(start_hour, end_hour):
         time_label = f"{hour:02d}:00"
@@ -2928,12 +2955,20 @@ def get_my_communities():
     for m in memberships:
         c = Community.query.get(m.community_id)
         if c:
+            # Calculate unread messages
+            last_read = m.last_read_at or m.joined_at
+            unread_count = CommunityMessage.query.filter(
+                CommunityMessage.community_id == c.id,
+                CommunityMessage.created_at > last_read
+            ).count()
+            
             results.append({
                 'id': c.id,
                 'name': c.name,
                 'type': c.type,
                 'role': m.role,
-                'image_url': c.image_url
+                'image_url': c.image_url,
+                'unread_count': unread_count
             })
             
     return jsonify(results), 200

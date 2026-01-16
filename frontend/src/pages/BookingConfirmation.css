@@ -1,250 +1,340 @@
 .confirmation-page {
     min-height: 100vh;
-    background: #0f0f0f;
+    background: #000;
     display: flex;
     justify-content: center;
-    padding-bottom: 3rem;
-    color: white;
-}
-
-.confirmation-container {
-    width: 100%;
-    max-width: 500px;
     padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.success-header {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.success-icon-wrapper {
-    background: rgba(0, 230, 118, 0.1);
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1.5rem;
-    box-shadow: 0 0 30px rgba(0, 230, 118, 0.2);
-}
-
-.success-header h1 {
-    font-size: 1.8rem;
-    margin-bottom: 0.5rem;
     color: white;
 }
 
-.success-header p {
-    color: #888;
-}
-
-/* Ticket Card */
-.ticket-card {
+.confirm-container {
     width: 100%;
-    background: #1a1a1a;
-    border-radius: 20px;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    border: 1px solid #333;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
-/* Semi-circles for ticket effect */
-.ticket-card::before,
-.ticket-card::after {
-    content: '';
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    background: #0f0f0f;
-    border-radius: 50%;
-    top: 140px;
-    /* Adjust based on divider position */
-    z-index: 2;
-}
-
-.ticket-card::before {
-    left: -15px;
-}
-
-.ticket-card::after {
-    right: -15px;
-}
-
-.ticket-top {
-    background: linear-gradient(135deg, #1e1e1e, #252525);
-    padding: 1.5rem;
-    text-align: center;
-    border-bottom: 2px dashed #333;
-}
-
-.ticket-row {
+.confirm-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 1rem;
-    font-size: 0.8rem;
-    color: #666;
+    align-items: center;
+    margin-bottom: 2rem;
 }
 
-.ticket-row .value {
-    color: var(--primary);
+.timer-badge {
+    background: rgba(255, 100, 100, 0.1);
+    color: #ff6b6b;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-family: monospace;
-    font-size: 1rem;
+    font-size: 1.2rem;
+    border: 1px solid rgba(255, 100, 100, 0.2);
 }
 
-.ticket-main-info h2 {
-    color: white;
-    margin: 0.5rem 0;
-    font-size: 1.4rem;
+.confirm-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 2rem;
 }
 
-.ticket-type {
-    color: var(--primary);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: bold;
-}
-
-.ticket-body {
-    padding: 2rem 1.5rem;
-}
-
-.info-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.info-item {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-.info-item .icon {
-    color: #666;
-    background: #222;
-    padding: 8px;
-    box-sizing: content-box;
-    border-radius: 50%;
-}
-
-.info-item .lbl {
-    display: block;
-    font-size: 0.8rem;
-    color: #666;
-    margin-bottom: 0.2rem;
-}
-
-.info-item .val {
-    font-size: 1rem;
-    color: white;
-    font-weight: 500;
-}
-
-.payment-summary {
+.section-card {
     background: #111;
-    padding: 1rem;
-    border-radius: 8px;
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid #222;
+}
+
+.payment-option-label {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
 }
 
-.payment-summary span {
-    color: #888;
+.payment-option-label.active {
+    background: #1a1a1a;
+    border-color: var(--primary);
+}
+
+.friend-pill {
+    background: var(--primary);
+    color: black;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
     font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
 }
 
-.payment-summary .amount {
-    color: #ffd700;
-    font-size: 1.2rem;
-    font-weight: bold;
-}
-
-.ticket-footer {
-    background: #111;
-    padding: 1.5rem;
-    text-align: center;
-    border-top: 1px solid #222;
-}
-
-.qr-placeholder img {
-    background: white;
-    padding: 5px;
-    border-radius: 4px;
+.summary-row {
+    display: flex;
+    justify-content: space-between;
     margin-bottom: 0.5rem;
 }
 
-.ticket-footer p {
-    font-size: 0.8rem;
-    color: #555;
-    margin: 0;
-}
-
-/* Actions */
-.action-buttons {
+.pay-btn {
     width: 100%;
-    margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.primary-action {
-    background: white;
-    color: black;
-    border: none;
     padding: 1rem;
     border-radius: 12px;
+    background: var(--primary);
+    color: black;
     font-weight: bold;
+    border: none;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+    font-size: 1.1rem;
+    margin-top: 1rem;
     transition: transform 0.2s;
 }
 
-.primary-action:hover {
-    transform: translateY(-2px);
+.pay-btn:active {
+    transform: scale(0.98);
 }
 
-.secondary-action {
-    background: transparent;
-    color: #ccc;
-    border: 1px solid #333;
-    padding: 0.8rem;
-    border-radius: 12px;
+/* --- Mobile Responsive Styles --- */
+@media (max-width: 768px) {
+    .confirmation-page {
+        padding: 1rem;
+    }
+
+    .confirm-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .confirm-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .confirm-grid {
+        grid-template-columns: 1fr;
+        /* Stack columns */
+        gap: 1.5rem;
+    }
+
+    /* Reverse order so Summary appears first on mobile? 
+       Usually Summary is better at bottom or top depending on UX. 
+       Let's keep standard stacking for now (Left col on top).
+    */
+
+    .section-card {
+        padding: 1.2rem;
+    }
+
+    .timer-badge {
+        font-size: 1rem;
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* --- Professional Invoice Styles --- */
+.invoice-container-professional {
+    background: white;
+    color: #111;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    position: relative;
+    font-family: 'Inter', sans-serif;
+    /* Ensure clean font */
+}
+
+.invoice-container-professional::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.inv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.inv-logo {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #10b981;
+    letter-spacing: -1px;
+}
+
+.inv-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 1px;
+}
+
+.inv-details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.inv-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.inv-item label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.inv-item span {
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.95rem;
+}
+
+.inv-slots-table {
+    margin-bottom: 2rem;
+}
+
+.inv-slots-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.inv-slots-table th {
+    text-align: left;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.inv-slots-table td {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
     font-size: 0.9rem;
-    cursor: pointer;
+}
+
+.inv-slots-table .text-right {
+    text-align: right;
+}
+
+.inv-summary-box {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.summary-row.big-total {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.summary-row.balance-due {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.inv-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 2px dashed #e2e8f0;
+    padding-top: 1.5rem;
+}
+
+.inv-thankyou h4 {
+    margin: 0;
+    color: #10b981;
+    font-size: 1.1rem;
+}
+
+.inv-thankyou p {
+    margin: 4px 0;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.inv-thankyou small {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+/* Actions Bar */
+.inv-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.action-btn-primary,
+.action-btn-secondary,
+.action-btn-text {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
 }
 
-.secondary-action:hover {
-    background: #1a1a1a;
+.action-btn-primary {
+    background: var(--primary);
+    color: black;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.action-btn-secondary {
+    background: #334155;
     color: white;
+}
+
+.action-btn-text {
+    background: transparent;
+    color: #94a3b8;
+    border: 1px solid #334155;
+}
+
+.action-btn-primary:active,
+.action-btn-secondary:active {
+    transform: scale(0.98);
 }

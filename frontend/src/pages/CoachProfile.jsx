@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, MapPin, CheckCircle, Video, Calendar, Clock, ArrowLeft, Shield, Users } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import API_URL from '../config';
+import { showWarning } from '../utils/SwalUtils';
 import './CoachProfile.css';
 
 const CoachProfile = () => {
@@ -18,13 +18,13 @@ const CoachProfile = () => {
         const fetchData = async () => {
             try {
                 // Fetch Coach Profile
-                const cRes = await fetch(`${API_URL}/api/coaches/${id}`);
+                const cRes = await fetch(`http://localhost:5000/api/coaches/${id}`);
                 if (cRes.ok) {
                     setCoach(await cRes.json());
                 }
 
                 // Fetch Batches
-                const bRes = await fetch(`${API_URL}/api/coaches/${id}/batches`);
+                const bRes = await fetch(`http://localhost:5000/api/coaches/${id}/batches`);
                 if (bRes.ok) {
                     setBatches(await bRes.json());
                 }
@@ -47,7 +47,7 @@ const CoachProfile = () => {
 
         if (window.confirm(`Confirm enrollment for ${batch.name} at ₹${batch.price_per_month}/mo?`)) {
             try {
-                const res = await fetch(`${API_URL}/api/bookings/coach`, {
+                const res = await fetch('http://localhost:5000/api/bookings/coach', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -184,7 +184,7 @@ const CoachProfile = () => {
                             onClick={() => {
                                 // For 1-on-1, maybe navigate to a schedule picker or just quick book
                                 // Keeping it simple for now -> Direct book or alert
-                                alert("1-on-1 Booking feature coming next! Use Batches for now.");
+                                showWarning('Coming Soon', "1-on-1 Booking feature coming next! Use Batches for now.");
                             }}
                         >
                             Book Session

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Star, CheckCircle, Clock, Calendar, ChevronRight, Check } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import API_URL from '../config';
+import { showSuccess, showError, showConfirm } from '../utils/SwalUtils';
 import './AcademyProfile.css';
 
 const AcademyProfile = () => {
@@ -17,7 +17,7 @@ const AcademyProfile = () => {
         const fetchData = async () => {
             try {
                 // Fetch Academy Details
-                const accRes = await fetch(`${API_URL}/api/academies/${id}`);
+                const accRes = await fetch(`http://localhost:5000/api/academies/${id}`);
                 if (accRes.ok) {
                     const accData = await accRes.json();
                     // Inject mock facilities if missing
@@ -26,7 +26,7 @@ const AcademyProfile = () => {
                 }
 
                 // Fetch Programs
-                const progRes = await fetch(`${API_URL}/api/academies/${id}/programs`);
+                const progRes = await fetch(`http://localhost:5000/api/academies/${id}/programs`);
                 if (progRes.ok) {
                     const progData = await progRes.json();
                     setPrograms(progData);
@@ -48,10 +48,11 @@ const AcademyProfile = () => {
             return;
         }
 
-        if (!window.confirm("Confirm enrollment request for this batch?")) return;
+        const confirmed = await showConfirm('Confirm Enrollment', "Confirm enrollment request for this batch?");
+        if (!confirmed) return;
 
         try {
-            const res = await fetch(`${API_URL}/api/academies/enroll`, {
+            const res = await fetch('http://localhost:5000/api/academies/enroll', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -61,14 +62,14 @@ const AcademyProfile = () => {
             });
 
             if (res.ok) {
-                alert("Enrollment request submitted! The academy will contact you.");
+                showSuccess('Request Sent', "Enrollment request submitted! The academy will contact you.");
             } else {
                 const err = await res.json();
-                alert(err.message || "Enrollment failed");
+                showError('Enrollment Failed', err.message || "Enrollment failed");
             }
         } catch (error) {
             console.error(error);
-            alert("Something went wrong");
+            showError('Error', "Something went wrong");
         }
     };
 

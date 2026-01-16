@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, MapPin, Award, Calendar, Wallet, TrendingUp, Users, Activity, Clock, PieChart as PieIcon, ArrowRight, Zap, BarChart2, Check, X, Bell } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Navbar from '../components/Navbar';
+import { showConfirm } from '../utils/SwalUtils';
 import './Dashboard.css';
-import API_URL from '../config';
 
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
@@ -45,8 +45,8 @@ const Dashboard = () => {
             const headers = { 'Authorization': `Bearer ${token}` };
 
             const endpoint = currentRole === 'owner'
-                ? `${API_URL}/api/owner/stats`
-                : `${API_URL}/api/activity`;
+                ? 'http://localhost:5000/api/owner/stats'
+                : 'http://localhost:5000/api/activity';
 
             const res = await fetch(endpoint, { headers });
             const data = await res.json();
@@ -54,7 +54,7 @@ const Dashboard = () => {
 
             // If Owner and has pending items, fetch the details immediately
             if (currentRole === 'owner' && data.bookings_breakdown?.pending > 0) {
-                const bookingRes = await fetch(`${API_URL}/api/owner/bookings`, { headers });
+                const bookingRes = await fetch('http://localhost:5000/api/owner/bookings', { headers });
                 if (bookingRes.ok) {
                     const allBookings = await bookingRes.json();
                     const pending = allBookings.filter(b => b.status === 'pending');
@@ -73,7 +73,7 @@ const Dashboard = () => {
     const handleConfirmBooking = async (id) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/bookings/confirm`, {
+            const res = await fetch('http://localhost:5000/api/bookings/confirm', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -103,10 +103,11 @@ const Dashboard = () => {
     };
 
     const handleRejectBooking = async (id) => {
-        if (!window.confirm('Reject this booking?')) return;
+        const confirmed = await showConfirm('Reject Booking?', 'Are you sure you want to reject this booking?');
+        if (!confirmed) return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/bookings/${id}`, {
+            const res = await fetch(`http://localhost:5000/api/bookings/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

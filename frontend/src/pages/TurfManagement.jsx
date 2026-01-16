@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, MapPin, Edit, Trash2, Clock, DollarSign, Users, X, Trophy, BarChart2 } from 'lucide-react';
-import API_URL from '../config';
 import Navbar from '../components/Navbar';
 import LocationPicker from '../components/LocationPicker';
+import { showSuccess, showError, showConfirm } from '../utils/SwalUtils';
 import './TurfManagement.css';
 
 
@@ -32,7 +32,7 @@ const TurfManagement = () => {
     const fetchTurfs = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/turfs/my-turfs`, {
+            const res = await fetch('http://localhost:5000/api/turfs/my-turfs', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -54,8 +54,8 @@ const TurfManagement = () => {
         try {
             const token = localStorage.getItem('token');
             const url = editingTurf
-                ? `${API_URL}/api/turfs/${editingTurf.id}`
-                : `${API_URL}/api/turfs/create`;
+                ? `http://localhost:5000/api/turfs/${editingTurf.id}`
+                : 'http://localhost:5000/api/turfs/create';
 
             const method = editingTurf ? 'PUT' : 'POST';
 
@@ -74,31 +74,32 @@ const TurfManagement = () => {
             console.log('Response:', data);
 
             if (res.ok) {
-                alert('Turf saved successfully!');
+                showSuccess('Saved', 'Turf saved successfully!');
                 fetchTurfs();
                 resetForm();
                 setShowModal(false);
             } else {
                 if (res.status === 401 || res.status === 422) {
-                    alert('Session expired. Please login again.');
+                    showError('Session Expired', 'Please login again.');
                     localStorage.removeItem('token');
                     navigate('/login');
                 } else {
-                    alert(`Error: ${data.message || 'Failed to save turf'}`);
+                    showError('Error', data.message || 'Failed to save turf');
                 }
             }
         } catch (error) {
             console.error('Failed to save turf:', error);
-            alert(`Error: ${error.message}`);
+            showError('Error', error.message);
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this turf?')) return;
+        const confirmed = await showConfirm('Delete Turf?', "Are you sure you want to delete this turf? This cannot be undone.");
+        if (!confirmed) return;
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/turfs/${id}`, {
+            const res = await fetch(`http://localhost:5000/api/turfs/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, MapPin, CheckCircle, Video, Users, Calendar, Clock, Award } from 'lucide-react';
-import API_URL from '../config';
 import Navbar from '../components/Navbar';
 import './Trainers.css';
 
@@ -19,8 +18,8 @@ const Trainers = () => {
         const fetchData = async () => {
             try {
                 const [coachRes, academyRes] = await Promise.all([
-                    fetch(`${API_URL}/api/coaches`),
-                    fetch(`${API_URL}/api/academies`)
+                    fetch('http://localhost:5000/api/coaches'),
+                    fetch('http://localhost:5000/api/academies')
                 ]);
 
                 if (coachRes.ok) {

@@ -1,16 +1,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import API_URL from '../config';
 import { Search, Trophy, Calendar, MapPin, Users, Filter, Plus, Smartphone, Award, Share2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import Loader from '../components/Loader';
+import { API_URL } from '../utils/api';
+
 import './Tournaments.css';
 
 const Tournaments = () => {
     const navigate = useNavigate();
     const [selectedSport, setSelectedSport] = useState('All');
+    const [searchQuery, setSearchQuery] = useState('');
     const [tournaments, setTournaments] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [showFilters, setShowFilters] = useState(false);
+    const [advancedFilters, setAdvancedFilters] = useState({
+        date: '',
+        host: '',
+        turf: '',
+        city: ''
+    });
 
     const [error, setError] = useState(null);
 
@@ -27,22 +38,53 @@ const Tournaments = () => {
             } catch (error) {
                 console.error("Failed to fetch tournaments", error);
                 setError(error.message);
-            } finally {
-                setLoading(false);
             }
         };
         fetchTournaments();
     }, []);
 
-    const filteredTournaments = selectedSport === 'All'
-        ? tournaments
-        : tournaments.filter(t => t.sport?.includes(selectedSport));
+    const handleShare = async (tournament) => {
+        const url = `${window.location.origin}/tournaments/${tournament.id}`;
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: tournament.name,
+                    text: `Check out ${tournament.name} on Turfics!`,
+                    url: url
+                });
+            } catch (err) {
+                console.log('Error sharing:', err);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(url);
+                alert('Tournament link copied to clipboard!');
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        }
+    };
+
+    const filteredTournaments = tournaments.filter(t => {
+        const matchesSport = selectedSport === 'All' || t.sport?.includes(selectedSport);
+        const matchesSearch = (t.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+            (t.location?.toLowerCase() || '').includes(searchQuery.toLowerCase());
+
+        // Advanced Filters
+        const matchesDate = !advancedFilters.date || (t.start_date && t.start_date.startsWith(advancedFilters.date));
+        // Note: Backend might need to send host/organizer name. Assuming 'Organizer' for now or t.organizer if available.
+        const matchesHost = !advancedFilters.host || (t.organizer_name?.toLowerCase() || 'organizer').includes(advancedFilters.host.toLowerCase());
+        const matchesTurf = !advancedFilters.turf || (t.location?.toLowerCase() || '').includes(advancedFilters.turf.toLowerCase());
+        const matchesCity = !advancedFilters.city || (t.location?.toLowerCase() || '').includes(advancedFilters.city.toLowerCase());
+
+        return matchesSport && matchesSearch && matchesDate && matchesHost && matchesTurf && matchesCity;
+    });
 
     return (
         <div className="tournaments-page">
             <Navbar />
-            <div style={{ marginTop: '60px' }}></div>
 
+            {/* Hero Section */}
             {/* Hero Section */}
             <header className="tournaments-hero">
                 <div className="hero-content">
@@ -51,25 +93,21 @@ const Tournaments = () => {
                     <p>Discover local tournaments with huge prize pools or host your own professionally.</p>
 
                     <div className="hero-actions">
-                        <button className="primary-btn glow-effect" onClick={() => {
+                        <button className="tab-pill active" onClick={() => {
                             const section = document.querySelector('.tournaments-grid');
                             section?.scrollIntoView({ behavior: 'smooth' });
                         }}>Explore Tournaments</button>
 
-                        <button className="secondary-btn" onClick={() => navigate('/host-tournament')}>
-                            <Plus size={18} /> Host a Tournament
+                        <button className="tab-pill" onClick={() => navigate('/host-tournament')}>
+                            Host a Tournament
                         </button>
 
                         {localStorage.getItem('token') && (
-                            <button className="secondary-btn" style={{ marginLeft: '10px', background: 'rgba(255,255,255,0.1)', border: '1px solid #444' }} onClick={() => navigate('/my-tournaments')}>
-                                <Trophy size={18} /> My Tournaments
+                            <button className="tab-pill" onClick={() => navigate('/my-tournaments')}>
+                                My Tournaments
                             </button>
                         )}
                     </div>
-                </div>
-                <div className="hero-visual-3d">
-                    {/* Abstract Trophy Graphic placeholder */}
-                    <div className="trophy-orb"></div>
                 </div>
             </header>
 
@@ -77,7 +115,12 @@ const Tournaments = () => {
             <div className="toolbar-section">
                 <div className="search-bar">
                     <Search size={20} color="#666" />
-                    <input type="text" placeholder="Search tournaments by name, location..." />
+                    <input
+                        type="text"
+                        placeholder="Search tournaments by name, location..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                 </div>
 
                 <div className="sport-filters">
@@ -92,13 +135,66 @@ const Tournaments = () => {
                     ))}
                 </div>
 
-                <button className="filter-btn-icon"><Filter size={20} /></button>
+                <button className="filter-btn-icon" onClick={() => setShowFilters(true)}><Filter size={20} /></button>
             </div>
+
+            {/* Advanced Filter Modal */}
+            {showFilters && (
+                <div className="filter-modal-overlay" onClick={() => setShowFilters(false)}>
+                    <div className="filter-modal" onClick={e => e.stopPropagation()}>
+                        <h3>Advanced Filters</h3>
+
+                        <div className="filter-group">
+                            <label>Date</label>
+                            <input
+                                type="date"
+                                value={advancedFilters.date}
+                                onChange={e => setAdvancedFilters({ ...advancedFilters, date: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="filter-group">
+                            <label>Host (Organizer)</label>
+                            <input
+                                type="text"
+                                placeholder="Enter organizer name"
+                                value={advancedFilters.host}
+                                onChange={e => setAdvancedFilters({ ...advancedFilters, host: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="filter-group">
+                            <label>Turf (Venue)</label>
+                            <input
+                                type="text"
+                                placeholder="Enter turf name"
+                                value={advancedFilters.turf}
+                                onChange={e => setAdvancedFilters({ ...advancedFilters, turf: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="filter-group">
+                            <label>City</label>
+                            <input
+                                type="text"
+                                placeholder="Enter city"
+                                value={advancedFilters.city}
+                                onChange={e => setAdvancedFilters({ ...advancedFilters, city: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="filter-actions">
+                            <button className="reset-btn" onClick={() => setAdvancedFilters({ date: '', host: '', turf: '', city: '' })}>Reset</button>
+                            <button className="apply-btn" onClick={() => setShowFilters(false)}>Apply Filters</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Tournaments Grid */}
             <div className="tournaments-grid">
                 {error && <p style={{ color: 'red', textAlign: 'center', width: '100%' }}>Error: {error}</p>}
-                {loading ? <p style={{ color: 'white', textAlign: 'center', width: '100%' }}>Loading tournaments...</p> : (
+                {loading ? <Loader text="Scouting Tournaments..." /> : (
                     filteredTournaments.length > 0 ? filteredTournaments.map(t => (
                         <div key={t.id} className="tournament-card">
                             <div className="card-image" style={{ backgroundImage: `url(${t.image_url})` }}>
@@ -154,7 +250,7 @@ const Tournaments = () => {
                                     </div>
 
                                     <div className="action-row">
-                                        <button className="share-btn"><Share2 size={18} /></button>
+                                        <button className="share-btn" onClick={() => handleShare(t)}><Share2 size={18} /></button>
                                         <button className="view-btn" onClick={() => navigate(`/tournaments/${t.id}`)}>View Details</button>
                                     </div>
                                 </div>

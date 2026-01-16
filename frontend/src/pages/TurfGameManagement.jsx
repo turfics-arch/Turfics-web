@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, X, AlertCircle, Image as ImageIcon } from 'lucide-react';
-import API_URL from '../config';
 import Navbar from '../components/Navbar';
+import { showSuccess, showError, showConfirm } from '../utils/SwalUtils';
 import './TurfGameManagement.css';
 
 const TurfGameManagement = () => {
@@ -62,7 +62,7 @@ const TurfGameManagement = () => {
             const token = localStorage.getItem('token');
 
             // Fetch turf details
-            const turfRes = await fetch(`${API_URL}/api/turfs/my-turfs`, {
+            const turfRes = await fetch(`http://localhost:5000/api/turfs/my-turfs`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const turfs = await turfRes.json();
@@ -70,7 +70,7 @@ const TurfGameManagement = () => {
             setTurf(currentTurf);
 
             // Fetch games
-            const gamesRes = await fetch(`${API_URL}/api/turfs/${turfId}/games`, {
+            const gamesRes = await fetch(`http://localhost:5000/api/turfs/${turfId}/games`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (gamesRes.ok) {
@@ -90,8 +90,8 @@ const TurfGameManagement = () => {
         try {
             const token = localStorage.getItem('token');
             const url = selectedGame
-                ? `${API_URL}/api/games/${selectedGame.id}`
-                : `${API_URL}/api/turfs/${turfId}/games`;
+                ? `http://localhost:5000/api/games/${selectedGame.id}`
+                : `http://localhost:5000/api/turfs/${turfId}/games`;
 
             const method = selectedGame ? 'PUT' : 'POST';
 
@@ -119,17 +119,17 @@ const TurfGameManagement = () => {
             });
 
             if (res.ok) {
-                alert(`Game ${selectedGame ? 'updated' : 'added'} successfully!`);
+                showSuccess('Success', `Game ${selectedGame ? 'updated' : 'added'} successfully!`);
                 fetchTurfAndGames();
                 setShowGameModal(false);
                 resetGameForm();
             } else if (res.status === 401 || res.status === 422) {
-                alert('Session expired. Please login again.');
+                showError('Session Expired', 'Please login again.');
                 localStorage.removeItem('token');
                 navigate('/login');
             } else {
                 const data = await res.json();
-                alert(`Error: ${data.message || 'Failed to save sport'}`);
+                showError('Error', data.message || 'Failed to save sport');
             }
         } catch (error) {
             console.error('Error saving game:', error);
@@ -141,8 +141,8 @@ const TurfGameManagement = () => {
         try {
             const token = localStorage.getItem('token');
             const url = editingUnit
-                ? `${API_URL}/api/units/${editingUnit.id}`
-                : `${API_URL}/api/games/${selectedGame.id}/units`;
+                ? `http://localhost:5000/api/units/${editingUnit.id}`
+                : `http://localhost:5000/api/games/${selectedGame.id}/units`;
 
             const method = editingUnit ? 'PUT' : 'POST';
 
@@ -156,18 +156,18 @@ const TurfGameManagement = () => {
             });
 
             if (res.ok) {
-                alert('Unit saved successfully!');
+                showSuccess('Success', 'Unit saved successfully!');
                 fetchTurfAndGames();
                 setShowUnitModal(false);
                 resetUnitForm();
                 setEditingUnit(null);
             } else if (res.status === 401 || res.status === 422) {
-                alert('Session expired. Please login again.');
+                showError('Session Expired', 'Please login again.');
                 localStorage.removeItem('token');
                 navigate('/login');
             } else {
                 const data = await res.json();
-                alert(`Error: ${data.message || 'Failed to save unit'}`);
+                showError('Error', data.message || 'Failed to save unit');
             }
         } catch (error) {
             console.error('Error saving unit:', error);
@@ -175,11 +175,12 @@ const TurfGameManagement = () => {
     };
 
     const handleDeleteUnit = async (unitId) => {
-        if (!window.confirm('Are you sure you want to disable this unit?')) return;
+        const confirmed = await showConfirm('Disable Unit?', 'Are you sure? This will hide it from bookings.');
+        if (!confirmed) return;
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/units/${unitId}`, {
+            const res = await fetch(`http://localhost:5000/api/units/${unitId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -190,7 +191,7 @@ const TurfGameManagement = () => {
                 localStorage.removeItem('token');
                 navigate('/login');
             } else {
-                alert('Failed to delete unit');
+                showError('Failed', 'Failed to delete unit');
             }
         } catch (error) {
             console.error('Error deleting unit:', error);
@@ -201,7 +202,7 @@ const TurfGameManagement = () => {
         if (!newImageUrl) return;
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`${API_URL}/api/units/${currentUnitForImg.id}/images`, {
+            const res = await fetch(`http://localhost:5000/api/units/${currentUnitForImg.id}/images`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ image_url: newImageUrl })
@@ -215,10 +216,11 @@ const TurfGameManagement = () => {
     };
 
     const handleDeleteImage = async (imgId) => {
-        if (!window.confirm("Delete image?")) return;
+        const confirmed = await showConfirm('Delete Image?', "Are you sure you want to delete this image?");
+        if (!confirmed) return;
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`${API_URL}/api/unit-images/${imgId}`, {
+            const res = await fetch(`http://localhost:5000/api/unit-images/${imgId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

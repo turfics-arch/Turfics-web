@@ -4,7 +4,6 @@ import CreateCommunityModal from '../components/CreateCommunityModal';
 import { Search, Plus, Users, Radio, Globe, Lock, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import API_URL from '../config';
 import './Community.css';
 
 const Community = () => {
@@ -24,20 +23,28 @@ const Community = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
+            if (!token) {
+                // Handle no token
+                return;
+            }
 
             // Parallel fetch
             const [myRes, publicRes] = await Promise.all([
-                axios.get(`${API_URL}/api/communities/my`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${API_URL}/api/communities`, { headers: { Authorization: `Bearer ${token}` } })
+                axios.get('http://127.0.0.1:5000/api/communities/my', { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get('http://127.0.0.1:5000/api/communities', { headers: { Authorization: `Bearer ${token}` } })
             ]);
 
-            setMyCommunities(myRes.data.map(c => ({
-                ...c,
-                unread_count: Math.floor(Math.random() * 4) // Simulate 0-3 unread messages
-            })));
+            setMyCommunities(myRes.data);
             setPublicCommunities(publicRes.data);
+
+            // Auto-switch to Discover if no joined communities
+            if (myComms.length === 0 && publicRes.data.length > 0) {
+                setActiveTab('discover');
+            }
+
         } catch (error) {
             console.error("Error fetching communities:", error);
+            // Optional: Set an error state to show a toast
         } finally {
             setLoading(false);
         }
@@ -52,7 +59,7 @@ const Community = () => {
         setSearchTerm(e.target.value);
         if (e.target.value.length > 2) {
             try {
-                const res = await axios.get(`${API_URL}/api/communities?q=${e.target.value}`);
+                const res = await axios.get(`http://127.0.0.1:5000/api/communities?q=${e.target.value}`);
                 setPublicCommunities(res.data);
                 if (activeTab !== 'discover') setActiveTab('discover');
             } catch (err) {
@@ -61,7 +68,7 @@ const Community = () => {
         } else if (e.target.value.length === 0) {
             // Reset
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_URL}/api/communities`, { headers: { Authorization: `Bearer ${token}` } });
+            const res = await axios.get('http://127.0.0.1:5000/api/communities', { headers: { Authorization: `Bearer ${token}` } });
             setPublicCommunities(res.data);
         }
     };
@@ -128,16 +135,15 @@ const Community = () => {
                                     ) : (
                                         myCommunities.map(c => (
                                             <div key={c.id} className="community-card" onClick={() => navigate(`/community/${c.id}`)}>
-                                                <div className="card-image" style={{ backgroundImage: `url(${c.image_url || 'https://via.placeholder.com/400x200?text=Community'})` }}>
-                                                    <div className={`status-badge ${c.role === 'admin' ? 'admin' : 'member'}`}>
-                                                        {c.role}
-                                                    </div>
-                                                    {c.unread_count > 0 && (
-                                                        <div className="unread-card-badge">
-                                                            {c.unread_count} New
-                                                        </div>
-                                                    )}
+                                                <div className="card-image-wrapper">
+                                                    <div className="card-image" style={{ backgroundImage: `url(${c.image_url || 'https://via.placeholder.com/400x200?text=Community'})` }}></div>
                                                 </div>
+
+                                                {c.unread_count > 0 && (
+                                                    <div className="unread-card-badge">
+                                                        {c.unread_count}
+                                                    </div>
+                                                )}
                                                 <div className="card-info">
                                                     <h3>{c.name}</h3>
                                                     <div className="meta-row">
@@ -145,8 +151,14 @@ const Community = () => {
                                                             {c.type === 'private' ? <Lock size={12} /> : <Globe size={12} />}
                                                             {c.type}
                                                         </span>
+                                                        <span className="member-count">
+                                                            <Users size={12} /> {c.members_count || '10+'}
+                                                        </span>
                                                     </div>
-                                                    <button className="view-btn">View Community</button>
+                                                    <p className="card-desc">{c.description || 'Welcome back! Check out the latest updates.'}</p>
+                                                    <button className="view-btn" style={{ background: 'rgba(0, 230, 118, 0.15)', color: '#00E676', borderColor: '#00E676' }}>
+                                                        Open Community
+                                                    </button>
                                                 </div>
                                             </div>
                                         ))
@@ -200,19 +212,21 @@ const Community = () => {
                                     ) : (
                                         publicCommunities.map(c => (
                                             <div key={c.id} className="community-card" onClick={() => navigate(`/community/${c.id}`)}>
-                                                <div className="card-image" style={{ backgroundImage: `url(${c.image_url || 'https://via.placeholder.com/400x200?text=Community'})` }}>
+                                                <div className="card-image-wrapper">
+                                                    <div className="card-image" style={{ backgroundImage: `url(${c.image_url || 'https://via.placeholder.com/400x200?text=Community'})` }}></div>
                                                 </div>
                                                 <div className="card-info">
                                                     <h3>{c.name}</h3>
-                                                    <p className="card-desc">{c.description || 'No description'}</p>
                                                     <div className="meta-row">
-                                                        <span className="member-count">
-                                                            <Users size={14} /> {c.members_count} Members
+                                                        <span className="type-badge">
+                                                            {c.type === 'private' ? <Lock size={12} /> : <Globe size={12} />}
+                                                            {c.type}
                                                         </span>
-                                                        <span className="type-badge" style={{ background: 'transparent', border: 'none', padding: 0 }}>
-                                                            {c.type === 'private' ? <Lock size={14} /> : <Globe size={14} />}
+                                                        <span className="member-count">
+                                                            <Users size={12} /> {c.members_count}
                                                         </span>
                                                     </div>
+                                                    <p className="card-desc">{c.description || 'No description available for this community.'}</p>
                                                     <button className="join-btn">View Details</button>
                                                 </div>
                                             </div>

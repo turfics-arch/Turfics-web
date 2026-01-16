@@ -3,11 +3,12 @@ import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import { Search, MapPin, Star, Crosshair, X, Check } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { showError } from '../utils/SwalUtils';
 import 'leaflet/dist/leaflet.css';
 import './TurfDiscovery.css';
 import L from 'leaflet';
-import API_URL from '../config';
 import Navbar from '../components/Navbar';
+import { API_URL } from '../utils/api';
 
 // Fix for default marker icon in React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -331,12 +332,13 @@ const TurfDiscovery = () => {
                     const loc = { lat: latitude, lng: longitude };
                     setUserLocation(loc);
                     setTempLocation(loc); // Update temp loc too
+                    setTempLocation(loc); // Update temp loc too
                     // Don't auto-close if in picker mode, let user confirm
                 },
-                () => alert("Location access is disabled.")
+                () => showError('Location Access Denied', "Location access is disabled.")
             );
         } else {
-            alert("Geolocation not supported.");
+            showError('Not Supported', "Geolocation not supported.");
         }
     };
 
@@ -360,7 +362,7 @@ const TurfDiscovery = () => {
     return (
         <div className="discovery-container">
             <Navbar />
-            <div style={{ marginTop: '60px' }}></div>
+            <div style={{ marginTop: '120px' }}></div>
 
             {viewMode === 'cities' ? (
                 /* City Selection View */

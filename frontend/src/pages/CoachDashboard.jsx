@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import API_URL from '../config';
 import { User, Calendar, Check, X, Edit, DollarSign, MapPin, Clock } from 'lucide-react';
+import Loader from '../components/Loader';
+import { showSuccess, showError, showConfirm, showToast } from '../utils/SwalUtils';
 import './CoachDashboard.css';
 
 const CoachDashboard = () => {
@@ -29,7 +30,7 @@ const CoachDashboard = () => {
         const token = localStorage.getItem('token');
         try {
             // Fetch Profile
-            const pRes = await fetch(`${API_URL}/api/coach/me`, {
+            const pRes = await fetch('http://localhost:5000/api/coach/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -44,13 +45,13 @@ const CoachDashboard = () => {
             }
 
             // Fetch Bookings
-            const bRes = await fetch(`${API_URL}/api/coach/bookings`, {
+            const bRes = await fetch('http://localhost:5000/api/coach/bookings', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (bRes.ok) setBookings(await bRes.json());
 
             // Fetch Batches
-            const batchRes = await fetch(`${API_URL}/api/coach/batches`, {
+            const batchRes = await fetch('http://localhost:5000/api/coach/batches', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (batchRes.ok) setBatches(await batchRes.json());
@@ -66,7 +67,7 @@ const CoachDashboard = () => {
         e.preventDefault();
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`${API_URL}/api/coach/batches`, {
+            const res = await fetch('http://localhost:5000/api/coach/batches', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -84,7 +85,7 @@ const CoachDashboard = () => {
 
     const fetchBatchStudents = async (batchId) => {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${API_URL}/api/coach/batches/${batchId}/students`, {
+        const res = await fetch(`http://localhost:5000/api/coach/batches/${batchId}/students`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) setBatchStudents(await res.json());
@@ -99,7 +100,7 @@ const CoachDashboard = () => {
         e.preventDefault();
         const token = localStorage.getItem('token');
         try {
-            const res = await fetch(`${API_URL}/api/coach/profile`, {
+            const res = await fetch('http://localhost:5000/api/coach/profile', {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -121,8 +122,17 @@ const CoachDashboard = () => {
 
     const handleBookingAction = async (id, action) => {
         const token = localStorage.getItem('token');
+
+        const result = await showConfirm(
+            action === 'confirm' ? 'Confirm Booking?' : 'Reject Booking?',
+            `Are you sure you want to <b>${action}</b> this session?`,
+            action === 'confirm' ? 'Yes, Confirm' : 'Yes, Reject'
+        );
+
+        if (!result.isConfirmed) return;
+
         try {
-            const res = await fetch(`${API_URL}/api/coach/bookings/${id}/action`, {
+            const res = await fetch(`http://localhost:5000/api/coach/bookings/${id}/action`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -133,13 +143,17 @@ const CoachDashboard = () => {
             if (res.ok) {
                 // Optimistic update
                 setBookings(prev => prev.map(b => b.id === id ? { ...b, status: action === 'confirm' ? 'confirmed' : 'rejected' } : b));
+                showToast(`Session ${action === 'confirm' ? 'confirmed' : 'rejected'} successfully!`);
+            } else {
+                showError('Action Failed', 'Could not update booking status');
             }
         } catch (err) {
             console.error(err);
+            showError('Error', 'An error occurred while updating booking');
         }
     };
 
-    if (loading) return <div className="loading-screen">Loading Dashboard...</div>;
+    if (loading) return <Loader text="Analyzing Plays..." />;
 
     return (
         <div className="coach-dashboard">

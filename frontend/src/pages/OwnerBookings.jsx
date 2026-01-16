@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import API_URL from '../config';
 import { Check, X, Bell, Calendar, Clock, DollarSign, Filter, Search, ChevronRight, XCircle, Lock } from 'lucide-react';
+import { showSuccess, showError, showConfirm, showWarning } from '../utils/SwalUtils';
 import './OwnerBookings.css';
 
 const OwnerBookings = () => {
@@ -22,9 +22,9 @@ const OwnerBookings = () => {
 
         try {
             const [bRes, sRes, tRes] = await Promise.all([
-                fetch(`${API_URL}/api/owner/bookings`, { headers: { 'Authorization': `Bearer ${token} ` } }),
-                fetch(`${API_URL}/api/owner/stats`, { headers: { 'Authorization': `Bearer ${token} ` } }),
-                fetch(`${API_URL}/api/turfs/my-turfs`, { headers: { 'Authorization': `Bearer ${token} ` } })
+                fetch('http://localhost:5000/api/owner/bookings', { headers: { 'Authorization': `Bearer ${token} ` } }),
+                fetch('http://localhost:5000/api/owner/stats', { headers: { 'Authorization': `Bearer ${token} ` } }),
+                fetch('http://localhost:5000/api/turfs/my-turfs', { headers: { 'Authorization': `Bearer ${token} ` } })
             ]);
 
             if (bRes.ok && sRes.ok) {
@@ -53,7 +53,7 @@ const OwnerBookings = () => {
     const handleConfirm = async (id) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/bookings/confirm`, {
+            const res = await fetch('http://localhost:5000/api/bookings/confirm', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token} `,
@@ -71,17 +71,18 @@ const OwnerBookings = () => {
 
             } else {
                 const d = await res.json();
-                alert(d.message);
+                showError('Error', d.message);
             }
         } catch (e) { console.error(e); }
     };
 
     const handleCancel = async (id) => {
-        if (!window.confirm('Are you sure you want to reject/cancel this booking?')) return;
+        const confirmed = await showConfirm('Reject Booking?', 'Are you sure you want to reject/cancel this booking?');
+        if (!confirmed) return;
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/bookings/${id}`, {
+            const res = await fetch(`http://localhost:5000/api/bookings/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -111,7 +112,7 @@ const OwnerBookings = () => {
         if (!turfId || turfId === 'all') return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL}/api/turfs/${turfId}/games`, {
+            const res = await fetch(`http://localhost:5000/api/turfs/${turfId}/games`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -188,8 +189,9 @@ const OwnerBookings = () => {
                     unit_id: b.turf_unit_id
                 });
                 setShowSlotModal(true);
+                setShowSlotModal(true);
             } else {
-                alert(`Online Booking: ${b.guest_name}\nStatus: ${b.status}\nCannot edit online bookings here.`);
+                showWarning('Online Booking', `Guest: ${b.guest_name}\nStatus: ${b.status}\nCannot edit online bookings manually.`);
             }
         } else {
             setSlotAction('manual');
@@ -203,7 +205,7 @@ const OwnerBookings = () => {
 
         // Validation for New Bookings
         if ((slotAction === 'manual' || slotAction === 'block') && (!slotForm.turf_id || !slotForm.unit_id)) {
-            alert('Please select a Venue and Court/Unit');
+            showWarning('Selection Required', 'Please select a Venue and Court/Unit');
             return;
         }
 
@@ -212,7 +214,7 @@ const OwnerBookings = () => {
             // selectedSlot.iso is reliable
             const startTimeStr = selectedSlot.iso;
 
-            let url = `${API_URL}/api/owner/bookings/walk-in`;
+            let url = 'http://localhost:5000/api/owner/bookings/walk-in';
             let method = 'POST';
             let body = {};
 
@@ -228,7 +230,7 @@ const OwnerBookings = () => {
                     payment_status: 'paid'
                 };
             } else if (slotAction === 'block') {
-                url = `${API_URL}/api/owner/bookings/block`;
+                url = 'http://localhost:5000/api/owner/bookings/block';
                 body = {
                     turf_id: parseInt(slotForm.turf_id),
                     unit_id: parseInt(slotForm.unit_id),
@@ -238,7 +240,7 @@ const OwnerBookings = () => {
                 };
             } else if (slotAction.startsWith('edit-')) {
                 // Update Entry
-                url = `${API_URL}/api/owner/bookings/${selectedSlot.booking.booking_id}`;
+                url = `http://localhost:5000/api/owner/bookings/${selectedSlot.booking.booking_id}`;
                 method = 'PUT';
                 body = {
                     guest_name: slotAction === 'edit-block' ? `Blocked: ${slotForm.reason}` : slotForm.guest_name,
@@ -254,9 +256,9 @@ const OwnerBookings = () => {
                 setShowSlotModal(false);
                 fetchData(); // Refresh grid
             } else {
-                alert(data.message || 'Operation failed');
+                showError('Failed', data.message || 'Operation failed');
             }
-        } catch (e) { console.error(e); alert('Error submitting form'); }
+        } catch (e) { console.error(e); showError('Error', 'Error submitting form'); }
     };
 
     const [activeTab, setActiveTab] = useState('upcoming');

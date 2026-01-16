@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import API_URL from '../config';
 import { Trophy, Calendar, MapPin, DollarSign, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import { showSuccess, showError } from '../utils/SwalUtils';
 import './HostTournament.css';
 
 const HostTournament = () => {
@@ -46,14 +46,14 @@ const HostTournament = () => {
 
             // 1. Fetch My Turfs if owner
             if (role === 'owner') {
-                const res = await axios.get(`${API_URL}/api/turfs/my-turfs`, {
+                const res = await axios.get('http://localhost:5000/api/turfs/my-turfs', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setMyTurfs(res.data);
             }
 
             // 2. Fetch All Active Turfs for "External" selection
-            const resExt = await axios.get(`${API_URL}/api/turfs`);
+            const resExt = await axios.get('http://localhost:5000/api/turfs');
             setExternalTurfs(resExt.data);
 
         } catch (err) {
@@ -118,15 +118,16 @@ const HostTournament = () => {
                 daily_end_time: formData.dailyEndTime
             };
 
-            await axios.post(`${API_URL}/api/tournaments`, dataToSend, {
+            await axios.post('http://localhost:5000/api/tournaments', dataToSend, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            alert('Tournament Published Successfully!');
+
+            showSuccess('Published!', 'Tournament Published Successfully!');
             navigate('/tournaments'); // Go to list
         } catch (err) {
             console.error(err);
-            alert('Failed to publish tournament: ' + (err.response?.data?.message || err.message));
+            showError('Publish Failed', 'Failed to publish tournament: ' + (err.response?.data?.message || err.message));
         } finally {
             setLoading(false);
         }

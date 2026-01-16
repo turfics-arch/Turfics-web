@@ -9,8 +9,10 @@ import {
     Info, Star, Phone, MessageCircle, Ruler, Zap, Sun, Award, ThumbsUp
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import Loader from '../components/Loader';
+import { API_URL } from '../utils/api';
+import { showSuccess, showError, showConfirm, showWarning } from '../utils/SwalUtils';
 import './TurfDetails.css';
-import API_URL from '../config';
 
 // Fix Leaflet Default Icon
 let DefaultIcon = L.icon({
@@ -46,7 +48,21 @@ const TurfDetails = () => {
 
     // Image Catalog State
     const [activeImgIndex, setActiveImgIndex] = useState(0);
+    const [showModal, setShowModal] = useState(false); // Full screen modal state
+    const [suggestedTurfs, setSuggestedTurfs] = useState([]); // All suggested turfs
+    const [visibleCount, setVisibleCount] = useState(2); // Initially show 2
     useEffect(() => { setActiveImgIndex(0); }, [selectedUnit]);
+
+    // Auto-slide Gallery
+    useEffect(() => {
+        if (!selectedUnit || !selectedUnit.images || selectedUnit.images.length <= 1) return;
+
+        const interval = setInterval(() => {
+            setActiveImgIndex(prev => (prev === selectedUnit.images.length - 1 ? 0 : prev + 1));
+        }, 3000); // Change image every 3 seconds
+
+        return () => clearInterval(interval);
+    }, [selectedUnit]);
 
     // Fetch Turf Data
     useEffect(() => {
@@ -73,6 +89,24 @@ const TurfDetails = () => {
             }
         };
         fetchTurf();
+    }, [id]);
+
+    // Fetch Suggested Turfs
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            try {
+                const res = await fetch(`${API_URL}/api/turfs`);
+                if (res.ok) {
+                    const data = await res.json();
+                    // Filter current turf and take some random ones (e.g., up to 10)
+                    const others = data.filter(t => t.id !== parseInt(id));
+                    setSuggestedTurfs(others.sort(() => 0.5 - Math.random()).slice(0, 8));
+                }
+            } catch (err) {
+                console.error("Error fetching suggestions", err);
+            }
+        };
+        fetchSuggestions();
     }, [id]);
 
     // Fetch Slots when Unit or Date changes
@@ -130,8 +164,9 @@ const TurfDetails = () => {
 
         const token = localStorage.getItem('token');
         if (!token) {
-            alert("Please login to book a slot");
-            navigate('/login');
+            showWarning('Login Required', 'Please login to book a slot').then(() => {
+                navigate('/login');
+            });
             return;
         }
 
@@ -163,9 +198,15 @@ const TurfDetails = () => {
         const totalHours = selectedSlots.length * 0.5;
         const totalPrice = selectedSlots.reduce((a, s) => a + s.price, 0);
 
-        if (!window.confirm(`Hold ${batches.length > 1 ? batches.length + ' separate blocks ' : ''}for total ${totalHours} hours?\nTotal Price: ₹${totalPrice}`)) {
-            return;
-        }
+
+
+        const result = await showConfirm(
+            'Book Turf?',
+            `Book <b>${batches.length > 1 ? batches.length + ' separate blocks ' : ''}</b> for <b>${totalHours} hours</b>?<br/>Total Price: <b>₹${totalPrice}</b>`,
+            'Yes, Book it!'
+        );
+
+        if (!result.isConfirmed) return;
 
         setBookingStatus('loading');
         let successInfo = [];
@@ -201,6 +242,17 @@ const TurfDetails = () => {
                     });
                 } else {
                     const err = await response.json();
+
+                    // Specific fix for execution: Check for token expiration
+                    if (response.status === 401 || err.message === 'Token has expired') {
+                        setBookingStatus('idle');
+                        await showWarning('Session Expired', 'Your session has expired. Please login again.');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        navigate('/login');
+                        return; // Stop booking loop
+                    }
+
                     errors.push(err.message || 'Unknown error');
                 }
             }
@@ -215,9 +267,11 @@ const TurfDetails = () => {
                         bookingsInfo: successInfo
                     }
                 });
+
+
             } else {
                 setBookingStatus('error');
-                alert(`All holds failed.\nErrors: ${errors.join(', ')}`);
+                showError('Booking Failed', `Errors: ${errors.join(', ')}`);
                 // Refresh slots
                 const slotRes = await fetch(`${API_URL}/api/units/${selectedUnit.id}/slots?date=${selectedDate}`);
                 const slotData = await slotRes.json();
@@ -226,13 +280,13 @@ const TurfDetails = () => {
         } catch (error) {
             console.error('Booking Error:', error);
             setBookingStatus('error');
-            alert('Failed to connect to server');
+            showError('Error', 'Failed to connect to server');
         } finally {
             setBookingStatus('idle');
         }
     };
 
-    if (loading) return <div className="loading">Loading turf details...</div>;
+    if (loading) return <Loader text="Preparing Pitch..." />;
     if (!turfData) return <div className="error">Turf not found</div>;
 
     const { turf, games } = turfData;
@@ -342,7 +396,7 @@ const TurfDetails = () => {
                         <div className="section unit-gallery-catalog">
                             <h3>{selectedUnit.name} Gallery</h3>
 
-                            <div className="catalog-hero">
+                            <div className="catalog-hero" onClick={() => setShowModal(true)} style={{ cursor: 'pointer' }}>
                                 <img
                                     src={selectedUnit.images[activeImgIndex].url}
                                     alt={selectedUnit.images[activeImgIndex].caption}
@@ -421,14 +475,14 @@ const TurfDetails = () => {
 
                 <div className="sidebar">
                     {selectedUnit ? (
-                        <div className="section booking-card" style={{ position: 'sticky', top: '100px', padding: '0.8rem', borderRadius: '16px', background: '#111', border: '1px solid #333' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-                                <h3 style={{ margin: 0, fontSize: '1rem' }}>Book {selectedUnit.name}</h3>
+                        <div className="booking-card">
+                            <div className="booking-card-header">
+                                <h3>Book {selectedUnit.name}</h3>
                                 <div style={{ fontSize: '0.75rem', color: '#888' }}>{selectedDate}</div>
                             </div>
 
-                            {/* Date Strip (Extended Scroll - 90 Days) */}
-                            <div className="date-strip-compact" style={{ display: 'flex', gap: '0.6rem', overflowX: 'auto', paddingBottom: '0.8rem', marginBottom: '1.2rem', scrollbarWidth: 'thin' }}>
+                            {/* Date Strip */}
+                            <div className="date-strip-compact">
                                 {Array.from({ length: 90 }).map((_, i) => {
                                     const d = new Date();
                                     d.setDate(d.getDate() + i);
@@ -438,22 +492,14 @@ const TurfDetails = () => {
 
                                     return (
                                         <div key={dateStr} style={{ display: 'flex', flexDirection: 'column' }}>
-                                            {isFirstDayOfMonth && <div style={{ fontSize: '0.65rem', color: 'var(--primary)', marginBottom: '4px', fontWeight: 'bold' }}>{d.toLocaleDateString('en-US', { month: 'short' })}</div>}
+                                            {isFirstDayOfMonth && <div style={{ fontSize: '0.6rem', color: 'var(--primary)', marginBottom: '2px', fontWeight: 'bold' }}>{d.toLocaleDateString('en-US', { month: 'short' })}</div>}
                                             <button
+                                                className={`date-btn ${isSelected ? 'active' : ''}`}
                                                 onClick={() => setSelectedDate(dateStr)}
-                                                style={{
-                                                    flex: '0 0 auto', minWidth: '50px', height: '60px', borderRadius: '12px',
-                                                    background: isSelected ? 'var(--primary)' : '#222',
-                                                    border: isSelected ? 'none' : '1px solid #333',
-                                                    color: isSelected ? 'black' : '#888',
-                                                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                                    cursor: 'pointer', transition: 'all 0.2s', fontSize: '0.75rem',
-                                                    marginTop: isFirstDayOfMonth ? 0 : '14px' // Align with month label if present logic (simplified)
-                                                    // actually aligning might be tricky with flex. Let's keep it simple.
-                                                }}
+                                                style={{ marginTop: isFirstDayOfMonth ? 0 : '14px' }}
                                             >
-                                                <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>{d.getDate()}</span>
-                                                <span style={{ fontSize: '0.7rem' }}>{d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2)}</span>
+                                                <span className="day">{d.getDate()}</span>
+                                                <span className="weekday">{d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2)}</span>
                                             </button>
                                         </div>
                                     );
@@ -461,85 +507,63 @@ const TurfDetails = () => {
                             </div>
 
                             {/* Time Filters */}
-                            <div className="time-scale" style={{ display: 'flex', background: '#222', borderRadius: '12px', padding: '3px', marginBottom: '1rem' }}>
+                            <div className="time-filters">
                                 {['Morning', 'Afternoon', 'Evening', 'Night'].map(filter => (
                                     <button
                                         key={filter}
+                                        className={`time-filter-btn ${timeFilter === filter ? 'active' : ''}`}
                                         onClick={() => setTimeFilter(filter)}
-                                        style={{
-                                            flex: 1,
-                                            padding: '8px 0',
-                                            borderRadius: '10px',
-                                            background: timeFilter === filter ? '#333' : 'transparent',
-                                            color: timeFilter === filter ? 'white' : '#666',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            fontSize: '0.8rem',
-                                            fontWeight: timeFilter === filter ? 'bold' : 'normal',
-                                            transition: 'all 0.2s'
-                                        }}
                                     >
                                         {filter}
                                     </button>
                                 ))}
                             </div>
 
-                            {/* Slots Grid (Expanded Height & Standard Size) */}
-                            <div className="slots-grid-sidebar" style={{ minHeight: '300px', maxHeight: '550px', overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.3rem', padding: '2px' }}>
-                                {slots.filter(s => {
-                                    const h = new Date(s.start_iso).getHours();
-                                    if (timeFilter === 'Morning') return h >= 5 && h < 12;
-                                    if (timeFilter === 'Afternoon') return h >= 12 && h < 17;
-                                    if (timeFilter === 'Evening') return h >= 17 && h < 21;
-                                    if (timeFilter === 'Night') return h >= 21 || h < 5;
-                                    return true;
-                                }).length === 0 ? (
-                                    <div style={{ gridColumn: '1/-1', textAlign: 'center', color: '#555', padding: '3rem', fontSize: '0.9rem' }}>
-                                        No slots available in {timeFilter}
-                                    </div>
-                                ) : (
-                                    slots.filter(s => {
+                            {/* Scrollable Slots Area */}
+                            <div className="slots-scroll-area">
+                                <div className="slots-grid-sidebar">
+                                    {slots.filter(s => {
                                         const h = new Date(s.start_iso).getHours();
                                         if (timeFilter === 'Morning') return h >= 5 && h < 12;
                                         if (timeFilter === 'Afternoon') return h >= 12 && h < 17;
                                         if (timeFilter === 'Evening') return h >= 17 && h < 21;
                                         if (timeFilter === 'Night') return h >= 21 || h < 5;
                                         return true;
-                                    }).map(slot => {
-                                        const isSelected = selectedSlots.find(s => String(s.id) === String(slot.id));
-                                        return (
-                                            <button
-                                                key={slot.id}
-                                                disabled={slot.status === 'booked'}
-                                                onClick={() => toggleSlot(slot)}
-                                                style={{
-                                                    background: isSelected ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
-                                                    border: isSelected ? 'none' : '1px solid #333',
-                                                    color: isSelected ? 'black' : '#ccc',
-                                                    borderRadius: '12px',
-                                                    padding: '0.6rem 0.4rem',
-                                                    fontSize: '0.8rem',
-                                                    cursor: slot.status === 'booked' ? 'not-allowed' : 'pointer',
-                                                    opacity: slot.status === 'booked' ? 0.4 : 1,
-                                                    height: '60px',
-                                                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
-                                                }}
-                                            >
-                                                <div style={{ fontWeight: 'bold' }}>{slot.time.split(' ')[0]}</div>
-                                                <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>{slot.time.split(' ')[1]}</div>
-                                            </button>
-                                        );
-                                    })
-                                )}
+                                    }).length === 0 ? (
+                                        <div style={{ gridColumn: '1/-1', textAlign: 'center', color: '#555', padding: '2rem 1rem', fontSize: '0.8rem' }}>
+                                            No slots available in {timeFilter}
+                                        </div>
+                                    ) : (
+                                        slots.filter(s => {
+                                            const h = new Date(s.start_iso).getHours();
+                                            if (timeFilter === 'Morning') return h >= 5 && h < 12;
+                                            if (timeFilter === 'Afternoon') return h >= 12 && h < 17;
+                                            if (timeFilter === 'Evening') return h >= 17 && h < 21;
+                                            if (timeFilter === 'Night') return h >= 21 || h < 5;
+                                            return true;
+                                        }).map(slot => {
+                                            const isSelected = selectedSlots.find(s => String(s.id) === String(slot.id));
+                                            return (
+                                                <button
+                                                    key={slot.id}
+                                                    disabled={slot.status === 'booked'}
+                                                    onClick={() => toggleSlot(slot)}
+                                                    className={`slot-btn ${isSelected ? 'selected' : ''}`}
+                                                >
+                                                    <span className="time">{slot.time.split(' ')[0]}</span>
+                                                </button>
+                                            );
+                                        })
+                                    )}
+                                </div>
                             </div>
 
+                            {/* Footer Action */}
                             {selectedSlots.length > 0 && (
-                                <div className="booking-action" style={{ marginTop: '1rem', borderTop: '1px solid #333', paddingTop: '0.8rem' }}>
-                                    <div style={{ fontSize: '0.85rem', color: '#aaa', marginBottom: '0.5rem', textAlign: 'center' }}>
+                                <div className="booking-card-footer">
+                                    <div style={{ fontSize: '0.8rem', color: '#aaa', marginBottom: '0.5rem', textAlign: 'center' }}>
                                         {(() => {
                                             const totalHours = selectedSlots.length * 0.5;
-
-                                            // Check Logic
                                             const sorted = [...selectedSlots].sort((a, b) => new Date(a.start_iso) - new Date(b.start_iso));
                                             let hasShortBlock = false;
                                             if (sorted.length > 0) {
@@ -555,8 +579,8 @@ const TurfDetails = () => {
                                                 if (currentRun < 2) hasShortBlock = true;
                                             }
 
-                                            if (hasShortBlock) return <span style={{ color: '#eab308' }}>Min 1 hour per continuous block</span>;
-                                            return <span style={{ color: '#10b981' }}>{totalHours}h Selected • ₹{selectedSlots.reduce((a, s) => a + s.price, 0)}</span>;
+                                            if (hasShortBlock) return <span style={{ color: '#eab308' }}>Min 1h blocks</span>;
+                                            return <span style={{ color: '#10b981' }}>{totalHours}h • ₹{selectedSlots.reduce((a, s) => a + s.price, 0)}</span>;
                                         })()}
                                     </div>
 
@@ -565,65 +589,21 @@ const TurfDetails = () => {
                                         onClick={handleBookSlot}
                                         disabled={(() => {
                                             if (selectedSlots.length === 0 || bookingStatus === 'loading') return true;
-
-                                            // Validation Logic
                                             const sorted = [...selectedSlots].sort((a, b) => new Date(a.start_iso) - new Date(b.start_iso));
                                             if (sorted.length === 0) return true;
-
                                             let currentRun = 1;
                                             for (let i = 1; i < sorted.length; i++) {
                                                 if (new Date(sorted[i - 1].end_iso).getTime() === new Date(sorted[i].start_iso).getTime()) {
                                                     currentRun++;
                                                 } else {
-                                                    if (currentRun < 2) return true; // Short block found
+                                                    if (currentRun < 2) return true;
                                                     currentRun = 1;
                                                 }
                                             }
                                             return currentRun < 2;
                                         })()}
-                                        style={{
-                                            width: '100%', padding: '0.8rem', fontSize: '0.95rem', borderRadius: '50px',
-                                            background: (() => {
-                                                if (selectedSlots.length === 0) return '#333';
-
-                                                // Validation Logic for color
-                                                const sorted = [...selectedSlots].sort((a, b) => new Date(a.start_iso) - new Date(b.start_iso));
-                                                let isValid = true;
-                                                let currentRun = 1;
-                                                for (let i = 1; i < sorted.length; i++) {
-                                                    if (new Date(sorted[i - 1].end_iso).getTime() === new Date(sorted[i].start_iso).getTime()) {
-                                                        currentRun++;
-                                                    } else {
-                                                        if (currentRun < 2) isValid = false;
-                                                        currentRun = 1;
-                                                    }
-                                                }
-                                                if (currentRun < 2) isValid = false;
-
-                                                return isValid ? 'var(--primary)' : '#333';
-                                            })(),
-                                            color: (() => {
-                                                if (selectedSlots.length === 0) return '#666';
-
-                                                const sorted = [...selectedSlots].sort((a, b) => new Date(a.start_iso) - new Date(b.start_iso));
-                                                let isValid = true;
-                                                let currentRun = 1;
-                                                for (let i = 1; i < sorted.length; i++) {
-                                                    if (new Date(sorted[i - 1].end_iso).getTime() === new Date(sorted[i].start_iso).getTime()) {
-                                                        currentRun++;
-                                                    } else {
-                                                        if (currentRun < 2) isValid = false;
-                                                        currentRun = 1;
-                                                    }
-                                                }
-                                                if (currentRun < 2) isValid = false;
-
-                                                return isValid ? 'black' : '#666';
-                                            })(),
-                                            fontWeight: 'bold', cursor: 'pointer', border: 'none', transition: 'all 0.2s'
-                                        }}
                                     >
-                                        {bookingStatus === 'loading' ? 'Processing...' : 'Hold & Proceed'}
+                                        {bookingStatus === 'loading' ? 'Processing...' : 'Book Now'}
                                     </button>
                                 </div>
                             )}
@@ -637,22 +617,123 @@ const TurfDetails = () => {
                 </div>
             </div>
 
-            {/* Mobile Sticky Booking Footer */}
-            {selectedSlots.length > 0 && (
-                <div className="mobile-booking-footer">
-                    <div className="mbf-info">
-                        <span className="mbf-time">{selectedSlots.length * 0.5} Hours</span>
-                        <span className="mbf-price">₹{selectedSlots.reduce((a, s) => a + s.price, 0)}</span>
+            {/* Platform Stats Banner Full Width */}
+            <div className="stats-banner-full">
+                <div className="container">
+                    <div className="stats-grid-centered">
+                        <div className="stat-item">
+                            <h3>500+</h3>
+                            <p>Venues</p>
+                        </div>
+                        <div className="stat-divider"></div>
+                        <div className="stat-item">
+                            <h3>150K</h3>
+                            <p>Players</p>
+                        </div>
+                        <div className="stat-divider"></div>
+                        <div className="stat-item">
+                            <h3>4.8</h3>
+                            <p>App Rating</p>
+                        </div>
                     </div>
-                    <button
-                        className="mbf-btn"
-                        onClick={handleBookSlot}
-                        disabled={bookingStatus === 'loading'}
-                    >
-                        {bookingStatus === 'loading' ? 'Processing...' : 'Proceed'}
-                    </button>
+
+                    <div className="stats-tagline">
+                        <h2>One App. <span className="highlight">Every Sport.</span></h2>
+                        <p>Built for the pros, accessible to everyone.</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Suggested Turfs Section */}
+            {suggestedTurfs.length > 0 && (
+                <div className="container section suggestions-section" style={{ marginTop: '2rem', border: 'none', background: 'transparent', boxShadow: 'none' }}>
+                    <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>You Might Also Like</h3>
+                    <div className="suggestions-grid">
+                        {suggestedTurfs.slice(0, visibleCount).map(turf => (
+                            <div key={turf.id} className="suggestion-card" onClick={() => {
+                                navigate(`/turf/${turf.id}`);
+                                window.scrollTo(0, 0);
+                            }}>
+                                <div className="sug-img-wrapper">
+                                    <img src={turf.image_url || '/default-turf.jpg'} alt={turf.name} />
+                                    <div className="sug-rating">
+                                        <Star size={12} fill="currentColor" /> {turf.rating || 'New'}
+                                    </div>
+                                </div>
+                                <div className="sug-content">
+                                    <h4>{turf.name}</h4>
+                                    <p className="sug-loc"><MapPin size={14} /> {turf.location}</p>
+                                    <div className="sug-tags">
+                                        {(turf.amenities || '').split(',').slice(0, 2).map((bg, i) => (
+                                            <span key={i}>{bg.trim()}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {visibleCount < suggestedTurfs.length && (
+                        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+                            <button className="view-more-sug-btn" onClick={() => setVisibleCount(prev => prev + 4)}>
+                                See More Results
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
+
+
+            {/* Mobile Sticky Booking Footer */}
+            {
+                selectedSlots.length > 0 && (
+                    <div className="mobile-booking-footer">
+                        <div className="mbf-info">
+                            <span className="mbf-time">{selectedSlots.length * 0.5} Hours</span>
+                            <span className="mbf-price">₹{selectedSlots.reduce((a, s) => a + s.price, 0)}</span>
+                        </div>
+                        <button
+                            className="mbf-btn"
+                            onClick={handleBookSlot}
+                            disabled={bookingStatus === 'loading'}
+                        >
+                            {bookingStatus === 'loading' ? 'Processing...' : 'Proceed'}
+                        </button>
+                    </div>
+                )
+            }
+            {/* Full Screen Image Modal */}
+            {
+                showModal && selectedUnit && (
+                    <div className="fullscreen-overlay" onClick={() => setShowModal(false)}>
+                        <button className="fullscreen-close" onClick={() => setShowModal(false)}>×</button>
+
+                        <div className="fullscreen-content" onClick={(e) => e.stopPropagation()}>
+                            <img
+                                src={selectedUnit.images[activeImgIndex].url}
+                                alt={selectedUnit.images[activeImgIndex].caption}
+                                className="fullscreen-img"
+                            />
+                            {selectedUnit.images[activeImgIndex].caption && (
+                                <div className="fullscreen-caption">{selectedUnit.images[activeImgIndex].caption}</div>
+                            )}
+
+                            {selectedUnit.images.length > 1 && (
+                                <>
+                                    <button className="fs-nav prev" onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveImgIndex(prev => prev === 0 ? selectedUnit.images.length - 1 : prev - 1);
+                                    }}>&#10094;</button>
+                                    <button className="fs-nav next" onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveImgIndex(prev => prev === selectedUnit.images.length - 1 ? 0 : prev + 1);
+                                    }}>&#10095;</button>
+                                </>
+                            )}
+
+                        </div>
+                    </div>
+                )}
         </div>
     );
 };
