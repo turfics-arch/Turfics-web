@@ -64,6 +64,71 @@ def seed_all():
                 "owner_id": users["owner1"].id,
                 "amenities": "Pro Shop, Locker Rooms, Water",
                 "image_url": "https://images.unsplash.com/photo-1626224583764-84786c713608?w=800"
+            },
+            # --- COIMBATORE TURFS ---
+            {
+                "name": "Kovai TURF",
+                "location": "Avinashi Road, Peelamedu, Coimbatore",
+                "latitude": 11.0260,
+                "longitude": 77.0050,
+                "owner_id": users["owner1"].id,
+                "amenities": "Floodlights, Cafe, Parking",
+                "image_url": "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800"
+            },
+            {
+                "name": "ProZone Arena",
+                "location": "Saravanampatti, Coimbatore",
+                "latitude": 11.0800,
+                "longitude": 76.9958,
+                "owner_id": users["owner1"].id,
+                "amenities": "Multiple Courts, AC Lounge, Showers",
+                "image_url": "https://images.unsplash.com/photo-1577708577587-c83407983633?w=800"
+            },
+            {
+                "name": "Race Course Grounds",
+                "location": "Race Course, Coimbatore",
+                "latitude": 11.0001,
+                "longitude": 76.9750,
+                "owner_id": users["owner1"].id,
+                "amenities": "Jogging Track, Open Air, Vending Machines",
+                "image_url": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800"
+            },
+            {
+                "name": "Gandhipuram Sports Hub",
+                "location": "Gandhipuram, Coimbatore",
+                "latitude": 11.0180,
+                "longitude": 76.9650,
+                "owner_id": users["owner1"].id,
+                "amenities": "Central Location, 24/7 Access, Equipment Rental",
+                "image_url": "https://images.unsplash.com/photo-1589487391730-58f20eb2c308?w=800"
+            },
+            {
+                "name": "Tusker Football Club",
+                "location": "Thudiyalur, Coimbatore",
+                "latitude": 11.0768,
+                "longitude": 76.9258,
+                "owner_id": users["owner1"].id,
+                "amenities": "FIFA Standard Turf, Dugouts, Stands",
+                "image_url": "https://images.unsplash.com/photo-1487466365202-1afdb86c764e?w=800"
+            },
+            # --- OTHER CITIES ---
+            {
+                "name": "Marina Smash",
+                "location": "Marina Beach Road, Chennai",
+                "latitude": 13.0500,
+                "longitude": 80.2824,
+                "owner_id": users["owner1"].id,
+                "amenities": "Sea View, Pro Shop, Refreshments",
+                "image_url": "https://images.unsplash.com/photo-1626224583764-84786c713608?w=800"
+            },
+            {
+                "name": "Indiranagar Kicks",
+                "location": "100ft Road, Indiranagar, Bangalore",
+                "latitude": 12.9784,
+                "longitude": 77.6408,
+                "owner_id": users["owner1"].id,
+                "amenities": "Rooftop Arena, Sports Bar, Valet Parking",
+                "image_url": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800"
             }
         ]
 
@@ -76,6 +141,8 @@ def seed_all():
                 print(f"Created Turf: {t.name}")
                 
                 # Add Games & Units for this turf
+                
+                # Add Games & Units for this turf
                 if t.name == "City Sports Arena":
                     g = TurfGame(turf_id=t.id, sport_type="Football", default_price=1200)
                     db.session.add(g)
@@ -83,14 +150,45 @@ def seed_all():
                     u1 = TurfUnit(turf_game_id=g.id, name="Main Pitch", unit_type="PITCH", capacity=14, size="7-a-side")
                     db.session.add(u1)
                     print("Added Football game and Pitch to City Sports Arena")
-                else:
+                
+                elif t.name == "Smash Badminton Center" or t.name == "ProZone Arena" or t.name == "Marina Smash":
                     g = TurfGame(turf_id=t.id, sport_type="Badminton", default_price=400)
                     db.session.add(g)
                     db.session.commit()
                     u1 = TurfUnit(turf_game_id=g.id, name="Court 1", unit_type="COURT", capacity=4)
                     u2 = TurfUnit(turf_game_id=g.id, name="Court 2", unit_type="COURT", capacity=4)
                     db.session.add_all([u1, u2])
-                    print("Added Badminton game and Courts to Smash Center")
+                    print(f"Added Badminton game and Courts to {t.name}")
+
+                elif t.name == "Kovai TURF" or t.name == "Tusker Football Club" or t.name == "Indiranagar Kicks":
+                    g = TurfGame(turf_id=t.id, sport_type="Football", default_price=1500)
+                    db.session.add(g)
+                    db.session.commit()
+                    u1 = TurfUnit(turf_game_id=g.id, name="Turf A", unit_type="PITCH", capacity=14, size="7-a-side")
+                    u2 = TurfUnit(turf_game_id=g.id, name="Turf B", unit_type="PITCH", capacity=10, size="5-a-side")
+                    db.session.add_all([u1, u2])
+                    print(f"Added Football game and Pitches to {t.name}")
+
+                elif t.name == "Race Course Grounds":
+                    g = TurfGame(turf_id=t.id, sport_type="Cricket", default_price=2000)
+                    db.session.add(g)
+                    db.session.commit()
+                    u1 = TurfUnit(turf_game_id=g.id, name="Net 1", unit_type="NET", capacity=10)
+                    u2 = TurfUnit(turf_game_id=g.id, name="Net 2", unit_type="NET", capacity=10)
+                    db.session.add_all([u1, u2])
+                    print(f"Added Cricket game and Nets to {t.name}")
+                
+                elif t.name == "Gandhipuram Sports Hub":
+                    # Multi Sport
+                    g1 = TurfGame(turf_id=t.id, sport_type="Football", default_price=1000)
+                    g2 = TurfGame(turf_id=t.id, sport_type="Badminton", default_price=500)
+                    db.session.add_all([g1, g2])
+                    db.session.commit()
+                    u1 = TurfUnit(turf_game_id=g1.id, name="Futsal Court", unit_type="PITCH", capacity=10, size="5-a-side")
+                    u2 = TurfUnit(turf_game_id=g2.id, name="Shuttle Court", unit_type="COURT", capacity=4)
+                    db.session.add_all([u1, u2])
+                    print(f"Added Multi-Sport games to {t.name}")
+
                 db.session.commit()
             else:
                 print(f"Turf {t.name} exists.")
