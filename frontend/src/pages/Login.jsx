@@ -148,6 +148,8 @@ const Login = () => {
                 showSuccess('Registration Successful', 'Please login with your new account.');
             }
         } catch (err) {
+            console.error("Login Error Details:", err);
+            console.error("Response:", err.response);
             showError('Authentication Failed', err.response?.data?.message || 'Please check your credentials.');
         } finally {
             setIsLoading(false);
