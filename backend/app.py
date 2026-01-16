@@ -149,6 +149,27 @@ def setup_db():
     except Exception as e:
         return jsonify({"message": f"Error during setup: {str(e)}"}), 500
 
+@app.route('/api/admin/reset-seed-passwords', methods=['GET'])
+def reset_seed_passwords():
+    """Formally resets seeds passwords to password123 using the CURRENT server environment's hashing"""
+    try:
+        updated_count = 0
+        target_usernames = ["admin", "owner1", "coach1", "player1", "player2", "academy_admin"]
+        
+        for username in target_usernames:
+            user = User.query.filter_by(username=username).first()
+            if user:
+                # Force reset password
+                user.set_password("password123")
+                updated_count += 1
+                print(f"DEBUG RESET: Reset password for {username}")
+        
+        db.session.commit()
+        return jsonify({"message": f"Successfully reset passwords for {updated_count} seeded users to 'password123'"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": f"Error resetting passwords: {str(e)}"}), 500
+
 # Auth Routes
 @app.route('/api/auth/register', methods=['POST'])
 def register():
