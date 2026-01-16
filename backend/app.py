@@ -103,6 +103,21 @@ def health_check():
     except Exception as e:
         return jsonify({"status": "unhealthy", "database": str(e)}), 500
 
+@app.route('/api/admin/setup-db', methods=['GET'])
+def setup_db():
+    """Temporary route to initialize and seed the remote database"""
+    try:
+        # 1. Create all tables
+        db.create_all()
+        
+        # 2. Run seeding logic
+        from seed_all import seed_all
+        seed_all()
+        
+        return jsonify({"message": "Database setup and seeding completed successfully!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error during setup: {str(e)}"}), 500
+
 # Auth Routes
 @app.route('/api/auth/register', methods=['POST'])
 def register():
