@@ -115,7 +115,7 @@ const Tournaments = () => {
 
             {/* Filters & Search */}
             <div className="toolbar-section">
-                <div className="search-filter-mobile-wrapper">
+                <div className="search-and-filter-group">
                     <div className="search-bar">
                         <Search size={20} color="#666" />
                         <input
@@ -125,7 +125,7 @@ const Tournaments = () => {
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <button className="filter-btn-icon mobile-only" onClick={() => setShowFilters(true)}>
+                    <button className="filter-btn-icon" onClick={() => setShowFilters(true)}>
                         <Filter size={20} />
                     </button>
                 </div>
@@ -141,8 +141,6 @@ const Tournaments = () => {
                         </button>
                     ))}
                 </div>
-
-                <button className="filter-btn-icon desktop-only" onClick={() => setShowFilters(true)}><Filter size={20} /></button>
             </div>
 
             {/* Advanced Filter Modal */}

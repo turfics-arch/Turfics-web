@@ -568,31 +568,23 @@
         /* Increased height for better rectangle display */
     }
 
-    /* Mobile Toolbar Layout */
-    .search-filter-mobile-wrapper {
+    /* Mobile Toolbar */
+    .toolbar-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        height: auto;
+    }
+
+    .search-and-filter-group {
         display: flex;
         width: 100%;
         gap: 0.8rem;
     }
 
-    .mobile-only {
-        display: flex !important;
-    }
-
-    .desktop-only {
-        display: none !important;
-    }
-
-    .toolbar-section {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1.5rem;
-        height: auto;
-    }
-
     .search-bar {
         flex: 1;
-        width: 100%;
+        width: auto;
     }
 
     .sport-filters {
@@ -620,9 +612,11 @@
     }
 }
 
-/* Desktop Defaults */
-.search-filter-mobile-wrapper {
-    display: contents;
+/* Desktop Default & Wrapper */
+.search-and-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .mobile-only {
@@ -635,7 +629,7 @@
     justify-content: space-between;
     align-items: center;
     /* Ensures perfect vertical alignment */
-    gap: 1rem;
+    gap: 2rem;
     margin-bottom: 2rem;
     padding: 0 1rem;
     max-width: 1400px;
