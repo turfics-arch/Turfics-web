@@ -215,7 +215,7 @@
 .tournaments-grid {
     display: grid;
     /* Increased min width back up for wider cards */
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 1.5rem;
     padding: 0 2rem;
     max-width: 1400px;
@@ -596,7 +596,8 @@
 
     .tournaments-grid {
         grid-template-columns: 1fr;
-        padding: 0 1rem;
+        padding: 0 0.5rem;
+        /* Reduced padding to make cards wider on mobile */
     }
 
     .hosting-promo {
