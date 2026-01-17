@@ -685,6 +685,11 @@
     .stats-grid {
         grid-template-columns: 1fr;
     }
+
+    .share-btn-transparent {
+        margin-left: auto;
+        /* Push to right on mobile */
+    }
 }
 
 /* --- Modal & Wizard Enhanced --- */
