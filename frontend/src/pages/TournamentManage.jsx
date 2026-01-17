@@ -496,28 +496,32 @@ const TournamentManage = () => {
                                                     </div>
                                                 </div>
                                                 <div className="match-score">
-                                                    <input id={`s1-${m.id}`} type="text" defaultValue={m.score1} className="score-input" placeholder="0" />
-                                                    <span>-</span>
-                                                    <input id={`s2-${m.id}`} type="text" defaultValue={m.score2} className="score-input" placeholder="0" />
-                                                    <button className="update-btn"
-                                                        style={{ marginRight: '5px' }}
-                                                        onClick={() => handleUpdateScore(
-                                                            m.id,
-                                                            document.getElementById(`s1-${m.id}`).value,
-                                                            document.getElementById(`s2-${m.id}`).value,
-                                                            'completed'
-                                                        )}>
-                                                        Update
-                                                    </button>
-                                                    <button className="update-btn"
-                                                        style={{ background: '#00e676', color: 'black' }}
-                                                        onClick={() => handleEndMatch(
-                                                            m,
-                                                            document.getElementById(`s1-${m.id}`).value,
-                                                            document.getElementById(`s2-${m.id}`).value
-                                                        )}>
-                                                        End Match
-                                                    </button>
+                                                    <div className="score-group">
+                                                        <input id={`s1-${m.id}`} type="text" defaultValue={m.score1} className="score-input" placeholder="0" />
+                                                        <span>-</span>
+                                                        <input id={`s2-${m.id}`} type="text" defaultValue={m.score2} className="score-input" placeholder="0" />
+                                                    </div>
+                                                    <div className="match-actions">
+                                                        <button className="update-btn"
+                                                            style={{ marginRight: '5px' }}
+                                                            onClick={() => handleUpdateScore(
+                                                                m.id,
+                                                                document.getElementById(`s1-${m.id}`).value,
+                                                                document.getElementById(`s2-${m.id}`).value,
+                                                                'completed'
+                                                            )}>
+                                                            Update
+                                                        </button>
+                                                        <button className="update-btn"
+                                                            style={{ background: '#00e676', color: 'black' }}
+                                                            onClick={() => handleEndMatch(
+                                                                m,
+                                                                document.getElementById(`s1-${m.id}`).value,
+                                                                document.getElementById(`s2-${m.id}`).value
+                                                            )}>
+                                                            End Match
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -613,9 +617,9 @@ const TournamentManage = () => {
                                 </div>
                             )}
 
-                            <div className="registrations-table-container">
+                            <div className="reg-table-container">
                                 {tournament.registrations_list && tournament.registrations_list.length > 0 ? (
-                                    <table className="users-table">
+                                    <table className="reg-table">
                                         <thead>
                                             <tr>
                                                 <th>Team Name</th>
