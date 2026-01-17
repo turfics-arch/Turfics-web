@@ -135,8 +135,8 @@
 }
 
 .search-bar {
-    flex: 0 0 320px;
-    /* Slightly wider */
+    flex: 0 0 450px;
+    /* Expanded width */
     height: 50px;
     background: #1a1a1a;
     border: 1px solid #333;
@@ -162,15 +162,15 @@
 
 .sport-filters {
     display: flex;
-    gap: 2rem;
-    /* Increased gap within filters */
+    gap: 1.5rem;
+    /* Slightly reduced gap for tighter pack */
     overflow-x: auto;
     align-items: center;
     height: 100%;
     flex: 1;
-    /* Take up remaining space */
-    justify-content: center;
-    /* Center them in the middle space */
+    justify-content: flex-start;
+    /* Align to left (near search bar) */
+    padding-left: 1rem;
 }
 
 .filter-pill {
