@@ -337,6 +337,7 @@
     line-height: 1.1;
     background: linear-gradient(to right, #fff, #aaa);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 1rem 0;
 }
@@ -425,6 +426,7 @@
 .theme-gold h1 {
     background: linear-gradient(to right, #ffd700, #ffaa00);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 

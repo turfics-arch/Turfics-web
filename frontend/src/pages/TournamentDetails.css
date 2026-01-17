@@ -625,6 +625,10 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 2rem;
+        padding-top: 4rem;
+        /* Added spacing for mobile */
+        justify-content: flex-end;
+        /* Ensure it stays at bottom or moves down depending on height */
     }
 
     .td-status-box {
