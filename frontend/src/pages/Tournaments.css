@@ -564,15 +564,18 @@
         padding: 1rem;
     }
 
+    /* Mobile Toolbar Grid Layout */
     .toolbar-section {
         display: grid;
         grid-template-columns: 1fr auto;
+        /* Search takes remaining space, button takes auto */
         grid-template-areas:
             "search filter"
             "sportfilters sportfilters";
         gap: 1rem;
         height: auto;
         align-items: center;
+        padding: 0 1rem;
     }
 
     .search-bar {
@@ -590,6 +593,7 @@
         width: 100%;
         justify-content: flex-start;
         padding-bottom: 0.5rem;
+        overflow-x: auto;
     }
 
     .tournaments-grid {
@@ -609,12 +613,11 @@
     }
 }
 
-/* Toolbar Alignment */
+/* Toolbar Alignment - Desktop Default */
 .toolbar-section {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* Ensures perfect vertical alignment */
     gap: 1rem;
     margin-bottom: 2rem;
     padding: 0 1rem;
