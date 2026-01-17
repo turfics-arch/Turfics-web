@@ -270,6 +270,8 @@
     .mobile-search-container {
         flex: none;
         width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
         justify-content: space-between;
     }
 
@@ -283,6 +285,13 @@
         width: 50px;
         /* Square-ish */
         flex-shrink: 0;
+    }
+
+    .sport-filters {
+        width: 100%;
+        justify-content: center;
+        padding-bottom: 0.5rem;
+        /* Scrollbar space */
     }
 }
 
