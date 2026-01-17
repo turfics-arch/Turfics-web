@@ -115,14 +115,17 @@ const Tournaments = () => {
 
             {/* Filters & Search */}
             <div className="toolbar-section">
-                <div className="search-bar">
-                    <Search size={20} color="#666" />
-                    <input
-                        type="text"
-                        placeholder="Search tournaments by name, location..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                <div className="mobile-search-container">
+                    <div className="search-bar">
+                        <Search size={20} color="#666" />
+                        <input
+                            type="text"
+                            placeholder="Search tournaments..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <button className="filter-btn-icon" onClick={() => setShowFilters(true)}><Filter size={20} /></button>
                 </div>
 
                 <div className="sport-filters">
@@ -136,8 +139,6 @@ const Tournaments = () => {
                         </button>
                     ))}
                 </div>
-
-                <button className="filter-btn-icon" onClick={() => setShowFilters(true)}><Filter size={20} /></button>
             </div>
 
             {/* Advanced Filter Modal */}
