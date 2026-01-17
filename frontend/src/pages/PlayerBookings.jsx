@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import { Calendar, Clock, MapPin, CreditCard, AlertCircle, Star, PenTool, CheckCircle, X, Download, Share2 } from 'lucide-react';
+import { Calendar, Clock, MapPin, CreditCard, AlertCircle, Star, PenTool, CheckCircle, X, Download, Share2, Filter } from 'lucide-react';
 import Loader from '../components/Loader';
 import { showSuccess, showError, showConfirm, showWarning } from '../utils/SwalUtils';
 import html2canvas from 'html2canvas';
@@ -23,6 +23,18 @@ const PlayerBookings = () => {
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [selectedBookingDetails, setSelectedBookingDetails] = useState(null);
     const invoiceRef = React.useRef(null);
+
+    // New Filter States
+    const [showFilters, setShowFilters] = useState(false);
+    const [statusFilter, setStatusFilter] = useState('All');
+    const [sportFilter, setSportFilter] = useState('All');
+
+    // Derived State for Filtering
+    const filteredBookings = bookings.filter(booking => {
+        const matchesStatus = statusFilter === 'All' || booking.status.toLowerCase() === statusFilter.toLowerCase();
+        const matchesSport = sportFilter === 'All' || booking.sport === sportFilter;
+        return matchesStatus && matchesSport;
+    });
 
     const fetchBookings = async () => {
         setLoading(true);
@@ -184,31 +196,83 @@ const PlayerBookings = () => {
                 </header>
 
                 <div className="tabs-container">
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button
+                            className={`tab-btn ${activeTab === 'upcoming' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('upcoming')}
+                        >
+                            Upcoming
+                        </button>
+                        <button
+                            className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('history')}
+                        >
+                            History
+                        </button>
+                        <button
+                            className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('all')}
+                        >
+                            All
+                        </button>
+                    </div>
+
                     <button
-                        className={`tab-btn ${activeTab === 'upcoming' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('upcoming')}
+                        className={`filter-toggle-btn ${showFilters ? 'active' : ''}`}
+                        onClick={() => setShowFilters(!showFilters)}
+                        title="Toggle Filters"
                     >
-                        Upcoming
-                    </button>
-                    <button
-                        className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('history')}
-                    >
-                        History
-                    </button>
-                    <button
-                        className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('all')}
-                    >
-                        All
+                        <Filter size={20} />
+                        <span className="filter-text">Filter</span>
+                        {(statusFilter !== 'All' || sportFilter !== 'All') && <span className="filter-dot"></span>}
                     </button>
                 </div>
+
+                {showFilters && (
+                    <div className="filters-bar animate-slide-down">
+                        <div className="filter-group">
+                            <label>Status:</label>
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="filter-select"
+                            >
+                                <option value="All">All Status</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="pending">Pending</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+
+                        <div className="filter-group">
+                            <label>Sport:</label>
+                            <select
+                                value={sportFilter}
+                                onChange={(e) => setSportFilter(e.target.value)}
+                                className="filter-select"
+                            >
+                                <option value="All">All Sports</option>
+                                {/* Get unique sports from current bookings */}
+                                {[...new Set(bookings.map(b => b.sport))].map(sport => (
+                                    <option key={sport} value={sport}>{sport}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {(statusFilter !== 'All' || sportFilter !== 'All') && (
+                            <button className="clear-filters-btn" onClick={() => { setStatusFilter('All'); setSportFilter('All'); }}>
+                                <X size={14} /> Clear
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 <div className="bookings-list">
                     {loading ? (
                         <Loader text="Checking Schedule..." />
-                    ) : bookings.length > 0 ? (
-                        bookings.map(booking => (
+                    ) : filteredBookings.length > 0 ? (
+                        filteredBookings.map(booking => (
                             <div
                                 key={booking.id}
                                 className="booking-card"
@@ -253,8 +317,8 @@ const PlayerBookings = () => {
                     ) : (
                         <div className="empty-state">
                             <AlertCircle size={48} style={{ opacity: 0.5, marginBottom: '1rem' }} />
-                            <h3>No {activeTab} bookings found</h3>
-                            <p>Check out the discovery page to find new turfs!</p>
+                            <h3>No bookings found</h3>
+                            <p>Try adjusting your filters or check the discovery page!</p>
                         </div>
                     )}
                 </div>

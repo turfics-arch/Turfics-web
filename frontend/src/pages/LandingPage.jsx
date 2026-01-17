@@ -132,9 +132,10 @@ const LandingPage = () => {
                         <span onClick={() => navigate('/discovery')} className="nav-link" style={{ cursor: 'pointer' }}>Turfs</span>
                         <span onClick={() => navigate('/community')} className="nav-link" style={{ cursor: 'pointer' }}>Community</span>
                         <span onClick={() => navigate('/trainers')} className="nav-link" style={{ cursor: 'pointer' }}>Coaches</span>
-                        <span onClick={() => navigate('/teams')} className="nav-link" style={{ cursor: 'pointer' }}>Teams</span>
-                        <a href="#" className="nav-link">Partner with us</a>
-                        <a href="#" className="nav-link">Support</a>
+                        <span onClick={() => navigate('/tournaments')} className="nav-link" style={{ cursor: 'pointer' }}>Tournaments</span>
+                        <span onClick={() => navigate('/teams')} className="nav-link" style={{ cursor: 'pointer' }}>Play with Others</span>
+                        <span onClick={() => navigate('/about')} className="nav-link" style={{ cursor: 'pointer' }}>About Us</span>
+                        <span onClick={() => navigate('/support')} className="nav-link" style={{ cursor: 'pointer' }}>Support</span>
                     </div>
 
                     <div className="nav-cta desktop-only">
@@ -181,9 +182,10 @@ const LandingPage = () => {
                             <span onClick={() => navigate('/discovery')} className="mobile-nav-link">Turfs</span>
                             <span onClick={() => navigate('/community')} className="mobile-nav-link">Community</span>
                             <span onClick={() => navigate('/trainers')} className="mobile-nav-link">Coaches</span>
-                            <span onClick={() => navigate('/teams')} className="mobile-nav-link">Teams</span>
-                            <a href="#" className="mobile-nav-link">Partner with us</a>
-                            <a href="#" className="mobile-nav-link">Support</a>
+                            <span onClick={() => navigate('/tournaments')} className="mobile-nav-link">Tournaments</span>
+                            <span onClick={() => navigate('/teams')} className="mobile-nav-link">Play with Others</span>
+                            <span onClick={() => navigate('/about')} className="mobile-nav-link">About Us</span>
+                            <span onClick={() => navigate('/support')} className="mobile-nav-link">Support</span>
 
                             <div className="mobile-auth-buttons">
                                 {localStorage.getItem('token') ? (
@@ -451,7 +453,7 @@ const LandingPage = () => {
                         <div className="footer-links">
                             <div className="link-column">
                                 <h4>Company</h4>
-                                <a href="#">About Us</a>
+                                <a href="#" onClick={(e) => { e.preventDefault(); navigate('/about'); }}>About Us</a>
                                 <a href="#">Careers</a>
                                 <a href="#">Blog</a>
                             </div>
@@ -463,7 +465,7 @@ const LandingPage = () => {
                             </div>
                             <div className="link-column">
                                 <h4>Support</h4>
-                                <a href="#">Help Center</a>
+                                <a href="#" onClick={(e) => { e.preventDefault(); navigate('/support'); }}>Help Center</a>
                                 <a href="#">Privacy Policy</a>
                                 <a href="#">Terms of Service</a>
                             </div>

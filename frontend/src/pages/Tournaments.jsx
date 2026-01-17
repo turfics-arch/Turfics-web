@@ -240,20 +240,31 @@ const Tournaments = () => {
                                     </div>
                                 </div>
 
-                                <div className="card-footer">
-                                    <div className="slots-bar">
-                                        <div className="slots-text">
-                                            <span>Slots</span>
-                                            <strong>Available</strong>
-                                        </div>
-                                        <div className="progress-bg">
-                                            <div className="progress-fill" style={{ width: '50%' }}></div>
-                                        </div>
+                                <div className="card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                                    <div className="action-row" style={{ marginBottom: 0 }}>
+                                        <button className="view-btn" onClick={() => navigate(`/tournaments/${t.id}`)}>View Details</button>
+                                        <button
+                                            className="share-btn-transparent"
+                                            onClick={() => handleShare(t)}
+                                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', transform: 'translateY(8px)' }}
+                                        >
+                                            <Share2 size={20} color="#888" />
+                                        </button>
                                     </div>
 
-                                    <div className="action-row">
-                                        <button className="share-btn" onClick={() => handleShare(t)}><Share2 size={18} /></button>
-                                        <button className="view-btn" onClick={() => navigate(`/tournaments/${t.id}`)}>View Details</button>
+                                    <div className="slots-bar" style={{ marginBottom: 0, width: '120px' }}>
+                                        <div className="slots-text">
+                                            <span>Slots</span>
+                                            <strong>{Math.max(0, (t.max_teams || 0) - (t.registered_teams || 0))} Left</strong>
+                                        </div>
+                                        <div className="progress-bg">
+                                            <div
+                                                className="progress-fill"
+                                                style={{
+                                                    width: `${Math.min(100, Math.max(0, ((t.registered_teams || 0) / (t.max_teams || 1)) * 100))}%`
+                                                }}
+                                            ></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

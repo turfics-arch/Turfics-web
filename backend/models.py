@@ -75,7 +75,7 @@ class TurfGame(db.Model):
     
     # Pricing & Timing
     default_price = db.Column(db.Float, nullable=False)
-    slot_duration = db.Column(db.Integer, default=60)  # minutes
+    slot_duration = db.Column(db.Integer, default=30)  # minutes
     
     # Availability
     is_active = db.Column(db.Boolean, default=True)
@@ -268,6 +268,7 @@ class Tournament(db.Model):
     location = db.Column(db.String(200)) # Text location fallback
     
     sport = db.Column(db.String(50))
+    format = db.Column(db.String(20), default='team') # team, individual
     entry_fee = db.Column(db.Float)
     prize_pool = db.Column(db.Float)
     
@@ -300,6 +301,11 @@ class TournamentRegistration(db.Model):
     captain_name = db.Column(db.String(100))
     contact_number = db.Column(db.String(20))
     
+    # Detailed Registration Data
+    players_data = db.Column(db.Text) # JSON string of player details [{name, age}, ...]
+    consent = db.Column(db.Boolean, default=False)
+    payment_ref = db.Column(db.String(100)) # Payment Gateway Reference
+    
     payment_status = db.Column(db.String(20), default='pending') # pending, paid
     status = db.Column(db.String(20), default='pending') # pending, approved, rejected
     
@@ -322,6 +328,7 @@ class TournamentMatch(db.Model):
     scheduled_time = db.Column(db.DateTime)
     
     winner = db.Column(db.String(100))
+    notes = db.Column(db.String(255))
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -329,6 +336,7 @@ class TournamentAnnouncement(db.Model):
     __tablename__ = 'tournament_announcements'
     id = db.Column(db.Integer, primary_key=True)
     tournament_id = db.Column(db.Integer, db.ForeignKey('tournaments.id'), nullable=False)
+    title = db.Column(db.String(100))
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

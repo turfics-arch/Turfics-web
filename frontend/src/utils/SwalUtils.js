@@ -53,19 +53,20 @@ export const showConfirm = (title, message, confirmText = 'Yes, Proceed!') => {
     });
 };
 
-export const showInput = async (title, message, placeholder = '') => {
+export const showInput = async (title, message, placeholder = '', options = {}) => {
     const result = await Swal.fire({
         ...commonConfig,
         title: title,
         text: message,
-        input: 'text',
+        input: 'text', // Default, can be overridden by options
         inputPlaceholder: placeholder,
         showCancelButton: true,
         inputValidator: (value) => {
             if (!value) {
                 return 'You need to write something!';
             }
-        }
+        },
+        ...options // Merge custom options (like input type 'select', inputOptions, etc.)
     });
     return result; // result.value contains the input
 };

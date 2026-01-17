@@ -47,6 +47,7 @@
     flex-direction: column;
     align-items: center;
     /* Ensure button inside is centered */
+    margin-top: 5rem;
 }
 
 .tf-hero h1 {

@@ -1,15 +1,20 @@
 import os
 import requests
+import urllib.parse
 import string
 import random
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, set_access_cookies
-from datetime import datetime, timedelta
 
-from models import db, bcrypt, User, Turf, TurfGame, TurfUnit, UnitImage, Team, Booking, team_members, Coach, CoachBatch, CoachBooking, Academy, AcademyProgram, AcademyBatch, AcademyEnrollment, Tournament, TournamentRegistration, Review, Community, CommunityMember, CommunityMessage, MatchRequest, MatchJoinRequest
+load_dotenv() # Load before using environment variables
+
+from models import db, bcrypt, User, Turf, TurfGame, TurfUnit, UnitImage, Team, Booking, team_members, Coach, CoachBatch, CoachBooking, Academy, AcademyProgram, AcademyBatch, AcademyEnrollment, Tournament, TournamentRegistration, TournamentMatch, TournamentAnnouncement, Review, Community, CommunityMember, CommunityMessage, MatchRequest, MatchJoinRequest
+import pandas as pd
+import io
 import google.generativeai as genai
 
 # OTP Store (In-memory for demo purposes)
@@ -39,14 +44,32 @@ try:
     
     If you don't know, ask clarifying questions. Keep responses concise."""
     
-    chat_model = genai.GenerativeModel('gemini-2.5-flash-lite', system_instruction=SYSTEM_PROMPT)
+    # Try multiple models for the global chat_model
+    global_models = [
+        'gemini-2.0-flash-lite', 
+        'gemini-2.5-flash-lite',
+        'gemini-flash-lite-latest',
+        'gemini-2.0-flash', 
+        'gemini-1.5-flash'
+    ]
+    chat_model = None
+    for m_name in global_models:
+        try:
+            print(f"DEBUG: Initializing global model {m_name}...")
+            chat_model = genai.GenerativeModel(m_name, system_instruction=SYSTEM_PROMPT)
+            # Basic validation: small ping
+            chat_model.generate_content("ping", generation_config={"max_output_tokens": 1})
+            print(f"DEBUG: Successfully initialized {m_name}")
+            break
+        except Exception as e:
+            print(f"DEBUG: Failed to initialize {m_name}: {str(e)}")
+            chat_model = None
+
 except Exception as e:
     print(f"Gemini Init Error: {e}")
     chat_model = None
 
 
-
-load_dotenv()
 
 app = Flask(__name__)
 # Allow CORS for all domains for development
@@ -1431,7 +1454,7 @@ def get_unit_slots(unit_id):
                 'id': slot_start.strftime('%H:%M'),
                 'time': display_time,
                 'status': status,
-                'price': unit.price_override or game.default_price,
+                'price': (unit.price_override or game.default_price) * (duration_min / 60.0),
                 'start_iso': slot_start.isoformat(),
                 'end_iso': slot_end.isoformat()
             })
@@ -2648,58 +2671,173 @@ def create_tournament():
             end_date=datetime.fromisoformat(data['end_date'].replace('Z', '+00:00')) if data.get('end_date') else None,
             location=data.get('location'),
             max_teams=int(data.get('max_teams', 0)),
-            image_url=data.get('image_url'),
             description=data.get('description'),
             rules=data.get('rules'),
+            image_url=data.get('image_url'),
             venue_type=venue_type,
-            turf_id=data.get('turf_id') if venue_type == 'own_turf' else None, # Link if own turf
-            status='published' # Default to published for now
+            booking_turf_id=turf_id,
+            booking_id=booking_id
         )
         
         db.session.add(new_tournament)
-        db.session.add(new_tournament)
-        db.session.flush() # Get ID
-
-        # Auto-create "BOOKING" for the duration
-        if new_tournament.turf_id:
-            start = datetime.strptime(data.get('start_date'), '%Y-%m-%d')
-            end = datetime.strptime(data.get('end_date'), '%Y-%m-%d')
-            
-            # Parse custom times (HH:MM)
-            start_str = data.get('daily_start_time', '09:00').split(':')
-            end_str = data.get('daily_end_time', '18:00').split(':')
-            start_h, start_m = int(start_str[0]), int(start_str[1])
-            end_h, end_m = int(end_str[0]), int(end_str[1])
-            
-            delta = end - start
-            
-            for i in range(delta.days + 1):
-                day = start + timedelta(days=i)
-                
-                b = Booking(
-                    user_id=current_user['id'],
-                    turf_id=new_tournament.turf_id,
-                    turf_unit_id=1,
-                    start_time=day.replace(hour=start_h, minute=start_m),
-                    end_time=day.replace(hour=end_h, minute=end_m),
-                    total_price=0, # Owner/Organizer booking
-                    status='confirmed',
-                    payment_status='paid',
-                    booking_source='tournament_host'
-                )
-                db.session.add(b)
-
         db.session.commit()
         
-        return jsonify({
-            'message': 'Tournament created successfully',
-            'tournament_id': new_tournament.id
-        }), 201
+        return jsonify({'message': 'Tournament created', 'id': new_tournament.id}), 201
         
     except Exception as e:
         db.session.rollback()
-        print(f"Tournament Creation Error: {e}")
-        return jsonify({'message': f'Error creating tournament: {str(e)}'}), 500
+        print(f"Error creating tournament: {e}")
+        return jsonify({'message': str(e)}), 500
+
+@app.route('/api/tournaments/<int:id>', methods=['PUT'])
+@jwt_required()
+def update_tournament(id):
+    current_user = get_current_user()
+    tournament = Tournament.query.get_or_404(id)
+    
+    if tournament.organizer_id != current_user['id']:
+        return jsonify({'message': 'Unauthorized'}), 403
+        
+    data = request.get_json()
+    
+    try:
+        if 'status' in data:
+            tournament.status = data['status']
+        if 'name' in data:
+            tournament.name = data['name']
+        # Add other fields as needed
+        
+        db.session.commit()
+        return jsonify({'message': 'Tournament updated'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': str(e)}), 500
+
+
+@app.route('/api/ai/generate-poster', methods=['POST'])
+@jwt_required()
+def generate_poster_content():
+    import random
+    import urllib.parse
+    import json
+    import re
+    
+    data = request.get_json()
+    
+    if not chat_model:
+        return jsonify({'message': 'AI service unavailable'}), 503
+        
+    tone = data.get('tone')
+    # Use custom tone if provided, otherwise default
+    if tone == 'Other' and data.get('custom_tone'):
+        tone = data.get('custom_tone')
+        
+    # Construct Prompt
+    prompt = f"""
+    You are an expert sports marketer. Create high-energy poster content for a tournament.
+    
+    Tournament Details:
+    - Name: {data.get('name')}
+    - Sport: {data.get('sport')}
+    - Entry Fee: {data.get('entry_fee')}
+    - Prize Pool: {data.get('prize_pool')}
+    - Date: {data.get('start_date')}
+    - Tone: {tone}
+    
+    Output strictly legitimate JSON with these fields:
+    {{
+        "headline": "A short, punchy, 3-5 word main title (e.g. 'BATTLE OF THE TURF')",
+        "subheadline": "A compelling 1-sentence hook",
+        "highlights": ["Short bullet 1 (e.g. '5v5 Knockout')", "Short bullet 2 (e.g. 'Free Jeresy')", "Short bullet 3"],
+        "call_to_action": "A strong CTA button text (e.g. 'REGISTER NOW')",
+        "theme_suggestion": "One of: 'neon-green', 'fire-orange', 'midnight-blue', 'electric-purple'"
+    }}
+    Do not use markdown formatting like ```json ... ```. Just return the JSON string.
+    """
+    
+    try:
+        # Fallback list of models (Prioritizing Lite/Small models)
+        models_to_try = [
+            'gemini-2.0-flash-lite', 
+            'gemini-2.5-flash-lite', 
+            'gemini-flash-lite-latest',
+            'gemini-1.5-flash'
+        ]
+        last_err = "No models initialized"
+        print(f"DEBUG: Starting Poster Gen loop. models_to_try: {models_to_try}")
+        
+        for model_name in models_to_try:
+            try:
+                print(f"DEBUG: Trying model {model_name}...")
+                temp_model = genai.GenerativeModel(model_name, system_instruction=SYSTEM_PROMPT)
+                response = temp_model.generate_content(prompt)
+                text_response = response.text
+                print(f"DEBUG: Raw AI Response ({model_name}): {text_response}")
+                
+                # Robust cleaning: find the first { and last }
+                clean_text = text_response.strip()
+                match = re.search(r'(\{.*\})', clean_text, re.DOTALL)
+                if match:
+                    json_str = match.group(1)
+                else:
+                    json_str = clean_text.replace('```json', '').replace('```', '').strip()
+                    
+                content = json.loads(json_str)
+                
+                # Handle AI Image Generation URL if prompt is provided
+                if data.get('image_prompt'):
+                    encoded_prompt = urllib.parse.quote(f"{data.get('image_prompt')} {data.get('sport')} cinematic lighting high quality")
+                    content['background_image'] = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=800&height=1200&nologo=true&seed={random.randint(1, 1000)}"
+                
+                return jsonify(content), 200
+            except Exception as inner_e:
+                print(f"DEBUG: Model {model_name} failed: {inner_e}")
+                last_err = inner_e
+                continue
+        
+        # If we reach here, all Gemini models failed. Try Pollinations.ai as a final resort (Free, No Key)
+        print("DEBUG: All Gemini models failed. Trying Pollinations.ai fallback...")
+        try:
+            # Simplest Pollinations GET call is most robust
+            # Use a slightly shorter prompt for URL safety
+            lite_prompt = f"Tournament Poster JSON: {data.get('name')}, {data.get('sport')}, {data.get('start_date')}. Tone: {tone}. Fields: headline, subheadline, highlights, call_to_action, theme_suggestion."
+            encoded_poll_prompt = urllib.parse.quote(lite_prompt)
+            poll_url = f"https://text.pollinations.ai/{encoded_poll_prompt}?model=openai&json=true"
+            poll_res = requests.get(poll_url, timeout=15)
+            
+            if poll_res.status_code == 200:
+                print(f"DEBUG: Pollinations.ai response: {poll_res.text[:100]}...")
+                text_response = poll_res.text
+                # Robust cleaning: find the first { and last }
+                clean_text = text_response.strip()
+                match = re.search(r'(\{.*\})', clean_text, re.DOTALL)
+                if match:
+                    json_str = match.group(1)
+                else:
+                    json_str = clean_text.replace('```json', '').replace('```', '').strip()
+                
+                content = json.loads(json_str)
+                if data.get('image_prompt'):
+                    encoded_img_prompt = urllib.parse.quote(f"{data.get('image_prompt')} {data.get('sport')} cinematic lighting high quality")
+                    content['background_image'] = f"https://image.pollinations.ai/prompt/{encoded_img_prompt}?width=800&height=1200&nologo=true&seed={random.randint(1, 1000)}"
+                
+                return jsonify(content), 200
+        except Exception as poll_e:
+            print(f"DEBUG: Pollinations.ai fallback failed: {poll_e}")
+            last_err = f"Pollinations failed: {str(poll_e)}"
+
+        # If we reach here, EVERYTHING failed
+        print(f"DEBUG: Poster Gen Final Failure. Last Error: {last_err}")
+        return jsonify({'message': f'AI Service Unavailable. Tried Gemini (Quota Hit) and Fallback: {str(last_err)}'}), 503
+        
+    except json.JSONDecodeError as je:
+        print(f"JSON Parse Error: {je}")
+        return jsonify({'message': 'Failed to parse AI response. Try again.'}), 500
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"AI Gen Error: {e}")
+        return jsonify({'message': f'Failed to generate content: {str(e)}'}), 500
 
 @app.route('/api/tournaments', methods=['GET'])
 def get_tournaments():
@@ -2728,7 +2866,9 @@ def get_tournaments():
             'entry_fee': t.entry_fee,
             'prize_pool': t.prize_pool,
             'image_url': t.image_url,
-            'status': t.status
+            'status': t.status,
+            'max_teams': t.max_teams,
+            'registered_teams': len(t.registrations)
         })
         
     return jsonify(result), 200
@@ -2746,12 +2886,15 @@ def get_tournament_detail(tournament_id):
         'score1': m.score_team1,
         'score2': m.score_team2,
         'status': m.status,
+        'winner': m.winner,
+        'notes': m.notes,
         'time': m.scheduled_time.strftime('%H:%M %d/%m') if m.scheduled_time else None
     } for m in t.matches]
     
     # Announcements
     announcements = [{
         'id': a.id,
+        'title': a.title,
         'content': a.content,
         'created_at': a.created_at.strftime('%Y-%m-%d %H:%M')
     } for a in t.announcements]
@@ -2800,19 +2943,27 @@ def register_tournament_team(tournament_id):
     if existing:
         return jsonify({'message': 'You are already registered'}), 400
         
-    # Check cap
+    # Check caps and duplicates
     current_count = TournamentRegistration.query.filter_by(tournament_id=t.id).count()
     if t.max_teams and current_count >= t.max_teams:
         return jsonify({'message': 'Tournament is full'}), 400
         
+    import json
+    players_data_json = json.dumps(data.get('players', []))
+    
     registration = TournamentRegistration(
         tournament_id=t.id,
         user_id=current_user['id'],
         team_name=data.get('team_name'),
         captain_name=data.get('captain_name', current_user['username']),
         contact_number=data.get('contact_number'),
+        
+        players_data=players_data_json,
+        consent=data.get('consent', False),
+        payment_ref=data.get('payment_ref'),
+        
         status='pending', # Payment pending usually
-        payment_status='pending'
+        payment_status='paid' if data.get('payment_ref') else 'pending'
     )
     
     db.session.add(registration)
@@ -2898,6 +3049,106 @@ def update_registration_status(reg_id):
     db.session.commit()
     return jsonify({'message': 'Registration updated'}), 200
 
+@app.route('/api/tournaments/<int:tournament_id>/registrations/manual', methods=['POST'])
+@jwt_required()
+def manual_add_registration(tournament_id):
+    current_user = get_current_user()
+    t = Tournament.query.get_or_404(tournament_id)
+    
+    if t.organizer_id != current_user['id']:
+        return jsonify({'message': 'Unauthorized'}), 403
+        
+    data = request.get_json()
+    if not data.get('team_name') or not data.get('captain_name') or not data.get('contact_number'):
+        return jsonify({'message': 'Missing required fields'}), 400
+        
+    # Check duplicate
+    existing = TournamentRegistration.query.filter_by(tournament_id=t.id, team_name=data['team_name']).first()
+    if existing:
+        return jsonify({'message': 'Team already registered'}), 400
+        
+    reg = TournamentRegistration(
+        tournament_id=t.id,
+        user_id=None, # Manually added
+        team_name=data['team_name'],
+        captain_name=data['captain_name'],
+        contact_number=data['contact_number'],
+        players=data.get('players', []),
+        status='approved', 
+        payment_status='paid' 
+    )
+    db.session.add(reg)
+    db.session.commit()
+    return jsonify({'message': 'Team added successfully'}), 201
+
+@app.route('/api/tournaments/<int:tournament_id>/registrations/bulk', methods=['POST'])
+@jwt_required()
+def bulk_add_registration(tournament_id):
+    current_user = get_current_user()
+    t = Tournament.query.get_or_404(tournament_id)
+    
+    if t.organizer_id != current_user['id']:
+        return jsonify({'message': 'Unauthorized'}), 403
+        
+    if 'file' not in request.files:
+        return jsonify({'message': 'No file part'}), 400
+        
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'message': 'No selected file'}), 400
+        
+    try:
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(file)
+        elif file.filename.endswith(('.xls', '.xlsx')):
+            df = pd.read_excel(file)
+        else:
+            return jsonify({'message': 'Invalid file type. Use CSV or Excel.'}), 400
+            
+        success_count = 0
+        errors = []
+        
+        required_cols = ['Team Name', 'Captain Name', 'Contact Number']
+        if not all(col in df.columns for col in required_cols):
+             return jsonify({'message': f'Missing columns. Required: {", ".join(required_cols)}'}), 400
+             
+        for index, row in df.iterrows():
+            team_name = str(row['Team Name']).strip()
+            if not team_name: continue
+            
+            existing = TournamentRegistration.query.filter_by(tournament_id=t.id, team_name=team_name).first()
+            if existing:
+                errors.append(f"Row {index+1}: Team '{team_name}' already exists.")
+                continue
+                
+            players_raw = row.get('Players', '')
+            if pd.isna(players_raw):
+                players_list = []
+            else:
+                players_list = [p.strip() for p in str(players_raw).split(',')]
+            
+            reg = TournamentRegistration(
+                tournament_id=t.id,
+                user_id=None,
+                team_name=team_name,
+                captain_name=str(row['Captain Name']),
+                contact_number=str(row['Contact Number']),
+                players=players_list,
+                status='approved',
+                payment_status='paid'
+            )
+            db.session.add(reg)
+            success_count += 1
+            
+        db.session.commit()
+        return jsonify({
+            'message': f'Processed {success_count} teams successfully.',
+            'errors': errors
+        }), 201
+        
+    except Exception as e:
+        return jsonify({'message': f'Error processing file: {str(e)}'}), 500
+
 
 
 @app.route('/api/tournaments/<int:tournament_id>/announcements', methods=['POST'])
@@ -2912,6 +3163,7 @@ def post_announcement(tournament_id):
     data = request.get_json()
     announ = TournamentAnnouncement(
         tournament_id=t.id,
+        title=data.get('title'),
         content=data.get('content')
     )
     db.session.add(announ)
@@ -2933,7 +3185,8 @@ def add_match(tournament_id):
         round_name=data.get('round_name'),
         team1_name=data.get('team1'),
         team2_name=data.get('team2'),
-        scheduled_time=datetime.fromisoformat(data['time'].replace('Z', '+00:00')) if data.get('time') else None
+        scheduled_time=datetime.fromisoformat(data['time'].replace('Z', '+00:00')) if data.get('time') else None,
+        notes=data.get('notes')
     )
     db.session.add(match)
     db.session.commit()
@@ -2958,6 +3211,35 @@ def update_score(match_id):
         
     db.session.commit()
     return jsonify({'message': 'Score updated'}), 200
+
+@app.route('/api/tournaments/announcements/<int:ann_id>', methods=['DELETE'])
+@jwt_required()
+def delete_announcement(ann_id):
+    current_user = get_current_user()
+    ann = TournamentAnnouncement.query.get_or_404(ann_id)
+    t = Tournament.query.get(ann.tournament_id)
+    
+    if t.organizer_id != current_user['id']:
+        return jsonify({'message': 'Unauthorized'}), 403
+        
+    db.session.delete(ann)
+    db.session.commit()
+    return jsonify({'message': 'Announcement deleted'}), 200
+
+@app.route('/api/tournaments/matches/<int:match_id>', methods=['DELETE'])
+@jwt_required()
+def delete_match(match_id):
+    current_user = get_current_user()
+    match = TournamentMatch.query.get_or_404(match_id)
+    t = Tournament.query.get(match.tournament_id)
+    
+    if t.organizer_id != current_user['id']:
+        return jsonify({'message': 'Unauthorized'}), 403
+        
+    db.session.delete(match)
+    db.session.commit()
+    return jsonify({'message': 'Match deleted'}), 200
+
 
 
 
@@ -3500,27 +3782,49 @@ def pay_match_fee(req_id):
 
 @app.route('/api/support/chat', methods=['POST'])
 def support_chat():
-    if not chat_model:
-        return jsonify({'reply': "I'm currently undergoing maintenance. Please try again later."}), 503
-        
     data = request.get_json()
     user_msg = data.get('message', '')
     history = data.get('history', []) # list of {role: 'user/bot', text: '...'}
     
-    # Convert history to Gemini format (user/model)
-    chat_history = []
-    for h in history:
-        role = 'user' if h['role'] == 'user' else 'model'
-        chat_history.append({'role': role, 'parts': [h['text']]})
-        
-    try:
-        chat = chat_model.start_chat(history=chat_history)
-        response = chat.send_message(user_msg)
-        return jsonify({'reply': response.text})
-    except Exception as e:
-        print(f"Chat Error: {e}")
-        return jsonify({'reply': "I encountered an error processing your request. Please try again."}), 500
+    # SYSTEM PROMPT as text for fallbacks
+    alex_prompt = """You are Alex, the Senior Service Team Lead at Turfics.
+    Professional, empathetic, efficient. You handle bookings, payments, and platform help."""
 
+    # TRY GEMINI FIRST
+    if chat_model:
+        try:
+            # Convert history to Gemini format (user/model)
+            chat_history = []
+            for h in history:
+                role = 'user' if h['role'] == 'user' else 'model'
+                chat_history.append({'role': role, 'parts': [h['text']]})
+                
+            chat = chat_model.start_chat(history=chat_history)
+            response = chat.send_message(user_msg)
+            return jsonify({'reply': response.text})
+        except Exception as e:
+            print(f"DEBUG: Support Gemini Error: {e}")
+            # Fall through to Pollinations
+            
+    # FALLBACK: Pollinations.ai (Free, No Key)
+    print("DEBUG: Support Chat falling back to Pollinations.ai...")
+    try:
+        # Simplest Pollinations GET call with history flattened
+        history_text = "\n".join([f"{('User' if h['role']=='user' else 'Assistant')}: {h['text']}" for h in history])
+        full_query = f"{alex_prompt}\n\nHistory:\n{history_text}\nUser: {user_msg}\nResponse:"
+        
+        encoded_query = urllib.parse.quote(full_query)
+        poll_url = f"https://text.pollinations.ai/{encoded_query}?model=openai"
+        poll_res = requests.get(poll_url, timeout=15)
+        
+        if poll_res.status_code == 200:
+            return jsonify({'reply': poll_res.text})
+    except Exception as poll_e:
+        print(f"DEBUG: Support Pollinations Fallback Error: {poll_e}")
+
+    return jsonify({'reply': "I'm having trouble connecting to my service right now. Please try again later."}), 503
+
+# Added notes column to TournamentMatch
 if __name__ == '__main__':
     # Force reload
     app.run(debug=True, port=5000)
