@@ -244,8 +244,8 @@
 }
 
 .card-image {
-    height: 180px;
-    /* Reduced height */
+    height: 220px;
+    /* Increased height for better visual */
     background-size: cover;
     background-position: center;
     position: relative;
@@ -261,8 +261,9 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 60%;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    height: 70%;
+    /* More gradual fade */
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95), transparent);
 }
 
 .sport-badge {
@@ -564,27 +565,35 @@
     }
 
     .toolbar-section {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1.5rem;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "search filter"
+            "sportfilters sportfilters";
+        gap: 1rem;
         height: auto;
+        align-items: center;
     }
 
     .search-bar {
+        grid-area: search;
         flex: none;
         width: 100%;
     }
 
+    .filter-btn-icon {
+        grid-area: filter;
+    }
+
     .sport-filters {
+        grid-area: sportfilters;
         width: 100%;
         justify-content: flex-start;
         padding-bottom: 0.5rem;
-        /* Scrollbar space */
     }
 
     .tournaments-grid {
         grid-template-columns: 1fr;
-        /* Single column */
         padding: 0 1rem;
     }
 
