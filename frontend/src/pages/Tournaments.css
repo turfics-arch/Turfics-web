@@ -540,21 +540,59 @@
     .tournaments-hero {
         flex-direction: column;
         text-align: center;
+        padding: 2rem 1rem;
+    }
+
+    .tournaments-hero h1 {
+        font-size: 2.5rem;
+        /* Reduced from 4.5rem */
     }
 
     .hero-actions {
-        justify-content: center;
+        flex-direction: column;
+        width: 100%;
+        gap: 0.5rem;
+        background: transparent;
+        border: none;
+    }
+
+    .tab-pill {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem;
     }
 
     .toolbar-section {
         flex-direction: column;
         align-items: stretch;
+        gap: 1.5rem;
+        height: auto;
+    }
+
+    .search-bar {
+        flex: none;
+        width: 100%;
+    }
+
+    .sport-filters {
+        width: 100%;
+        justify-content: flex-start;
+        padding-bottom: 0.5rem;
+        /* Scrollbar space */
+    }
+
+    .tournaments-grid {
+        grid-template-columns: 1fr;
+        /* Single column */
+        padding: 0 1rem;
     }
 
     .hosting-promo {
         flex-direction: column;
         text-align: center;
         gap: 2rem;
+        padding: 2rem 1rem;
     }
 
     .promo-content {
