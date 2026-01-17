@@ -9,3 +9,4 @@ flask-bcrypt
 gunicorn
 requests
 google-generativeai
+pandas
