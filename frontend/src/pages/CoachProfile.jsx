@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Star, MapPin, CheckCircle, Video, Calendar, Clock, ArrowLeft, Shield, Users } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import Loader from '../components/Loader';
 import { showWarning } from '../utils/SwalUtils';
 import { API_URL } from '../utils/api';
 import './CoachProfile.css';
@@ -73,7 +74,7 @@ const CoachProfile = () => {
         }
     };
 
-    if (loading) return <div className="loading-screen">Loading Profile...</div>;
+    if (loading) return <Loader text="Loading Profile..." />;
     if (!coach) return <div className="loading-screen">Coach not found</div>;
 
     return (
@@ -184,9 +185,31 @@ const CoachProfile = () => {
                         <button
                             className="book-btn glow-effect"
                             onClick={() => {
-                                // For 1-on-1, maybe navigate to a schedule picker or just quick book
-                                // Keeping it simple for now -> Direct book or alert
-                                showWarning('Coming Soon', "1-on-1 Booking feature coming next! Use Batches for now.");
+                                const token = localStorage.getItem('token');
+                                if (!token) {
+                                    alert("Please login to book a session");
+                                    navigate('/login');
+                                    return;
+                                }
+                                if (window.confirm(`Confirm 1-on-1 session booking with ${coach.name} for ₹${coach.price_per_session}?`)) {
+                                    fetch(`${API_URL}/api/bookings/coach`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Authorization': `Bearer ${token}`,
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            coach_id: coach.id,
+                                            batch_id: null,
+                                            notes: '1-on-1 Session Request'
+                                        })
+                                    })
+                                        .then(res => {
+                                            if (res.ok) alert("Session Request Sent!");
+                                            else alert("Failed to book session.");
+                                        })
+                                        .catch(err => console.error(err));
+                                }
                             }}
                         >
                             Book Session

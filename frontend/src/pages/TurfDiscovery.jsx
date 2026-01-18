@@ -8,6 +8,7 @@ import 'leaflet/dist/leaflet.css';
 import './TurfDiscovery.css';
 import L from 'leaflet';
 import Navbar from '../components/Navbar';
+import Loader from '../components/Loader';
 import { API_URL } from '../utils/api';
 
 // Fix for default marker icon in React Leaflet
@@ -137,6 +138,7 @@ const TurfDiscovery = () => {
     const [userLocation, setUserLocation] = useState(null);
     const [turfs, setTurfs] = useState([]);
     const [filteredTurfs, setFilteredTurfs] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     // Fetch Turfs from API
     useEffect(() => {
@@ -156,10 +158,14 @@ const TurfDiscovery = () => {
                 }
             } catch (err) {
                 console.error("Error fetching turfs:", err);
+            } finally {
+                setLoading(false);
             }
         };
         fetchTurfs();
     }, []);
+
+    if (loading) return <Loader text="Locating Turfs..." />;
 
     // Filters & View Modes
     const [searchTerm, setSearchTerm] = useState('');

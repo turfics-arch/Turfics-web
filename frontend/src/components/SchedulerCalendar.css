@@ -1,0 +1,158 @@
+/* SchedulerCalendar.css */
+.scheduler-calendar-container {
+    background-color: var(--surface) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    color: var(--text-main);
+    height: 700px;
+    /* Default desktop height */
+    overflow: hidden;
+}
+
+/* Customizing React Big Calendar */
+.rbc-calendar {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+}
+
+.rbc-header {
+    padding: 10px 0;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--glass-border) !important;
+}
+
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.rbc-day-bg+.rbc-day-bg {
+    border-left: 1px solid var(--glass-border) !important;
+}
+
+.rbc-month-row+.rbc-month-row {
+    border-top: 1px solid var(--glass-border) !important;
+}
+
+.rbc-off-range-bg {
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.rbc-today {
+    background-color: rgba(0, 230, 118, 0.1) !important;
+    /* Primary color tint */
+}
+
+/* Toolbar Buttons */
+.rbc-toolbar button {
+    color: var(--text-main) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.rbc-toolbar button:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.rbc-toolbar button:active,
+.rbc-toolbar button.rbc-active {
+    background-color: var(--primary) !important;
+    color: black !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+}
+
+/* Events */
+.rbc-event {
+    background-color: var(--secondary);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    padding: 2px 8px;
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.rbc-event.rbc-selected {
+    background-color: var(--primary) !important;
+    filter: brightness(1.1);
+}
+
+/* Time Grid */
+.rbc-time-content {
+    border-top: 1px solid var(--glass-border) !important;
+}
+
+.rbc-timeslot-group {
+    border-bottom: 1px solid var(--glass-border) !important;
+}
+
+.rbc-day-slot .rbc-time-slot {
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Mobile Responsiveness for Calendar */
+@media (max-width: 768px) {
+    .scheduler-calendar-container {
+        padding: 10px;
+        height: auto !important;
+        min-height: 600px;
+        overflow-x: auto;
+        /* Allow horizontal scroll if needed, but prefer fit */
+    }
+
+    .rbc-calendar {
+        min-width: 100%;
+        /* Ensure it takes full width */
+    }
+
+    .rbc-toolbar {
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 15px;
+        align-items: center;
+    }
+
+    .rbc-toolbar-label {
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin: 5px 0;
+        text-align: center;
+        order: -1;
+        /* Move label to top on mobile */
+    }
+
+    .rbc-btn-group {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .rbc-btn-group button {
+        flex: 1;
+        text-align: center;
+        padding: 8px 4px;
+        font-size: 0.8rem;
+    }
+
+    .rbc-header {
+        font-size: 0.75rem;
+        padding: 4px 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .rbc-event {
+        font-size: 0.7rem;
+        padding: 1px 3px;
+    }
+}

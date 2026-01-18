@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { User, Calendar, Check, X, Edit, DollarSign, MapPin, Clock } from 'lucide-react';
 import Loader from '../components/Loader';
-import { showSuccess, showError, showConfirm, showToast } from '../utils/SwalUtils';
+import { showSuccess, showError, showConfirm, showToast, showInput, showEventDetails } from '../utils/SwalUtils';
+
 import { API_URL } from '../utils/api';
+import SchedulerCalendar from '../components/SchedulerCalendar';
+import moment from 'moment';
 import './CoachDashboard.css';
 
 const CoachDashboard = () => {
@@ -15,6 +18,25 @@ const CoachDashboard = () => {
     // Profile Form State
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({});
+    const [manualEvents, setManualEvents] = useState([]);
+
+    const handleSelectSlot = async ({ start, end }) => {
+        const result = await showConfirm('Add Manual Event?', `Create a note or block for ${moment(start).format('MMM Do, h:mm a')}?`, 'Create');
+        if (result.isConfirmed) {
+            const titleRes = await showInput('Event Title', 'Enter a title for this manual entry:');
+            if (titleRes.value) {
+                setManualEvents([...manualEvents, {
+                    id: `manual-${Date.now()}`,
+                    title: titleRes.value,
+                    start,
+                    end,
+                    color: '#ff9800', // Orange for manual
+                    resource: { notes: 'Manual Entry' }
+                }]);
+                showToast('Event Added', 'success');
+            }
+        }
+    };
 
     // Batches State
     const [batches, setBatches] = useState([]);
@@ -154,6 +176,63 @@ const CoachDashboard = () => {
         }
     };
 
+    const generateCalendarEvents = () => {
+        const events = [];
+
+        // 1. Map Individual Bookings
+        bookings.forEach(b => {
+            if (b.status === 'rejected') return;
+            const start = new Date(b.booking_time);
+            const end = new Date(start.getTime() + (60 * 60000)); // Default 1 hour
+
+            events.push({
+                id: `booking-${b.id}`,
+                title: `${b.player_name} (1-on-1)`,
+                start,
+                end,
+                color: b.status === 'confirmed' ? '#4CAF50' : '#FFA726',
+                resource: b
+            });
+        });
+
+        // 2. Project Batches (Simple Projection for next 2 months)
+        batches.forEach(batch => {
+            if (!batch.days || !batch.start_time) return;
+
+            const daysMap = { 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6, 'Sun': 0 };
+            const targetDays = batch.days.split(',').map(d => daysMap[d.trim().substring(0, 3)]); // "Mon", "Wed" -> [1, 3]
+
+            const startDate = new Date();
+            const endDate = new Date();
+            endDate.setMonth(endDate.getMonth() + 2); // Project 2 months ahead
+
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                if (targetDays.includes(d.getDay())) {
+                    // Create Event
+                    const sTime = batch.start_time.split(':');
+                    const eTime = batch.end_time.split(':');
+
+                    const start = new Date(d);
+                    start.setHours(parseInt(sTime[0]), parseInt(sTime[1]));
+
+                    const end = new Date(d);
+                    end.setHours(parseInt(eTime[0]), parseInt(eTime[1]));
+
+                    events.push({
+                        id: `batch-${batch.id}-${d.toISOString()}`,
+                        title: `${batch.name} (${batch.sport})`,
+                        start,
+                        end,
+                        color: '#2196F3', // Blue for batches
+                        resource: batch
+                    });
+                }
+            }
+        });
+
+        return events;
+    };
+
     if (loading) return <Loader text="Analyzing Plays..." />;
 
     return (
@@ -165,7 +244,10 @@ const CoachDashboard = () => {
                     <h1>Coach Dashboard</h1>
                     <div className="dash-tabs">
                         <button className={`tab-btn ${activeTab === 'bookings' ? 'active' : ''}`} onClick={() => setActiveTab('bookings')}>
-                            Requests & Schedule
+                            Requests
+                        </button>
+                        <button className={`tab-btn ${activeTab === 'schedule' ? 'active' : ''}`} onClick={() => setActiveTab('schedule')}>
+                            Schedule
                         </button>
                         <button className={`tab-btn ${activeTab === 'batches' ? 'active' : ''}`} onClick={() => setActiveTab('batches')}>
                             My Batches
@@ -366,6 +448,20 @@ const CoachDashboard = () => {
                                     ))}
                                 </div>
                             )}
+                        </div>
+                    )}
+                    {activeTab === 'schedule' && (
+                        <div className="schedule-section">
+                            <div className="section-header">
+                                <h2>Training Schedule</h2>
+                                <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Overview of your 1-on-1 sessions and recurring training batches.</p>
+                            </div>
+                            <br />
+                            <SchedulerCalendar
+                                events={[...generateCalendarEvents(), ...manualEvents]}
+                                onSelectEvent={(e) => showEventDetails(e.title, `<p>${e.resource?.notes || 'No description'}</p><br/><b>Time:</b> ${moment(e.start).format('LT')} - ${moment(e.end).format('LT')}`)}
+                                onSelectSlot={handleSelectSlot}
+                            />
                         </div>
                     )}
                 </main>

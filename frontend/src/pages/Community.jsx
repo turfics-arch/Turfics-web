@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import CreateCommunityModal from '../components/CreateCommunityModal';
-import { Search, Plus, Users, Radio, Globe, Lock, Loader } from 'lucide-react';
+import Loader from '../components/Loader';
+import { Search, Plus, Users, Radio, Globe, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Community.css';
@@ -118,10 +119,7 @@ const Community = () => {
 
                 <div className="tab-content">
                     {loading ? (
-                        <div className="loading-state">
-                            <Loader size={32} className="animate-spin" />
-                            <p>Loading communities...</p>
-                        </div>
+                        <Loader text="Loading communities..." />
                     ) : (
                         <>
                             {activeTab === 'my-communities' && (

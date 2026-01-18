@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Users, Shield, Trophy } from 'lucide-react';
 import { API_URL } from '../utils/api';
+import Loader from '../components/Loader';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -30,7 +31,7 @@ const AdminDashboard = () => {
         }
     };
 
-    if (loading) return <div className="loading-container">Loading Users...</div>;
+    if (loading) return <Loader text="Loading Users..." />;
 
     return (
         <div className="admin-dashboard-container">

@@ -91,3 +91,14 @@ export const showToast = (title, icon = 'success') => {
         title: title
     });
 };
+
+export const showEventDetails = (title, message) => {
+    return Swal.fire({
+        ...commonConfig,
+        title: title,
+        html: message,
+        icon: null, // No icon for clean look
+        showCloseButton: true,
+        showConfirmButton: false
+    });
+};

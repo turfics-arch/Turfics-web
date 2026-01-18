@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
+import Loader from '../components/Loader';
 import { User, Calendar, Check, X, Edit, MapPin, Clock, Plus, Trash2, Users, Trophy } from 'lucide-react';
-import { showSuccess, showError, showConfirm } from '../utils/SwalUtils';
+import { showSuccess, showError, showConfirm, showEventDetails, showInput, showToast } from '../utils/SwalUtils';
 import { API_URL } from '../utils/api';
+
+import SchedulerCalendar from '../components/SchedulerCalendar';
+import moment from 'moment';
 import './CoachDashboard.css'; // Reusing existing styles
 
 const AcademyDashboard = () => {
@@ -27,18 +31,40 @@ const AcademyDashboard = () => {
     const [selectedBatch, setSelectedBatch] = useState(null);
     const [batchStudents, setBatchStudents] = useState([]);
     const [showStudentModal, setShowStudentModal] = useState(false);
+    const [manualEvents, setManualEvents] = useState([]);
+
+    const handleSelectSlot = async ({ start, end }) => {
+        const result = await showConfirm('Add Manual Event?', `Create a note or block for ${moment(start).format('MMM Do, h:mm a')}?`, 'Create');
+        if (result.isConfirmed) {
+            const titleRes = await showInput('Event Title', 'Enter a title for this manual entry:');
+            if (titleRes.value) {
+                setManualEvents([...manualEvents, {
+                    id: `manual-${Date.now()}`,
+                    title: titleRes.value,
+                    start,
+                    end,
+                    color: '#ff9800', // Orange for manual
+                    resource: { description: 'Manual Entry' }
+                }]);
+                showToast('Event Added', 'success');
+            }
+        }
+    };
 
     useEffect(() => {
         fetchData();
     }, []);
 
     const fetchData = async () => {
+        console.log("AcademyDashboard: fetchData started");
         const token = localStorage.getItem('token');
         const headers = { 'Authorization': `Bearer ${token}` };
 
         try {
             // Profile
+            console.log("Fetching profile...");
             const pRes = await fetch(`${API_URL}/api/academy/me`, { headers });
+            console.log("Profile response:", pRes.status);
             if (pRes.ok) {
                 const data = await pRes.json();
                 setProfile(data);
@@ -49,24 +75,33 @@ const AcademyDashboard = () => {
             }
 
             // Stats
+            console.log("Fetching stats...");
             const sRes = await fetch(`${API_URL}/api/academy/stats`, { headers });
+            console.log("Stats response:", sRes.status);
             if (sRes.ok) setStats(await sRes.json());
 
             // Programs
+            console.log("Fetching programs...");
             const prRes = await fetch(`${API_URL}/api/academy/programs`, { headers });
+            console.log("Programs response:", prRes.status);
             if (prRes.ok) setPrograms(await prRes.json());
 
             // Batches
+            console.log("Fetching batches...");
             const bRes = await fetch(`${API_URL}/api/academy/batches`, { headers });
+            console.log("Batches response:", bRes.status);
             if (bRes.ok) setBatches(await bRes.json());
 
             // Enrollments
+            console.log("Fetching enrollments...");
             const eRes = await fetch(`${API_URL}/api/academy/enrollments`, { headers });
+            console.log("Enrollments response:", eRes.status);
             if (eRes.ok) setEnrollments(await eRes.json());
 
         } catch (err) {
-            console.error(err);
+            console.error("AcademyDashboard Error:", err);
         } finally {
+            console.log("AcademyDashboard: fetchData finished, setting loading false");
             setLoading(false);
         }
     };
@@ -153,7 +188,44 @@ const AcademyDashboard = () => {
         }
     };
 
-    if (loading) return <div className="loading-screen">Loading Dashboard...</div>;
+    const generateAcademyEvents = () => {
+        const events = [];
+        batches.forEach(b => {
+            if (!b.days || !b.start_time) return;
+
+            const daysMap = { 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6, 'Sun': 0 };
+            const targetDays = b.days.split(',').map(d => daysMap[d.trim().substring(0, 3)]);
+
+            const startDate = new Date();
+            const endDate = new Date();
+            endDate.setMonth(endDate.getMonth() + 2);
+
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                if (targetDays.includes(d.getDay())) {
+                    const sTime = b.start_time.split(':');
+                    const eTime = b.end_time.split(':');
+
+                    const start = new Date(d);
+                    start.setHours(parseInt(sTime[0]), parseInt(sTime[1]));
+
+                    const end = new Date(d);
+                    end.setHours(parseInt(eTime[0]), parseInt(eTime[1]));
+
+                    events.push({
+                        id: `batch-${b.id}-${d.toISOString()}`,
+                        title: `${b.name} (${b.program_sport})`,
+                        start,
+                        end,
+                        color: '#6200ea', // Deep Purple
+                        resource: b
+                    });
+                }
+            }
+        });
+        return events;
+    };
+
+    if (loading) return <Loader text="Loading Academy..." />;
 
     return (
         <div className="coach-dashboard">
@@ -164,6 +236,7 @@ const AcademyDashboard = () => {
                     <h1>Academy Dashboard</h1>
                     <div className="dash-tabs">
                         <button className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>Overview</button>
+                        <button className={`tab-btn ${activeTab === 'schedule' ? 'active' : ''}`} onClick={() => setActiveTab('schedule')}>Schedule</button>
                         <button className={`tab-btn ${activeTab === 'programs' ? 'active' : ''}`} onClick={() => setActiveTab('programs')}>Programs</button>
                         <button className={`tab-btn ${activeTab === 'batches' ? 'active' : ''}`} onClick={() => setActiveTab('batches')}>Batches</button>
                         <button className={`tab-btn ${activeTab === 'enrollments' ? 'active' : ''}`} onClick={() => setActiveTab('enrollments')}>Enrollments</button>
@@ -220,6 +293,22 @@ const AcademyDashboard = () => {
                                 )}
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {/* SCHEDULE TAB */}
+                {activeTab === 'schedule' && (
+                    <div className="schedule-section fade-in">
+                        <div className="section-header">
+                            <h2>Academy Schedule</h2>
+                            <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Overview of all training batches and coach allocations.</p>
+                        </div>
+                        <br />
+                        <SchedulerCalendar
+                            events={[...generateAcademyEvents(), ...manualEvents]}
+                            onSelectEvent={(e) => showEventDetails(e.title, `<p>${e.resource?.description || 'No description'}</p><br/><b>Time:</b> ${moment(e.start).format('LT')} - ${moment(e.end).format('LT')}`)}
+                            onSelectSlot={handleSelectSlot}
+                        />
                     </div>
                 )}
 
@@ -483,7 +572,7 @@ const AcademyDashboard = () => {
                     </div>
                 )
             }
-        </div >
+        </div>
     );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Loader from '../components/Loader';
 import { Calendar, Clock, User, Phone, CheckCircle, CreditCard, X, MapPin, Zap, AlertCircle } from 'lucide-react';
 import { showSuccess, showError, showWarning } from '../utils/SwalUtils';
 import { API_URL } from '../utils/api';
@@ -320,7 +321,7 @@ const WalkInBooking = () => {
                         {/* 3. Slots Grid */}
                         <div className="slots-grid-area">
                             {loadingSlots ? (
-                                <div className="loading-state">Loading availability...</div>
+                                <Loader text="Loading availability..." />
                             ) : (
                                 <div className="slots-grid-display">
                                     {slots.filter(s => {

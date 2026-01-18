@@ -2204,12 +2204,16 @@ def get_all_coaches():
     for c in coaches:
         result.append({
             'id': c.id,
+            'user_id': c.user_id,
             'name': c.name,
             'specialization': c.specialization,
             'rating': c.rating or 5.0,
             'experience': c.experience,
             'price_per_session': c.price_per_session,
-            'image_url': f"https://ui-avatars.com/api/?name={c.name}&background=random" 
+            'image_url': c.image_url or f"https://ui-avatars.com/api/?name={c.name}&background=random",
+            'bio': c.bio,
+            'availability': c.availability,
+            'location': c.location
         })
     return jsonify(result), 200
 
@@ -2270,13 +2274,27 @@ def create_coach_booking():
         )
     else:
         # 1-on-1 booking
+        # Determine time
+        b_time = datetime.utcnow()
+        if 'booking_time' in data and data['booking_time']:
+            try:
+                b_time = datetime.fromisoformat(data['booking_time'].replace('Z', '+00:00'))
+            except:
+                pass
+        
+        # Determine price
+        price = data.get('price')
+        if not price:
+            coach_obj = Coach.query.get(coach_id)
+            if coach_obj:
+                price = coach_obj.price_per_session
+
         booking = CoachBooking(
             coach_id=coach_id,
             user_id=current_user['id'],
-            # Parse ISO string "2023-01-01T10:00:00"
-            booking_time=datetime.fromisoformat(data['booking_time'].replace('Z', '+00:00')),
+            booking_time=b_time,
             duration_mins=60,
-            total_price=data.get('price'),
+            total_price=price,
             status='pending',
             notes=data.get('notes')
         )
@@ -2418,6 +2436,7 @@ def get_academy_batches():
             'id': b.id,
             'program_id': b.program_id,
             'program_sport': b.program.sport,
+            'head_coach_name': b.program.head_coach.name if b.program.head_coach else 'TBD',
             'name': b.name,
             'description': b.description,
             'days': b.days,
@@ -3823,6 +3842,8 @@ def support_chat():
         print(f"DEBUG: Support Pollinations Fallback Error: {poll_e}")
 
     return jsonify({'reply': "I'm having trouble connecting to my service right now. Please try again later."}), 503
+
+
 
 # Added notes column to TournamentMatch
 if __name__ == '__main__':
