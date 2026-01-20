@@ -16,6 +16,29 @@ const LandingPage = () => {
     const [activeSport, setActiveSport] = useState(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({
+        turfs: 0,
+        users: 0,
+        bookings: 0,
+        rating: 0,
+        tournaments: 0
+    });
+
+    // Fetch Platform Stats
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/stats`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setStats(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch stats", error);
+            }
+        };
+        fetchStats();
+    }, []);
 
     // Initial Fetch & Location
     useEffect(() => {
@@ -220,15 +243,15 @@ const LandingPage = () => {
                             <div className="flex-row">
                                 <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60" alt="User" className="avatar-sm" />
                                 <div>
-                                    <span className="text-xs text-muted">Just Booked</span>
-                                    <p className="text-sm bold">The Arena, Mumbai</p>
+                                    <span className="text-xs text-muted">Recent Booking</span>
+                                    <p className="text-sm bold">Sports Venue</p>
                                 </div>
                             </div>
                         </div>
                         <div className="float-card glass-panel-sm verified-badge-card" style={{ marginTop: '2rem', marginLeft: '2rem' }}>
                             <Shield size={20} color="#00e676" />
                             <div>
-                                <p className="text-sm bold">Verified Turfs</p>
+                                <p className="text-sm bold">Verified Venues</p>
                                 <span className="text-xs text-muted">100% Secure Payments</span>
                             </div>
                         </div>
@@ -236,17 +259,17 @@ const LandingPage = () => {
 
                     <div className="hero-content">
                         <div className="live-ticker">
-                            <span className="dot"></span> 124 Games Happening Now in Mumbai
+                            <span className="dot"></span> {stats.turfs} Active Venues Available
                         </div>
-                        <h1 className="hero-title">The World's Largest <br /> <span className="highlight-text">Sports Community.</span></h1>
-                        <p className="hero-subtitle">Book courts, find players, and host tournaments. Join 2 Million+ sports enthusiasts today.</p>
+                        <h1 className="hero-title">Your Local <br /> <span className="highlight-text">Sports Booking Platform</span></h1>
+                        <p className="hero-subtitle">Book courts, find coaches, and join tournaments in your city.</p>
 
                         <div className="search-widget glass-effect">
                             <div className="search-input-group full-width">
                                 <MapPin size={20} color="var(--primary)" />
                                 <input
                                     type="text"
-                                    placeholder="Search for turfs, trainers, or tournaments nearby..."
+                                    placeholder="Search for turfs, coaches, or tournaments..."
                                     style={{ width: '100%' }}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -299,26 +322,11 @@ const LandingPage = () => {
                                 <Star size={16} fill="#ffd700" color="#ffd700" />
                                 <Star size={16} fill="#ffd700" color="#ffd700" />
                             </div>
-                            <p className="text-xs text-muted mt-1">Trusted by 150K+ Players</p>
+                            <p className="text-xs text-muted mt-1">{stats.users.toLocaleString()}+ Users</p>
                         </div>
                     </div>
                 </header>
 
-                {/* Hybrid Stats/Features Section */}
-                <section className="stats-section">
-                    <div className="stat-item">
-                        <span className="stat-num">500+</span>
-                        <span className="stat-label">Venues</span>
-                    </div>
-                    <div className="stat-item">
-                        <span className="stat-num">150K</span>
-                        <span className="stat-label">Players</span>
-                    </div>
-                    <div className="stat-item">
-                        <span className="stat-num">4.8</span>
-                        <span className="stat-label">App Rating</span>
-                    </div>
-                </section>
 
                 {/* Features Grid with Turf Town Vibe */}
                 <section className="features-section" id="features">
@@ -335,7 +343,7 @@ const LandingPage = () => {
                             <div className="bento-content">
                                 <div className="bento-badge">Most Popular</div>
                                 <h3 className="bento-title">Book Top Rated Turfs</h3>
-                                <p className="bento-desc">Instant confirmation at 500+ premium venues.</p>
+                                <p className="bento-desc">Discover quality venues near you with instant confirmation.</p>
                             </div>
                         </div>
 
@@ -366,8 +374,8 @@ const LandingPage = () => {
                             <div className="bento-bg" style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1628779238951-be2c9f255915?q=80&w=1000")' }}></div>
                             <div className="bento-arrow"><ArrowUpRight size={24} /></div>
                             <div className="bento-content">
-                                <div className="bento-badge" style={{ background: '#ffd700', color: 'black' }}><Trophy size={14} color="black" /> 50K Prize Pool</div>
-                                <h3 className="bento-title">Compete & Win</h3>
+                                <div className="bento-badge" style={{ background: '#ffd700', color: 'black' }}><Trophy size={14} color="black" /> Compete</div>
+                                <h3 className="bento-title">Join Tournaments</h3>
                                 <p className="bento-desc">Battle it out in city-wide leagues and tournaments.</p>
                             </div>
                         </div>
@@ -379,7 +387,7 @@ const LandingPage = () => {
                     <div className="section-header">
                         <h2 className="section-title">Popular <span style={{ color: 'var(--primary)' }}>Venues Nearby</span></h2>
                     </div>
-                    <div className="turfs-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem', marginTop: '2rem' }}>
+                    <div className="turfs-grid">
                         {nearbyTurfs.length > 0 ? nearbyTurfs.map(turf => (
                             <div key={turf.id} className="turf-card-landing" onClick={() => navigate(`/turf/${turf.id}`)} style={{ cursor: 'pointer', background: '#1a1a1a', borderRadius: '16px', overflow: 'hidden', border: '1px solid #333', transition: 'transform 0.3s' }}>
                                 <div style={{ height: '180px', background: `url(${turf.image_url || 'https://via.placeholder.com/300'}) center/cover` }}></div>
@@ -403,13 +411,13 @@ const LandingPage = () => {
                 <section className="community-section-hero" style={{ padding: '2rem 2rem 5rem', maxWidth: '1200px', margin: '0 auto' }}>
                     <div className="community-card-landing" onClick={() => navigate('/community')} style={{ background: 'linear-gradient(to right, #1a1a1a, #0d0d0d)', border: '1px border #333', cursor: 'pointer' }}>
                         <div className="community-left">
-                            <div className="badge-pill">JOIN THE MOVEMENT</div>
-                            <h3>Our Community</h3>
-                            <p>Build your tribe. Join public or private sports communities, or follow broadcast channels for exclusive updates.</p>
+                            <div className="badge-pill">CONNECT & PLAY</div>
+                            <h3>Join Our Community</h3>
+                            <p>Connect with players, join sports communities, and stay updated with the latest events and tournaments.</p>
                             <div className="community-pills">
                                 <span><Users size={16} /> Public Groups</span>
                                 <span><Lock size={16} /> Private Squads</span>
-                                <span><Smartphone size={16} /> Broadcast Channels</span>
+                                <span><Smartphone size={16} /> Event Updates</span>
                             </div>
                         </div>
                         <div className="community-right-viz">
@@ -423,11 +431,11 @@ const LandingPage = () => {
                 {/* App Promotion */}
                 <section className="app-section">
                     <div className="app-content">
-                        <h2>Game on the Go.</h2>
-                        <p style={{ color: 'var(--text-secondary)', maxWidth: '400px' }}>Download the Turfics app for exclusive mobile-only deals and real-time notifications.</p>
+                        <h2>Mobile App Coming Soon</h2>
+                        <p style={{ color: 'var(--text-secondary)', maxWidth: '400px' }}>We're working on bringing Turfics to your mobile device. Stay tuned for exclusive mobile features!</p>
                         <div className="store-buttons">
-                            <button className="store-btn"><Smartphone size={20} /> App Store</button>
-                            <button className="store-btn"><Smartphone size={20} /> Play Store</button>
+                            <button className="store-btn" disabled style={{ opacity: 0.6, cursor: 'not-allowed' }}><Smartphone size={20} /> App Store (Soon)</button>
+                            <button className="store-btn" disabled style={{ opacity: 0.6, cursor: 'not-allowed' }}><Smartphone size={20} /> Play Store (Soon)</button>
                         </div>
                     </div>
                     <div className="app-visual">

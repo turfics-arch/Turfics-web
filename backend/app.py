@@ -157,6 +157,46 @@ def health_check():
     except Exception as e:
         return jsonify({"status": "unhealthy", "database": str(e)}), 500
 
+@app.route('/api/stats', methods=['GET'])
+def get_platform_stats():
+    """Provide real platform statistics for landing page"""
+    try:
+        # Count active turfs (not deleted)
+        total_turfs = Turf.query.filter_by(is_deleted=False).count()
+        
+        # Count registered users
+        total_users = User.query.count()
+        
+        # Count total bookings
+        total_bookings = Booking.query.count()
+        
+        # Calculate average rating from reviews
+        avg_rating = db.session.query(db.func.avg(Review.rating)).scalar()
+        avg_rating = round(float(avg_rating), 1) if avg_rating else 0
+        
+        # Count active tournaments (end date in future)
+        active_tournaments = Tournament.query.filter(
+            Tournament.end_date >= datetime.now()
+        ).count()
+        
+        return jsonify({
+            'turfs': total_turfs,
+            'users': total_users,
+            'bookings': total_bookings,
+            'rating': avg_rating,
+            'tournaments': active_tournaments
+        }), 200
+    except Exception as e:
+        print(f"Error fetching stats: {e}")
+        # Fallback values if database query fails
+        return jsonify({
+            'turfs': 0,
+            'users': 0,
+            'bookings': 0,
+            'rating': 0,
+            'tournaments': 0
+        }), 200
+
 @app.route('/api/admin/setup-db', methods=['GET'])
 def setup_db():
     """Temporary route to initialize and seed the remote database"""

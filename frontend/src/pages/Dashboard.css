@@ -76,20 +76,20 @@
 /* Grid Layouts */
 .dashboard-grid-row {
     display: grid;
-    gap: 1.5rem;
+    gap: 2rem;
     margin-bottom: 1.5rem;
 }
 
 /* KPI Cards */
 .kpi-grid {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
 }
 
 .kpi-card {
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
     border-radius: 12px;
-    padding: 1rem;
+    padding: 1.25rem;
     position: relative;
     overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s;
@@ -106,8 +106,8 @@
 }
 
 .kpi-icon-wrapper {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -117,7 +117,7 @@
 
 .kpi-label {
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 500;
     margin-bottom: 0.25rem;
     text-transform: uppercase;
