@@ -27,14 +27,21 @@ const LandingPage = () => {
     // Fetch Platform Stats
     useEffect(() => {
         const fetchStats = async () => {
+            console.log("DEBUG: fetchStats started. API_URL =", API_URL);
             try {
-                const response = await fetch(`${API_URL}/api/stats`);
+                console.log("DEBUG: Fetching stats from", `${API_URL}/api/stats_v2`);
+                const response = await fetch(`${API_URL}/api/stats_v2`);
+                console.log("DEBUG: stats response status =", response.status);
+
                 if (response.ok) {
                     const data = await response.json();
+                    console.log("DEBUG: stats data =", data);
                     setStats(data);
+                } else {
+                    console.error("DEBUG: Stats fetch failed status", response.status);
                 }
             } catch (error) {
-                console.error("Failed to fetch stats", error);
+                console.error("DEBUG: Failed to fetch stats", error);
             }
         };
         fetchStats();

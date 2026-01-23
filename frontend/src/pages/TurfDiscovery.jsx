@@ -165,8 +165,6 @@ const TurfDiscovery = () => {
         fetchTurfs();
     }, []);
 
-    if (loading) return <Loader text="Locating Turfs..." />;
-
     // Filters & View Modes
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSport, setSelectedSport] = useState('All');
@@ -364,6 +362,8 @@ const TurfDiscovery = () => {
         { name: 'Bangalore', img: 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=500', count: 56 },
         { name: 'Chennai', img: 'https://images.unsplash.com/photo-1582510003544-524378877227?q=80&w=500', count: 28 },
     ];
+
+    if (loading) return <Loader text="Locating Turfs..." />;
 
     return (
         <div className="discovery-container">

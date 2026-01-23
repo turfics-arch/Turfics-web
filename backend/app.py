@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, set_access_cookies
+from sqlalchemy.orm import joinedload
 
 load_dotenv() # Load before using environment variables
 
@@ -473,9 +474,47 @@ def get_all_users():
         })
     return jsonify(user_list), 200
 
+@app.route('/api/stats_v2', methods=['GET'])
+def get_stats():
+    """Public endpoint for landing page statistics"""
+    # print("DEBUG: /api/stats_v2 hit!")
+    try:
+        turfs_count = Turf.query.filter_by(status='active').count()
+        users_count = User.query.count()
+        bookings_count = Booking.query.count()
+        tournaments_count = Tournament.query.count()
+        
+        # Calculate average rating across all turfs
+        # This is a simple implementation; ideally use SQL func.avg
+        all_ratings = [t.rating for t in Turf.query.filter_by(status='active').all() if t.rating]
+        avg_rating = sum(all_ratings) / len(all_ratings) if all_ratings else 4.5
+        
+        return jsonify({
+            'turfs': turfs_count,
+            'users': users_count,
+            'bookings': bookings_count,
+            'rating': round(avg_rating, 1),
+            'tournaments': tournaments_count,
+            'debug_db': str(app.config.get('SQLALCHEMY_DATABASE_URI')),
+            'debug_turfs_raw': Turf.query.count()
+        }), 200
+    except Exception as e:
+        print(f"Error fetching stats: {e}")
+        # Return error for debugging
+        return jsonify({
+            'turfs': Turf.query.count(), # Try unfiltered
+            'users': User.query.count(),
+            'bookings': Booking.query.count(),
+            'rating': 0,
+            'tournaments': Tournament.query.count(),
+            'error': str(e),
+            'db_uri': str(app.config.get('SQLALCHEMY_DATABASE_URI'))
+        }), 200
+
 @app.route('/api/turfs', methods=['GET'])
 def get_turfs():
-    turfs = Turf.query.filter_by(status='active').all()
+    # Eager load 'games' to avoid N+1 queries
+    turfs = Turf.query.options(joinedload(Turf.games)).filter_by(status='active').all()
     turf_list = []
     
     for turf in turfs:
@@ -3888,4 +3927,4 @@ def support_chat():
 # Added notes column to TournamentMatch
 if __name__ == '__main__':
     # Force reload
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)

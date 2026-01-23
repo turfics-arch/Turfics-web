@@ -1252,6 +1252,7 @@
         margin-top: 1rem;
     }
 }
+
 /* Popular Turfs Grid - Responsive */
 .turfs-grid {
     display: grid;
@@ -1283,5 +1284,11 @@
     .turfs-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-logo img {
+        height: 40px !important;
     }
 }
