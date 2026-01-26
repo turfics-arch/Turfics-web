@@ -18,19 +18,19 @@ const SchedulerCalendar = ({ events, onSelectEvent, onSelectSlot, defaultView = 
                 startAccessor="start"
                 endAccessor="end"
                 style={{ height: '100%', minHeight: '500px' }}
-                onSelectEvent={onSelectEvent}
-                onSelectSlot={onSelectSlot}
-                selectable
                 view={view}
                 onView={setView}
                 date={date}
                 onNavigate={setDate}
-                views={['month', 'week', 'day', 'agenda']}
+                selectable
+                onSelectEvent={onSelectEvent}
+                onSelectSlot={onSelectSlot}
+                popup
                 eventPropGetter={(event) => ({
                     style: {
-                        backgroundColor: event.color || '#3174ad',
+                        backgroundColor: event.color || '#3b82f6',
                         borderRadius: '4px',
-                        opacity: 0.9,
+                        opacity: 0.8,
                         color: 'white',
                         border: '0px',
                         display: 'block'

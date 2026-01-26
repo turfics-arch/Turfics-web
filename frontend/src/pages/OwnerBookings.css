@@ -808,6 +808,103 @@
     transform: scale(0.98) !important;
 }
 
+/* Calendar Custom Styling */
+.rbc-calendar {
+    font-family: inherit;
+    border: none;
+}
+
+.rbc-toolbar {
+    margin-bottom: 1.5rem;
+    padding: 0.5rem;
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.rbc-toolbar-label {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: white;
+}
+
+.rbc-btn-group button {
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #94a3b8 !important;
+    padding: 0.5rem 1rem !important;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600 !important;
+    font-family: inherit !important;
+}
+
+.rbc-btn-group button:hover {
+    background: rgba(59, 130, 246, 0.1) !important;
+    color: white !important;
+    border-color: #3b82f6 !important;
+}
+
+.rbc-btn-group button.rbc-active {
+    background: #3b82f6 !important;
+    color: white !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+}
+
+.rbc-off-range-bg {
+    background: rgba(0, 0, 0, 0.1) !important;
+}
+
+.rbc-today {
+    background: rgba(59, 130, 246, 0.05) !important;
+}
+
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(15, 23, 42, 0.2);
+}
+
+.rbc-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding: 1rem !important;
+    font-weight: 700 !important;
+    color: #94a3b8 !important;
+    background: rgba(15, 23, 42, 0.3) !important;
+}
+
+.rbc-time-header {
+    background: rgba(15, 23, 42, 0.3) !important;
+}
+
+.rbc-time-content {
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.rbc-timeslot-group {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    min-height: 60px !important;
+}
+
+.rbc-time-slot {
+    border-top: 1px solid rgba(255, 255, 255, 0.02) !important;
+}
+
+.rbc-day-slot .rbc-events-container {
+    margin-right: 0 !important;
+}
+
+.rbc-event {
+    border: none !important;
+    padding: 4px 8px !important;
+    font-size: 0.8rem !important;
+    border-radius: 6px !important;
+}
+
 /* Scrollbar for Modal Body */
 .modal-body::-webkit-scrollbar {
     width: 6px;

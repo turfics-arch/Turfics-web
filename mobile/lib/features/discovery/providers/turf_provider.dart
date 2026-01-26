@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../data/services/api_service.dart';
-import '../data/models/models.dart';
+import '../../../data/services/api_service.dart';
+import '../../../data/models/models.dart';
 
 class TurfProvider with ChangeNotifier {
   List<Turf> _turfs = [];
@@ -9,6 +9,7 @@ class TurfProvider with ChangeNotifier {
 
   List<Turf> get turfs => _filteredTurfs;
   bool get isLoading => _isLoading;
+  String get selectedSport => _selectedSport;
 
   String _selectedSport = 'All';
   String _searchQuery = '';

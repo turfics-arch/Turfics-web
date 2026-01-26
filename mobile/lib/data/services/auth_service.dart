@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../core/constants.dart';
+import '../../core/constants/constants.dart';
 import 'api_service.dart';
 
 class AuthService {

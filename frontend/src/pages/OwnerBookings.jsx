@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import { Check, X, Bell, Calendar, Clock, DollarSign, Filter, Search, ChevronRight, XCircle, Lock } from 'lucide-react';
+import { Check, X, Bell, Calendar as CalendarIcon, Clock, DollarSign, Filter, Search, ChevronRight, XCircle, Lock } from 'lucide-react';
 import { showSuccess, showError, showConfirm, showWarning } from '../utils/SwalUtils';
 import { API_URL } from '../utils/api';
 import './OwnerBookings.css';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import io from 'socket.io-client';
+
+const localizer = momentLocalizer(moment);
 
 const OwnerBookings = () => {
     const [bookings, setBookings] = useState([]);
@@ -15,6 +21,25 @@ const OwnerBookings = () => {
 
     useEffect(() => {
         fetchData();
+
+        // Socket.IO Connection
+        const newSocket = io(API_URL);
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                // Decode token to get ID - simplistically for now
+                // Ideally backend verifies token on connection, but for room selection we do this
+                const userPart = JSON.parse(atob(token.split('.')[1]));
+                newSocket.emit('join_owner_room', { user_id: userPart.sub }); // 'sub' is standard for user_id in JWT
+            } catch (e) { console.error("Socket Auth Error", e); }
+        }
+
+        newSocket.on('new_booking', (data) => {
+            showSuccess('New Booking!', `New ${data.game_type} booking from ${data.guest_name}`);
+            fetchData(); // Refresh list
+        });
+
+        return () => newSocket.disconnect();
     }, []);
 
     const fetchData = async () => {
@@ -23,9 +48,9 @@ const OwnerBookings = () => {
 
         try {
             const [bRes, sRes, tRes] = await Promise.all([
-                fetch(`${API_URL}/api/owner/bookings`, { headers: { 'Authorization': `Bearer ${token} ` } }),
-                fetch(`${API_URL}/api/owner/stats`, { headers: { 'Authorization': `Bearer ${token} ` } }),
-                fetch(`${API_URL}/api/turfs/my-turfs`, { headers: { 'Authorization': `Bearer ${token} ` } })
+                fetch(`${API_URL}/api/owner/bookings`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_URL}/api/owner/stats`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_URL}/api/turfs/my-turfs`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
 
             if (bRes.ok && sRes.ok) {
@@ -57,7 +82,7 @@ const OwnerBookings = () => {
             const res = await fetch(`${API_URL}/api/bookings/confirm`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token} `,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ booking_id: id })
@@ -190,7 +215,6 @@ const OwnerBookings = () => {
                     unit_id: b.turf_unit_id
                 });
                 setShowSlotModal(true);
-                setShowSlotModal(true);
             } else {
                 showWarning('Online Booking', `Guest: ${b.guest_name}\nStatus: ${b.status}\nCannot edit online bookings manually.`);
             }
@@ -265,6 +289,7 @@ const OwnerBookings = () => {
     const [activeTab, setActiveTab] = useState('upcoming');
 
     // Global Filters State (replaces Grid-only state)
+    const [view, setView] = useState('week');
     const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]); // Default to Today
     const [filterTurfId, setFilterTurfId] = useState('all');
     const [filterSource, setFilterSource] = useState('all');
@@ -324,47 +349,39 @@ const OwnerBookings = () => {
 
     const filteredBookings = getListBookings();
 
-    // Helper: Generate Slots for Grid (Uses Global Filters)
-    const generateGridSlots = () => {
-        // Grid always needs a target date. Use filterDate or Today.
-        const targetDate = filterDate || new Date().toISOString().split('T')[0];
+    // --- Calendar Event Mapping ---
+    const calendarEvents = bookings.map(b => ({
+        id: b.booking_id,
+        title: `${b.guest_name} (${b.status})`,
+        start: new Date(b.start_time),
+        end: new Date(b.end_time),
+        resource: b,
+        // Style props
+        status: b.status
+    }));
 
-        const slots = [];
-        const startHour = 5; // 5 AM
-        const endHour = 23;  // 11 PM
-
-        for (let h = startHour; h <= endHour; h++) {
-            ['00', '30'].forEach(m => {
-                const timeLabel = `${h > 12 ? h - 12 : h}:${m} ${h >= 12 ? 'PM' : 'AM'}`;
-                const slotIso = `${targetDate}T${h.toString().padStart(2, '0')}:${m}:00`;
-                const slotDate = new Date(slotIso);
-
-                // Find booking overlapping this slot
-                // We use globalFilteredBookings because it already filters Turf & Source.
-                // We just need to check the time overlap against the *targetDate* slots.
-
-                const booking = globalFilteredBookings.find(b => {
-                    const bStart = new Date(b.start_time);
-                    const bEnd = new Date(b.end_time);
-                    const sTime = slotDate.getTime();
-
-                    // Simple check: is the slot start time strictly inside the booking duration?
-                    // (Or booking matches slot start)
-                    return bStart.getTime() <= sTime && bEnd.getTime() > sTime && b.status !== 'cancelled';
-                });
-
-                slots.push({
-                    time: timeLabel,
-                    iso: slotIso,
-                    booking: booking
-                });
-            });
-        }
-        return slots;
+    const handleSelectSlot = ({ start, end }) => {
+        setSelectedSlot({ iso: start.toISOString(), endIso: end.toISOString() });
+        setSlotAction('manual');
+        setSlotForm(prev => ({ ...prev, duration_mins: moment(end).diff(moment(start), 'minutes') }));
+        setShowSlotModal(true);
     };
 
-    // Calculate grid slots if in upcoming or history tab
-    const gridSlots = ['upcoming', 'history'].includes(activeTab) ? generateGridSlots() : [];
+    const handleSelectEvent = (event) => {
+        handleSlotClick({ booking: event.resource });
+    };
+
+    const eventStyleGetter = (event) => {
+        let backgroundColor = '#3b82f6';
+        if (event.status === 'confirmed') backgroundColor = '#10b981';
+        if (event.status === 'pending') backgroundColor = '#f59e0b';
+        if (event.status === 'blocked') backgroundColor = '#64748b';
+        if (event.status === 'cancelled') backgroundColor = '#ef4444';
+
+        return {
+            style: { backgroundColor, borderRadius: '5px', opacity: 0.8, color: 'white', border: '0px', display: 'block' }
+        };
+    };
 
     // Pending bookings (Raw list for Modal support)
     const pendingBookings = bookings.filter(b => b.status === 'pending');
@@ -390,7 +407,7 @@ const OwnerBookings = () => {
                                     <div className="pi-details">
                                         <h4>{b.turf_name}</h4>
                                         <div className="pi-info">
-                                            <span><Calendar size={14} /> {new Date(b.start_time).toLocaleDateString()}</span>
+                                            <span><CalendarIcon size={14} /> {new Date(b.start_time).toLocaleDateString()}</span>
                                             <span><Clock size={14} /> {new Date(b.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
                                         <div className="pi-info" style={{ marginTop: '4px' }}>
@@ -457,7 +474,7 @@ const OwnerBookings = () => {
                                     <div>
                                         <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px', color: '#64748b', marginBottom: '6px' }}>Selected Slot</div>
                                         <div style={{ fontSize: '1.1rem', fontWeight: '700', color: 'white', display: 'flex', alignItems: 'center' }}>
-                                            <Calendar size={16} style={{ marginRight: '8px', color: '#3b82f6' }} />
+                                            <CalendarIcon size={16} style={{ marginRight: '8px', color: '#3b82f6' }} />
                                             {new Date(selectedSlot?.iso).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                                             <span style={{ margin: '0 10px', opacity: 0.2 }}>|</span>
                                             <Clock size={16} style={{ marginRight: '8px', color: '#3b82f6' }} />
@@ -666,7 +683,7 @@ const OwnerBookings = () => {
                             onClick={() => { setSlotAction('manual'); setSlotForm({ ...slotForm, turf_id: '', unit_id: '' }); setShowSlotModal(true); }}
                             style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '0.8rem', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
                         >
-                            <Calendar size={18} /> New Walk-in Booking
+                            <CalendarIcon size={18} /> New Walk-in Booking
                         </button>
                         <button
                             onClick={() => { setSlotAction('block'); setSlotForm({ ...slotForm, turf_id: '', unit_id: '' }); setShowSlotModal(true); }}
@@ -696,7 +713,7 @@ const OwnerBookings = () => {
                             onChange={(e) => setFilterDate(e.target.value)}
                             style={{ width: '100%', padding: '0.6rem', paddingLeft: '2.2rem', borderRadius: '8px', background: '#0f172a', border: '1px solid #333', color: 'white', cursor: 'pointer', fontFamily: 'inherit' }}
                         />
-                        <Calendar size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+                        <CalendarIcon size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
                         {filterDate && (
                             <button
                                 onClick={() => setFilterDate('')}
@@ -756,112 +773,30 @@ const OwnerBookings = () => {
 
 
 
-                {/* --- GRID VIEW (Upcoming & History) --- */}
+                {/* --- CALENDAR VIEW (Replaces Grid) --- */}
                 {['upcoming', 'history'].includes(activeTab) && (
-                    <div className="grid-view-container" style={{ marginBottom: '2rem' }}>
-                        <div style={{ marginBottom: '1rem', color: '#94a3b8', fontSize: '0.9rem', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                            <span style={{ color: 'var(--primary)', fontWeight: 'bold', display: 'flex', alignItems: 'center', marginRight: '8px' }}>
-                                {activeTab === 'upcoming' && <span className="live-indicator"></span>}
-                                {activeTab === 'history' ? 'Past Schedule' : 'Live Schedule'}
-                            </span>
-                            <span>• <span style={{ color: 'white', marginLeft: '4px' }}>{filterDate || (activeTab === 'history' ? 'Today (Select Date)' : 'Today')}</span></span>
-                            {filterTurfId !== 'all' && <span> • Venue: <span style={{ color: 'white' }}>{uniqueTurfs.find(t => String(t.id) === String(filterTurfId))?.name}</span></span>}
-                        </div>
-
-                        {/* Slots Render */}
-                        <div className="slots-grid-full" style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
-                            gap: '0.8rem'
-                        }}>
-                            {gridSlots.map((slot, idx) => {
-                                let bg = 'rgba(255,255,255,0.02)';
-                                let border = '1px solid rgba(255,255,255,0.05)';
-                                let color = '#94a3b8';
-
-                                const now = new Date();
-                                const slotDate = new Date(slot.iso);
-                                const isCurrentHour = activeTab === 'upcoming' &&
-                                    (!filterDate || filterDate === now.toISOString().split('T')[0]) &&
-                                    now.getHours() === slotDate.getHours();
-
-                                if (isCurrentHour) {
-                                    border = '1px solid #10b981';
-                                    if (!slot.booking) bg = 'rgba(16, 185, 129, 0.05)';
-                                }
-
-                                if (slot.booking) {
-                                    color = 'white';
-                                    if (['confirmed', 'completed'].includes(slot.booking.status)) {
-                                        bg = 'rgba(16, 185, 129, 0.15)';
-                                        border = '1px solid rgba(16, 185, 129, 0.4)';
-                                    } else if (slot.booking.status === 'pending') {
-                                        bg = 'rgba(245, 158, 11, 0.15)';
-                                        border = '1px dashed #f59e0b';
-                                    } else {
-                                        bg = 'rgba(239, 68, 68, 0.15)';
-                                        border = '1px solid rgba(239, 68, 68, 0.3)';
-                                    }
-                                }
-
-                                return (
-                                    <div
-                                        key={idx}
-                                        className="slot-item"
-                                        style={{
-                                            background: bg, border: border, color: color,
-                                            borderRadius: '12px', padding: '1rem',
-                                            textAlign: 'center', minHeight: '90px', // slightly taller
-                                            display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-                                            cursor: 'pointer',
-                                            position: 'relative',
-                                            transition: 'transform 0.2s',
-                                            boxShadow: isCurrentHour ? '0 0 15px rgba(16, 185, 129, 0.1)' : 'none'
-                                        }}
-                                        onClick={() => handleSlotClick(slot)}
-                                    >
-                                        {isCurrentHour && <div className="live-indicator" style={{ position: 'absolute', top: '6px', right: '6px', margin: 0 }}></div>}
-
-                                        {/* Source Indicator (Top Left) */}
-                                        {slot.booking && (
-                                            <div style={{ position: 'absolute', top: '6px', left: '6px' }}>
-                                                {(slot.booking.booking_source === 'walk-in' || slot.booking.booking_source === 'owner-block') ? (
-                                                    <div title="Manual / Walk-in" style={{ background: '#3b82f6', borderRadius: '50%', width: '6px', height: '6px', boxShadow: '0 0 5px #3b82f6' }}></div>
-                                                ) : (
-                                                    <div title="Online" style={{ background: '#10b981', borderRadius: '50%', width: '6px', height: '6px', boxShadow: '0 0 5px #10b981' }}></div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '4px' }}>{slot.time}</div>
-                                        {slot.booking ? (
-                                            <div style={{ fontSize: '0.75rem', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                <div style={{ fontWeight: '600', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                    {slot.booking.guest_name || 'Booked'}
-                                                </div>
-                                                <div style={{
-                                                    fontSize: '0.65rem',
-                                                    marginTop: '2px',
-                                                    opacity: 0.8,
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '4px',
-                                                    textTransform: 'uppercase',
-                                                    letterSpacing: '0.5px'
-                                                }}>
-                                                    {['walk-in', 'owner-block', 'phone'].includes(slot.booking.booking_source) ? 'MANUAL' : 'ONLINE'}
-                                                </div>
-                                                <div style={{ textTransform: 'capitalize', opacity: 0.6, fontSize: '0.65rem' }}>{slot.booking.status}</div>
-                                            </div>
-                                        ) : (
-                                            <div style={{ fontSize: '0.7rem', opacity: 0.3 }}>Available</div>
-                                        )}
-                                    </div>
-                                )
-                            })}
-                        </div>
+                    <div className="calendar-container" style={{ height: '600px', background: '#1e293b', padding: '1rem', borderRadius: '12px', marginBottom: '2rem' }}>
+                        <Calendar
+                            localizer={localizer}
+                            events={calendarEvents}
+                            startAccessor="start"
+                            endAccessor="end"
+                            style={{ height: '100%', color: '#cbd5e1' }}
+                            selectable
+                            onSelectSlot={handleSelectSlot}
+                            onSelectEvent={handleSelectEvent}
+                            eventPropGetter={eventStyleGetter}
+                            view={view}
+                            onView={(v) => setView(v)}
+                            views={['day', 'week', 'month']}
+                            date={filterDate ? new Date(filterDate) : new Date()}
+                            onNavigate={(date) => setFilterDate(date.toISOString().split('T')[0])}
+                            min={new Date(0, 0, 0, 6, 0, 0)} // Start 6 AM
+                            max={new Date(0, 0, 0, 23, 0, 0)} // End 11 PM
+                        />
                     </div>
                 )}
+
 
 
                 {/* List Grid (Shows for All Tabs, filtered) */}
@@ -882,7 +817,7 @@ const OwnerBookings = () => {
 
                                     <div className="card-meta">
                                         <div className="meta-row">
-                                            <Calendar size={14} />
+                                            <CalendarIcon size={14} />
                                             <span>{new Date(b.start_time).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
                                         </div>
                                         <div className="meta-row">
@@ -925,39 +860,41 @@ const OwnerBookings = () => {
                         ))
                     ) : (
                         <div className="empty-grid-state">
-                            <Calendar size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                            <CalendarIcon size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
                             <p>No bookings found for this category.</p>
                         </div>
                     )}
                 </div>
-            </div>
+            </div >
             {/* --- Live Notification Toast --- */}
-            {notification && (
-                <div style={{
-                    position: 'fixed', bottom: '2rem', right: '2rem',
-                    background: '#1e293b', padding: '1rem 1.5rem', borderRadius: '16px',
-                    borderLeft: '4px solid #10b981',
-                    boxShadow: '0 10px 30px -5px rgba(0,0,0,0.5)',
-                    display: 'flex', alignItems: 'center', gap: '1rem',
-                    zIndex: 10000, animation: 'slideUp 0.3s ease-out'
-                }}>
-                    <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '8px', borderRadius: '50%' }}>
-                        <Bell size={20} color="#10b981" />
+            {
+                notification && (
+                    <div style={{
+                        position: 'fixed', bottom: '2rem', right: '2rem',
+                        background: '#1e293b', padding: '1rem 1.5rem', borderRadius: '16px',
+                        borderLeft: '4px solid #10b981',
+                        boxShadow: '0 10px 30px -5px rgba(0,0,0,0.5)',
+                        display: 'flex', alignItems: 'center', gap: '1rem',
+                        zIndex: 10000, animation: 'slideUp 0.3s ease-out'
+                    }}>
+                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '8px', borderRadius: '50%' }}>
+                            <Bell size={20} color="#10b981" />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 'bold', textTransform: 'uppercase' }}>{notification.title}</div>
+                            <div style={{ color: 'white', fontWeight: '500', marginTop: '2px' }}>{notification.message}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>{notification.time}</div>
+                        </div>
+                        <button
+                            onClick={() => setNotification(null)}
+                            style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', marginLeft: '1rem' }}
+                        >
+                            <X size={16} />
+                        </button>
                     </div>
-                    <div>
-                        <div style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 'bold', textTransform: 'uppercase' }}>{notification.title}</div>
-                        <div style={{ color: 'white', fontWeight: '500', marginTop: '2px' }}>{notification.message}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px' }}>{notification.time}</div>
-                    </div>
-                    <button
-                        onClick={() => setNotification(null)}
-                        style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', marginLeft: '1rem' }}
-                    >
-                        <X size={16} />
-                    </button>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

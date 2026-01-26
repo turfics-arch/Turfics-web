@@ -10,11 +10,14 @@ from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, set_access_cookies
 from sqlalchemy.orm import joinedload
+from flask_socketio import SocketIO, emit, join_room, leave_room
+import eventlet
 
 load_dotenv() # Load before using environment variables
 
-from models import db, bcrypt, User, Turf, TurfGame, TurfUnit, UnitImage, Team, Booking, team_members, Coach, CoachBatch, CoachBooking, Academy, AcademyProgram, AcademyBatch, AcademyEnrollment, Tournament, TournamentRegistration, TournamentMatch, TournamentAnnouncement, Review, Community, CommunityMember, CommunityMessage, MatchRequest, MatchJoinRequest
+from models import db, bcrypt, User, Turf, TurfGame, TurfUnit, UnitImage, Team, Booking, team_members, Coach, CoachBatch, CoachBooking, Academy, AcademyProgram, AcademyBatch, AcademyEnrollment, Tournament, TournamentRegistration, TournamentMatch, TournamentAnnouncement, Review, Community, CommunityMember, CommunityMessage, MatchRequest, MatchJoinRequest, TurfStaff, TurfWaitlist, Asset, MaintenanceTask, MaintenanceLog, InventoryItem, Supplier, TurfConditionLog
 import pandas as pd
+from routes.maintenance import maintenance_bp
 import io
 import google.generativeai as genai
 
@@ -118,6 +121,11 @@ db.init_app(app)
 bcrypt.init_app(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
+
+app.register_blueprint(maintenance_bp)
+
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+
 
 @jwt.invalid_token_loader
 def invalid_token_callback(error):
@@ -699,6 +707,7 @@ def get_turf_games(turf_id):
             'default_price': game.default_price,
             'slot_duration': game.slot_duration,
             'is_active': game.is_active,
+            'pricing_rules': game.pricing_rules,
             'units_count': len(units),
             'units': [{
                 'id': u.id,
@@ -735,7 +744,8 @@ def create_game(turf_id):
             sport_type=data.get('sport_type'),
             game_category=data.get('game_category', 'team'),
             default_price=float(data.get('default_price')),
-            slot_duration=int(data.get('slot_duration', 60))
+            slot_duration=int(data.get('slot_duration', 60)),
+            pricing_rules=data.get('pricing_rules', '{}')
         )
         
         db.session.add(new_game)
@@ -769,6 +779,7 @@ def update_game(game_id):
         game.default_price = float(data.get('default_price', game.default_price))
         game.slot_duration = int(data.get('slot_duration', game.slot_duration))
         game.is_active = data.get('is_active', game.is_active)
+        game.pricing_rules = data.get('pricing_rules', game.pricing_rules)
         
         db.session.commit()
         return jsonify({'message': 'Game updated successfully'}), 200
@@ -3925,6 +3936,306 @@ def support_chat():
 
 
 # Added notes column to TournamentMatch
+# ============================================
+# REAL-TIME & CUSTOMER APIs
+# ============================================
+
+# --- Socket.IO Events ---
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
+@socketio.on('join_owner_room')
+def on_join(data):
+    """Join a room specific to a user (owner) to receive personal updates"""
+    user_id = data.get('user_id')
+    if user_id:
+        room = f"user_{user_id}"
+        join_room(room)
+        print(f"User {user_id} joined room {room}")
+        emit('room_joined', {'room': room})
+
+def notify_owner_new_booking(owner_id, booking_data):
+    """Helper to emit new booking event"""
+    room = f"user_{owner_id}"
+    socketio.emit('new_booking', booking_data, room=room)
+
+
+# --- Customer Management API ---
+
+@app.route('/api/owner/customers', methods=['GET'])
+@jwt_required()
+def get_owner_customers():
+    current_user = get_current_user()
+    
+    # 1. Get all turfs owned by user
+    my_turfs = Turf.query.filter_by(owner_id=current_user['id']).all()
+    turf_ids = [t.id for t in my_turfs]
+    
+    if not turf_ids:
+        return jsonify([]), 200
+        
+    # 2. Find bookings for these turfs
+    # Join Booking -> User to get customer details
+    bookings = db.session.query(Booking, User).join(User, Booking.user_id == User.id)\
+        .filter(Booking.turf_id.in_(turf_ids)).all()
+        
+    # 3. Aggregate data per customer
+    customers = {}
+    
+    for booking, user in bookings:
+        if user.id not in customers:
+            customers[user.id] = {
+                'id': user.id,
+                'name': user.username,
+                'email': user.email,
+                'phone': user.phone_number,
+                'total_bookings': 0,
+                'total_spend': 0,
+                'last_visit': None
+            }
+        
+        cust = customers[user.id]
+        cust['total_bookings'] += 1
+        cust['total_spend'] += booking.total_price
+        
+        # Track last visit
+        b_time = booking.start_time
+        if cust['last_visit'] is None or b_time > cust['last_visit']:
+            cust['last_visit'] = b_time
+
+    # Convert to list
+    result = list(customers.values())
+    
+    # Format dates
+    for r in result:
+        if r['last_visit']:
+            r['last_visit'] = r['last_visit'].isoformat()
+            
+    return jsonify(result), 200
+
+# --- Payment Mock API ---
+
+@app.route('/api/payments/create-order', methods=['POST'])
+@jwt_required()
+def create_payment_order():
+    """Mock Razorpay Order Creation"""
+    data = request.get_json()
+    amount = data.get('amount')
+    currency = data.get('currency', 'INR')
+    
+    # Simulate Order ID
+    order_id = f"order_{''.join(random.choices(string.ascii_letters + string.digits, k=14))}"
+    
+    return jsonify({
+        'id': order_id,
+        'entity': 'order',
+        'amount': amount * 100, # In paise
+        'amount_paid': 0,
+        'currency': currency,
+        'status': 'created'
+    }), 200
+
+@app.route('/api/payments/verify', methods=['POST'])
+@jwt_required()
+def verify_payment():
+    """Mock Payment Verification"""
+    data = request.get_json()
+    # In real world, verify signature here using RAZORPAY_KEY_SECRET
+    
+    # Simulate success
+    return jsonify({'status': 'success', 'message': 'Payment verified'}), 200
+
+# ============================================
+# OPERATIONS & ADVANCED ANALYTICS (PHASE 3)
+# ============================================
+
+# --- Staff Management ---
+
+@app.route('/api/turfs/<int:turf_id>/staff', methods=['GET'])
+@jwt_required()
+def get_turf_staff(turf_id):
+    current_user = get_current_user()
+    turf = Turf.query.get_or_404(turf_id)
+    
+    # Check permissions (Owner only for now)
+    if turf.owner_id != current_user['id']:
+        return jsonify({"message": "Unauthorized"}), 403
+        
+    staff = TurfStaff.query.filter_by(turf_id=turf_id).all()
+    result = [{
+        'id': s.id,
+        'user_id': s.user_id,
+        'username': s.user.username,
+        'email': s.user.email,
+        'role': s.role,
+        'status': s.status,
+        'joined_at': s.joined_at.isoformat()
+    } for s in staff]
+    
+    return jsonify(result), 200
+
+@app.route('/api/turfs/<int:turf_id>/staff', methods=['POST'])
+@jwt_required()
+def add_turf_staff(turf_id):
+    current_user = get_current_user()
+    turf = Turf.query.get_or_404(turf_id)
+    
+    if turf.owner_id != current_user['id']:
+        return jsonify({"message": "Unauthorized"}), 403
+        
+    data = request.get_json()
+    email = data.get('email')
+    username = data.get('username')
+    password = data.get('password')
+    role = data.get('role', 'manager')
+    
+    # Check if we should create a new user or add existing one
+    user_to_add = User.query.filter((User.email == email) | (User.username == username)).first()
+    
+    if not user_to_add:
+        # Create a new user for this staff member
+        if not username or not password:
+             return jsonify({"message": "Username and password required for new staff"}), 400
+        
+        user_to_add = User(username=username, email=email, role='staff')
+        user_to_add.set_password(password)
+        db.session.add(user_to_add)
+        db.session.flush() # Get the user ID before commit
+        
+    if TurfStaff.query.filter_by(turf_id=turf_id, user_id=user_to_add.id).first():
+        return jsonify({"message": "User already staff"}), 400
+        
+    new_staff = TurfStaff(turf_id=turf_id, user_id=user_to_add.id, role=role, status='active')
+    db.session.add(new_staff)
+    db.session.commit()
+    
+    return jsonify({"message": "Staff added successfully"}), 201
+
+@app.route('/api/staff/<int:staff_id>/status', methods=['PATCH'])
+@jwt_required()
+def toggle_staff_status(staff_id):
+    current_user = get_current_user()
+    staff = TurfStaff.query.get_or_404(staff_id)
+    turf = Turf.query.get(staff.turf_id)
+    
+    if turf.owner_id != current_user['id']:
+        return jsonify({"message": "Unauthorized"}), 403
+        
+    data = request.get_json()
+    new_status = data.get('status')
+    if new_status in ['active', 'inactive']:
+        staff.status = new_status
+        db.session.commit()
+        return jsonify({"message": f"Staff status updated to {new_status}"}), 200
+        
+    return jsonify({"message": "Invalid status"}), 400
+
+@app.route('/api/staff/<int:staff_id>', methods=['DELETE'])
+@jwt_required()
+def remove_staff(staff_id):
+    current_user = get_current_user()
+    staff = TurfStaff.query.get_or_404(staff_id)
+    turf = Turf.query.get(staff.turf_id)
+    
+    if turf.owner_id != current_user['id']:
+        return jsonify({"message": "Unauthorized"}), 403
+        
+    db.session.delete(staff)
+    db.session.commit()
+    return jsonify({"message": "Staff removed"}), 200
+
+# --- Waitlist Management ---
+
+@app.route('/api/waitlist/join', methods=['POST'])
+@jwt_required()
+def join_waitlist():
+    current_user = get_current_user()
+    data = request.get_json()
+    
+    unit_id = data.get('unit_id')
+    date_str = data.get('date')
+    time_str = data.get('time') # "HH:MM"
+    
+    try:
+        desired_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        desired_time = datetime.strptime(time_str, "%H:%M").time()
+        
+        # Check if already waiting
+        existing = TurfWaitlist.query.filter_by(
+            user_id=current_user['id'],
+            turf_unit_id=unit_id,
+            desired_date=desired_date,
+            desired_time=desired_time,
+            status='waiting'
+        ).first()
+        
+        if existing:
+            return jsonify({"message": "Already on waitlist"}), 400
+            
+        entry = TurfWaitlist(
+            user_id=current_user['id'],
+            turf_unit_id=unit_id,
+            desired_date=desired_date,
+            desired_time=desired_time
+        )
+        db.session.add(entry)
+        db.session.commit()
+        
+        return jsonify({"message": "Joined waitlist"}), 201
+    except Exception as e:
+        return jsonify({"message": str(e)}), 400
+
+# --- Advanced Analytics V3 ---
+
+@app.route('/api/analytics/advanced', methods=['GET'])
+@jwt_required()
+def get_advanced_analytics():
+    current_user = get_current_user()
+    # For MVP, aggregate across all owned turfs
+    my_turfs = Turf.query.filter_by(owner_id=current_user['id']).all()
+    turf_ids = [t.id for t in my_turfs]
+    
+    if not turf_ids:
+        return jsonify({}), 200
+        
+    # Occupancy Rate (Simplistic: Bookings / Total Possible Slots)
+    # Assume 12 hours * 2 slots/hr = 24 slots/day per unit
+    total_bookings = Booking.query.filter(Booking.turf_id.in_(turf_ids)).count()
+    
+    # Calculate Theoretical Capacity (Last 30 days)
+    # Total Units * 30 days * 12 hours
+    total_units = TurfUnit.query.filter(TurfUnit.turf_game_id.in_(
+        [g.id for t in my_turfs for g in t.games]
+    )).count()
+    
+    capacity = total_units * 30 * 12 
+    occupancy_rate = (total_bookings / capacity * 100) if capacity > 0 else 0
+    
+    # Peak Hours Analysis
+    # SQL Group By Hour
+    # SQLite/Postgres syntax differs, doing python aggregation for safety in this env
+    all_bookings = Booking.query.filter(Booking.turf_id.in_(turf_ids)).all()
+    hour_counts = {}
+    for b in all_bookings:
+        h = b.start_time.hour
+        hour_counts[h] = hour_counts.get(h, 0) + 1
+        
+    peak_hours = [{'hour': h, 'count': c} for h, c in hour_counts.items()]
+    peak_hours.sort(key=lambda x: x['count'], reverse=True)
+    
+    return jsonify({
+        'occupancy_rate': round(occupancy_rate, 1),
+        'peak_hours': peak_hours[:5] # Top 5
+    }), 200
+
+
 if __name__ == '__main__':
-    # Force reload
-    app.run(debug=True, port=5001)
+    # Use socketio.run instead of app.run
+    print("Starting Turfics Backend with SocketIO...")
+    socketio.run(app, debug=True, port=int(os.getenv("PORT", 5000)))

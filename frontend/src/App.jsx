@@ -28,8 +28,11 @@ import CommunityDetails from './pages/CommunityDetails';
 import TurfManagement from './pages/TurfManagement';
 import TurfGameManagement from './pages/TurfGameManagement';
 import OwnerBookings from './pages/OwnerBookings';
+import OwnerCustomers from './pages/OwnerCustomers';
+import OwnerStaff from './pages/OwnerStaff';
 import WalkInBooking from './pages/WalkInBooking';
 import OwnerAnalytics from './pages/OwnerAnalytics';
+import MaintenanceDashboard from './pages/MaintenanceDashboard';
 import PlayerBookings from './pages/PlayerBookings';
 import CoachDashboard from './pages/CoachDashboard';
 import AcademyDashboard from './pages/AcademyDashboard';
@@ -102,8 +105,11 @@ function App() {
           <Route path="/manage-turfs" element={<PrivateRoute><TurfManagement /></PrivateRoute>} />
           <Route path="/manage-turfs/:turfId/games" element={<PrivateRoute><TurfGameManagement /></PrivateRoute>} />
           <Route path="/owner/bookings" element={<PrivateRoute><OwnerBookings /></PrivateRoute>} />
+          <Route path="/owner/customers" element={<PrivateRoute><OwnerCustomers /></PrivateRoute>} />
+          <Route path="/owner/staff" element={<PrivateRoute><OwnerStaff /></PrivateRoute>} />
           <Route path="/owner/walk-in" element={<PrivateRoute><WalkInBooking /></PrivateRoute>} />
           <Route path="/owner/analytics" element={<PrivateRoute><OwnerAnalytics /></PrivateRoute>} />
+          <Route path="/owner/maintenance" element={<PrivateRoute><MaintenanceDashboard /></PrivateRoute>} />
           <Route path="/coach/dashboard" element={<PrivateRoute><CoachDashboard /></PrivateRoute>} />
           <Route path="/academy/dashboard" element={<PrivateRoute><AcademyDashboard /></PrivateRoute>} />
           <Route path="/admin/dashboard" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />

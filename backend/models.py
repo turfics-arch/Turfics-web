@@ -478,3 +478,155 @@ class MatchJoinRequest(db.Model):
     user = db.relationship('User', backref='match_join_requests', foreign_keys=[user_id])
     
     __table_args__ = (db.UniqueConstraint('match_id', 'user_id', name='_match_user_uc'),)
+
+
+# --- OPERATIONS MODELS (PHASE 3) ---
+
+class TurfStaff(db.Model):
+    __tablename__ = 'turf_staff'
+    id = db.Column(db.Integer, primary_key=True)
+    turf_id = db.Column(db.Integer, db.ForeignKey('turfs.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    role = db.Column(db.String(50), default='manager') # manager, admin
+    status = db.Column(db.String(20), default='active') # active, inactive
+    
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = db.relationship('User', backref='staff_roles')
+    turf = db.relationship('Turf', backref='staff_members')
+    
+    __table_args__ = (db.UniqueConstraint('turf_id', 'user_id', name='_turf_staff_uc'),)
+
+class TurfWaitlist(db.Model):
+    __tablename__ = 'turf_waitlist'
+    id = db.Column(db.Integer, primary_key=True)
+    turf_unit_id = db.Column(db.Integer, db.ForeignKey('turf_units.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # The slot they are waiting for
+    desired_date = db.Column(db.Date, nullable=False)
+    desired_time = db.Column(db.Time, nullable=False) # Start time
+    
+    status = db.Column(db.String(20), default='waiting') # waiting, notified, expired, booked
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    unit = db.relationship('TurfUnit', backref='waitlist')
+    user = db.relationship('User', backref='waitlist_entries')
+
+# --- MAINTENANCE & ASSET MANAGEMENT MODELS ---
+
+class Supplier(db.Model):
+    __tablename__ = 'suppliers'
+    id = db.Column(db.Integer, primary_key=True)
+    turf_id = db.Column(db.Integer, db.ForeignKey('turfs.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    contact_person = db.Column(db.String(100))
+    phone = db.Column(db.String(20))
+    email = db.Column(db.String(120))
+    address = db.Column(db.String(255))
+    category = db.Column(db.String(50)) # Equipment, Chemicals, Seeds, Spare Parts
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Asset(db.Model):
+    __tablename__ = 'assets'
+    id = db.Column(db.Integer, primary_key=True)
+    turf_id = db.Column(db.Integer, db.ForeignKey('turfs.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False) # "Toro Reel Mower", "John Deere Roller"
+    category = db.Column(db.String(50)) # Mower, Roller, Sprinkler, Lighting, etc.
+    serial_number = db.Column(db.String(100))
+    purchase_date = db.Column(db.Date)
+    purchase_cost = db.Column(db.Float)
+    
+    # Usage Tracking
+    current_hours = db.Column(db.Float, default=0.0)
+    service_interval_hours = db.Column(db.Float) # e.g., service every 50 hours
+    last_service_hours = db.Column(db.Float, default=0.0)
+    next_service_date = db.Column(db.Date)
+    
+    status = db.Column(db.String(20), default='active') # active, in_repair, retired
+    location_notes = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class InventoryItem(db.Model):
+    __tablename__ = 'inventory_items'
+    id = db.Column(db.Integer, primary_key=True)
+    turf_id = db.Column(db.Integer, db.ForeignKey('turfs.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(50)) # Fertilizer, Pesticide, Seed, Fuel, Spare Part
+    unit = db.Column(db.String(20)) # kg, liters, units, bags
+    
+    current_stock = db.Column(db.Float, default=0.0)
+    min_stock_alert = db.Column(db.Float, default=5.0)
+    
+    supplier_id = db.Column(db.Integer, db.ForeignKey('suppliers.id'), nullable=True)
+    unit_price = db.Column(db.Float)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class MaintenanceTask(db.Model):
+    __tablename__ = 'maintenance_tasks'
+    id = db.Column(db.Integer, primary_key=True)
+    turf_id = db.Column(db.Integer, db.ForeignKey('turfs.id'), nullable=False)
+    asset_id = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=True) # Linked to a specific mower/machine
+    
+    title = db.Column(db.String(100), nullable=False) # "Morning Mowing", "Fertilizer Application"
+    description = db.Column(db.Text)
+    task_type = db.Column(db.String(50)) # Mowing, Watering, Fertilizing, Pest Control, Machine Service
+    
+    # Scheduling
+    is_recurring = db.Column(db.Boolean, default=False)
+    recurrence_rule = db.Column(db.String(100)) # "daily", "weekly", "monthly", or CRON-like
+    
+    scheduled_date = db.Column(db.DateTime, nullable=False)
+    priority = db.Column(db.String(20), default='medium') # low, medium, high, critical
+    
+    # Weather Sensitivity
+    is_weather_sensitive = db.Column(db.Boolean, default=False)
+    preferred_condition = db.Column(db.String(20)) # Dry, Sunny, etc.
+    
+    status = db.Column(db.String(20), default='scheduled') # scheduled, in_progress, completed, skipped, cancelled
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class MaintenanceLog(db.Model):
+    __tablename__ = 'maintenance_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('maintenance_tasks.id'), nullable=True)
+    asset_id = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=True)
+    turf_id = db.Column(db.Integer, db.ForeignKey('turfs.id'), nullable=False)
+    
+    performed_by = db.Column(db.String(100))
+    completion_date = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Consumables used
+    inventory_data = db.Column(db.Text) # JSON string: [{"item_id": 1, "qty": 2.5}]
+    
+    # Machine usage
+    hours_logged = db.Column(db.Float) # If linked to asset
+    
+    notes = db.Column(db.Text)
+    cost = db.Column(db.Float, default=0.0)
+    photo_url = db.Column(db.String(500))
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class TurfConditionLog(db.Model):
+    __tablename__ = 'turf_condition_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    turf_id = db.Column(db.Integer, db.ForeignKey('turfs.id'), nullable=False)
+    
+    log_date = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Metrics (1-10)
+    grass_quality = db.Column(db.Integer)
+    wear_level = db.Column(db.Integer)
+    soil_moisture = db.Column(db.Float) # % if sensors used
+    drainage_status = db.Column(db.String(50)) # Good, Fair, Poor
+    
+    notes = db.Column(db.Text)
+    photo_url = db.Column(db.String(500))
+    performed_by = db.Column(db.String(100))
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+

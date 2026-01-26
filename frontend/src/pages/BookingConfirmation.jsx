@@ -463,6 +463,17 @@ const BookingConfirmation = () => {
                                 {selectedFriends.length > 0 && (
                                     <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#aaa' }}>
                                         Splitting balance ₹{balanceAmount}: <strong>₹{Math.ceil(splitPerPerson)} / person</strong>
+
+                                        <button
+                                            onClick={() => {
+                                                const text = `Join me for a game at ${bookingsInfo?.[0]?.turf_name}! ${new Date(bookingsInfo[0].start_time).toLocaleString()}. Cost: ₹${Math.ceil(splitPerPerson)}/person.`;
+                                                navigator.clipboard.writeText(text);
+                                                showSuccess('Copied', 'Invite text copied to clipboard!');
+                                            }}
+                                            style={{ marginTop: '1rem', width: '100%', padding: '0.8rem', background: '#333', border: '1px solid #444', color: 'white', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                        >
+                                            <Share2 size={16} /> Copy Invite Text
+                                        </button>
                                     </div>
                                 )}
                             </div>

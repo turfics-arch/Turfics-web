@@ -202,7 +202,6 @@ const WalkInBooking = () => {
 
             await Promise.all(promises);
 
-            await Promise.all(promises);
 
             showSuccess(mode === 'block' ? 'Blocked' : 'Confirmed', mode === 'block' ? 'Slots Blocked Successfully' : 'Bookings Confirmed');
             setFormData({ ...formData, guest_name: '', guest_phone: '' });

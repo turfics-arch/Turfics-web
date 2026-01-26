@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../core/constants.dart';
+import '../../core/constants/constants.dart';
 
 class ApiService {
   // Helper to get headers
@@ -34,14 +34,19 @@ class ApiService {
   // POST Request
   static Future<dynamic> post(String endpoint, dynamic data, {bool auth = true}) async {
     final url = '${AppConstants.baseUrl}$endpoint';
-    print('POST REQUEST TO: $url');
-    final headers = await getHeaders(auth: auth);
-    final response = await http.post(
-      Uri.parse(url),
-      headers: headers,
-      body: jsonEncode(data),
-    );
-    return _handleResponse(response);
+    print('POST REQUEST TO: $url'); // Debug log
+    try {
+      final headers = await getHeaders(auth: auth);
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(data),
+      ).timeout(const Duration(seconds: 10)); // Add timeout
+      return _handleResponse(response);
+    } catch (e) {
+      print('API Error: $e');
+      throw Exception('Connection Failed: Is backend running? $e');
+    }
   }
 
   // PUT Request

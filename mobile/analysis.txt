@@ -1,0 +1,188 @@
+Analyzing mobile...                                             
+
+   info - Use 'const' with the constructor to improve performance - lib\core\theme\app_theme.dart:43:23 - prefer_const_constructors
+   info - Don't invoke 'print' in production code - lib\data\services\api_service.dart:37:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\services\api_service.dart:47:7 - avoid_print
+warning - Unused import: 'dart:convert' - lib\data\services\auth_service.dart:1:8 - unused_import
+warning - Unused import: 'dart:math' - lib\features\auth\screens\login_screen.dart:12:8 - unused_import
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\screens\login_screen.dart:68:12 - use_build_context_synchronously
+  error - The name 'Provider' is defined in the libraries 'package:provider/src/provider.dart (via package:provider/provider.dart)' and 'package:riverpod/src/provider.dart' - lib\features\auth\screens\login_screen.dart:86:24 - ambiguous_import
+  error - The name 'Provider' is defined in the libraries 'package:provider/src/provider.dart (via package:provider/provider.dart)' and 'package:riverpod/src/provider.dart' - lib\features\auth\screens\login_screen.dart:96:24 - ambiguous_import
+warning - The value of the local variable 'size' isn't used - lib\features\auth\screens\login_screen.dart:112:11 - unused_local_variable
+  error - 'Consumer' isn't a function - lib\features\auth\screens\login_screen.dart:221:25 - invocation_of_non_function
+  error - The name 'Consumer' is defined in the libraries 'package:flutter_riverpod/src/consumer.dart (via package:flutter_riverpod/flutter_riverpod.dart)' and 'package:provider/src/consumer.dart (via package:provider/provider.dart)' - lib\features\auth\screens\login_screen.dart:221:25 - ambiguous_import
+   info - Don't invoke 'print' in production code - lib\features\booking\providers\booking_provider.dart:26:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\booking\providers\booking_provider.dart:47:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\booking\providers\booking_provider.dart:75:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\discovery\providers\turf_provider.dart:30:7 - avoid_print
+  error - A value of type 'Turf?' can't be assigned to a variable of type 'Turf' - lib\features\discovery\screens\turf_details_screen.dart:45:19 - invalid_assignment
+warning - The value of the local variable 'hasShortBlock' isn't used - lib\features\discovery\screens\turf_details_screen.dart:102:10 - unused_local_variable
+   info - Use 'const' with the constructor to improve performance - lib\features\discovery\screens\turf_details_screen.dart:372:32 - prefer_const_constructors
+warning - Unused import: 'package:provider/provider.dart' - lib\features\discovery\screens\turfs_screen.dart:2:8 - unused_import
+warning - Unused import: 'package:go_router/go_router.dart' - lib\features\discovery\screens\turfs_screen.dart:3:8 - unused_import
+warning - Duplicate import - lib\features\discovery\screens\turfs_screen.dart:7:8 - duplicate_import
+   info - Use 'const' with the constructor to improve performance - lib\features\discovery\screens\turfs_screen.dart:130:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\discovery\screens\turfs_screen.dart:132:24 - prefer_const_constructors
+  error - The name 'Turf' isn't a type, so it can't be used as a type argument - lib\features\discovery\screens\turfs_screen.dart:235:44 - non_type_as_type_argument
+   info - Use 'const' with the constructor to improve performance - lib\features\discovery\screens\turfs_screen.dart:242:20 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\features\discovery\screens\turfs_screen.dart:244:25 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:77:32 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\features\social\screens\community_screen.dart:78:37 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:79:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:81:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:81:57 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:88:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:90:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:98:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:100:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:109:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:111:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:178:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:179:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:180:30 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\features\social\screens\community_screen.dart:182:35 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:183:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:185:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:185:64 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:187:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:187:68 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:238:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:239:31 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:239:58 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:240:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:241:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:246:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:247:29 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\features\social\screens\community_screen.dart:250:29 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:266:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:271:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:282:47 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:286:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:288:51 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:312:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:312:61 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:332:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:336:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:371:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:376:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:425:20 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\features\social\screens\community_screen.dart:426:23 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:427:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\social\screens\community_screen.dart:429:15 - prefer_const_constructors
+   info - 'AutoDisposeAsyncNotifierProviderRef' is deprecated and shouldn't be used. will be removed in 3.0.0. Use Ref instead - lib\features\tournaments\providers\tournament_controller.g.dart:162:8 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:74:28 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\features\tournaments\screens\tournaments_list_screen.dart:76:33 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:77:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:79:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:79:56 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:84:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:86:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:94:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:96:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:105:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:107:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:210:33 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:210:60 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:220:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:235:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:250:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:263:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:289:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:289:60 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:290:101 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:315:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:315:58 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:332:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\tournaments\screens\tournaments_list_screen.dart:340:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:69:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:71:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:79:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:81:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:202:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:216:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:237:34 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:242:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:244:64 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:250:43 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:251:71 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:259:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:259:54 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:260:76 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:274:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:274:60 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:298:33 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:298:60 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:308:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:323:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:325:64 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:336:33 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:337:33 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\features\training\screens\coaches_list_screen.dart:340:33 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:345:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:358:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:363:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:365:53 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:371:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:387:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\training\screens\coaches_list_screen.dart:387:62 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\academy\academy_dashboard.dart:12:13 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\academy\academy_dashboard.dart:14:16 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\academy\academy_dashboard.dart:15:21 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\screens\coach\coach_dashboard.dart:12:13 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\coach\coach_dashboard.dart:14:16 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\coach\coach_dashboard.dart:15:21 - prefer_const_literals_to_create_immutables
+warning - Unused import: 'package:go_router/go_router.dart' - lib\screens\dashboard\dashboard_screen.dart:2:8 - unused_import
+warning - Unused import: 'package:provider/provider.dart' - lib\screens\dashboard\dashboard_screen.dart:3:8 - unused_import
+warning - Unused import: 'package:cupertino_icons/cupertino_icons.dart' - lib\screens\dashboard\dashboard_screen.dart:4:8 - unused_import
+  error - Target of URI doesn't exist: '../../core/constants.dart' - lib\screens\dashboard\dashboard_screen.dart:5:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../providers/auth_provider.dart' - lib\screens\dashboard\dashboard_screen.dart:6:8 - uri_does_not_exist
+  error - Invalid constant value - lib\screens\dashboard\dashboard_screen.dart:38:49 - invalid_constant
+  error - Undefined name 'AppColors' - lib\screens\dashboard\dashboard_screen.dart:38:49 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\screens\dashboard\dashboard_screen.dart:47:28 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\screens\dashboard\dashboard_screen.dart:48:30 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\screens\dashboard\dashboard_screen.dart:49:32 - undefined_identifier
+warning - Unused import: 'package:go_router/go_router.dart' - lib\screens\dashboard\discovery_tab.dart:3:8 - unused_import
+  error - Target of URI doesn't exist: '../../core/constants.dart' - lib\screens\dashboard\discovery_tab.dart:4:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../providers/turf_provider.dart' - lib\screens\dashboard\discovery_tab.dart:5:8 - uri_does_not_exist
+  error - The name 'TurfProvider' isn't a type, so it can't be used as a type argument - lib\screens\dashboard\discovery_tab.dart:23:19 - non_type_as_type_argument
+  error - The name 'TurfProvider' isn't a type, so it can't be used as a type argument - lib\screens\dashboard\discovery_tab.dart:35:38 - non_type_as_type_argument
+  error - Undefined name 'AppColors' - lib\screens\dashboard\discovery_tab.dart:38:24 - undefined_identifier
+  error - Invalid constant value - lib\screens\dashboard\discovery_tab.dart:44:45 - invalid_constant
+  error - Undefined name 'AppConstants' - lib\screens\dashboard\discovery_tab.dart:44:45 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\screens\dashboard\discovery_tab.dart:83:46 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\screens\dashboard\discovery_tab.dart:84:44 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\screens\dashboard\discovery_tab.dart:85:45 - undefined_identifier
+  error - Invalid constant value - lib\screens\dashboard\discovery_tab.dart:99:74 - invalid_constant
+  error - Undefined name 'AppColors' - lib\screens\dashboard\discovery_tab.dart:99:74 - undefined_identifier
+  error - Invalid constant value - lib\screens\dashboard\discovery_tab.dart:104:53 - invalid_constant
+  error - Undefined name 'AppColors' - lib\screens\dashboard\discovery_tab.dart:104:53 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\screens\dashboard\discovery_tab.dart:109:34 - undefined_identifier
+  error - Invalid constant value - lib\screens\dashboard\discovery_tab.dart:112:43 - invalid_constant
+  error - Undefined name 'AppConstants' - lib\screens\dashboard\discovery_tab.dart:112:43 - undefined_identifier
+warning - Unused import: '../../data/models/models.dart' - lib\screens\dashboard\home_tab.dart:8:8 - unused_import
+   info - Use 'const' with the constructor to improve performance - lib\screens\dashboard\home_tab.dart:79:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\dashboard\home_tab.dart:81:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\dashboard\home_tab.dart:99:29 - prefer_const_constructors
+   info - The declaration '_buildTopBar' isn't referenced - lib\screens\dashboard\home_tab.dart:136:10 - unused_element
+   info - The declaration '_buildQuickAccessGrid' isn't referenced - lib\screens\dashboard\home_tab.dart:199:10 - unused_element
+  error - 'ProfileScreen.build' ('Widget Function(BuildContext)') isn't a valid override of 'ConsumerWidget.build' ('Widget Function(BuildContext, WidgetRef)') - lib\screens\dashboard\profile_screen.dart:12:10 - invalid_override
+  error - Undefined name 'ref' - lib\screens\dashboard\profile_screen.dart:18:14 - undefined_identifier
+  error - The name 'Provider' is defined in the libraries 'package:provider/src/provider.dart (via package:provider/provider.dart)' and 'package:riverpod/src/provider.dart' - lib\screens\dashboard\profile_screen.dart:20:14 - ambiguous_import
+  error - Target of URI doesn't exist: '../../core/constants.dart' - lib\screens\dashboard\profile_tab.dart:3:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../providers/auth_provider.dart' - lib\screens\dashboard\profile_tab.dart:4:8 - uri_does_not_exist
+  error - The name 'AuthProvider' isn't a type, so it can't be used as a type argument - lib\screens\dashboard\profile_tab.dart:16:26 - non_type_as_type_argument
+  error - Undefined name 'AppColors' - lib\screens\dashboard\profile_tab.dart:21:30 - undefined_identifier
+  error - Undefined name 'AppColors' - lib\screens\dashboard\profile_tab.dart:22:30 - undefined_identifier
+   info - Use 'const' with the constructor to improve performance - lib\screens\owner\owner_dashboard.dart:27:13 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\owner\owner_dashboard.dart:29:16 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\owner\owner_dashboard.dart:30:21 - prefer_const_literals_to_create_immutables
+warning - Unused import: 'package:provider/provider.dart' - lib\widgets\scaffold_with_nav_bar.dart:3:8 - unused_import
+warning - Unused import: '../features/auth/providers/auth_provider.dart' - lib\widgets\scaffold_with_nav_bar.dart:5:8 - unused_import
+   info - Statements in an if should be enclosed in a block - lib\widgets\scaffold_with_nav_bar.dart:22:40 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\widgets\scaffold_with_nav_bar.dart:23:51 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\widgets\scaffold_with_nav_bar.dart:24:44 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\widgets\scaffold_with_nav_bar.dart:25:47 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\widgets\scaffold_with_nav_bar.dart:26:10 - curly_braces_in_flow_control_structures
+warning - Unused import: 'package:mobile/main.dart' - test\widget_test.dart:11:8 - unused_import
+  error - The name 'MyApp' isn't a class - test\widget_test.dart:16:35 - creation_with_non_type
+

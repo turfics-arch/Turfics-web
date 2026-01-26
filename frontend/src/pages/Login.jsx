@@ -53,6 +53,7 @@ const Login = () => {
                 if (res.data.role === 'coach') navigate('/coach/dashboard');
                 else if (res.data.role === 'admin') navigate('/admin/dashboard');
                 else if (res.data.role === 'academy') navigate('/academy/dashboard');
+                else if (res.data.role === 'owner') navigate('/dashboard');
                 else navigate('/my-bookings');
             }, 1000);
         } catch (err) {
@@ -105,6 +106,7 @@ const Login = () => {
                 if (res.data.role === 'coach') navigate('/coach/dashboard');
                 else if (res.data.role === 'admin') navigate('/admin/dashboard');
                 else if (res.data.role === 'academy') navigate('/academy/dashboard');
+                else if (res.data.role === 'owner') navigate('/dashboard');
                 else navigate('/my-bookings');
             }, 1000);
         } catch (err) {
@@ -136,6 +138,7 @@ const Login = () => {
                 if (res.data.role === 'coach') navigate('/coach/dashboard');
                 else if (res.data.role === 'admin') navigate('/admin/dashboard');
                 else if (res.data.role === 'academy') navigate('/academy/dashboard');
+                else if (res.data.role === 'owner') navigate('/dashboard');
                 else navigate('/my-bookings');
             } else {
                 await axios.post(`${API_URL}/api/auth/register`, {

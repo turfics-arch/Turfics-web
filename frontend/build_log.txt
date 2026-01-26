@@ -1,0 +1,29 @@
+
+> frontend@0.0.0 build
+> vite build
+
+[36mvite v7.3.0 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 3193 modules transformed.
+Γ£ù Build failed in 9.11s
+error during build:
+src/pages/MaintenanceDashboard.jsx (7:14): "Tool" is not exported by "node_modules/lucide-react/dist/esm/lucide-react.js", imported by "src/pages/MaintenanceDashboard.jsx".
+file: D:/Turfics/Turfics-webapp/Turfics-webapp/frontend/src/pages/MaintenanceDashboard.jsx:7:14
+
+5: // import 'react-big-calendar/lib/css/react-big-calendar.css';
+6: import {
+7:     Activity, Tool, Package, Droplets, Sun, CloudRain,
+                 ^
+8:     AlertTriangle, Plus, ChevronRight, Camera, Clipboard,
+9:     ArrowRight, Settings, Info, Cloud
+
+    at getRollupError (file:///D:/Turfics/Turfics-webapp/Turfics-webapp/frontend/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+    at error (file:///D:/Turfics/Turfics-webapp/Turfics-webapp/frontend/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+    at Module.error (file:///D:/Turfics/Turfics-webapp/Turfics-webapp/frontend/node_modules/rollup/dist/es/shared/node-entry.js:17022:16)
+    at Module.traceVariable (file:///D:/Turfics/Turfics-webapp/Turfics-webapp/frontend/node_modules/rollup/dist/es/shared/node-entry.js:17478:29)
+    at ModuleScope.findVariable (file:///D:/Turfics/Turfics-webapp/Turfics-webapp/frontend/node_modules/rollup/dist/es/shared/node-entry.js:15141:39)
+    at ReturnValueScope.findVariable (file:///D:/Turfics/Turfics-webapp/Turfics-webapp/frontend/node_modules/rollup/dist/es/shared/node-entry.js:5688:38)
+    at FunctionBodyScope.findVariable (file:///D:/Turfics/Turfics-webapp/Turfics-webapp/frontend/node_modules/rollup/dist/es/shared/node-entry.js:5688:38)
+    at Identifier.bind (file:///D:/Turfics/Turfics-webapp/Turfics-webapp/frontend/node_modules/rollup/dist/es/shared/node-entry.js:5462:40)
+    at CallExpression.bind (file:///D:/Turfics/Turfics-webapp/Turfics-webapp/frontend/node_modules/rollup/dist/es/shared/node-entry.js:2825:28)
+    at CallExpression.bind (file:///D:/Turfics/Turfics-webapp/Turfics-webapp/frontend/node_modules/rollup/dist/es/shared/node-entry.js:12172:15)

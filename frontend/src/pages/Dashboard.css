@@ -46,6 +46,7 @@
     margin: 0;
     background: linear-gradient(to right, #fff, #94a3b8);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -93,12 +94,58 @@
     position: relative;
     overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s;
+    height: 220px;
+    /* Fixed height for uniformity */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .kpi-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
     border-color: rgba(255, 255, 255, 0.15);
+}
+
+.kpi-footer-link {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: auto;
+}
+
+/* Specific Icon Wrappers for Color Coding */
+.revenue-icon-wrapper {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+.bookings-icon-wrapper {
+    background: rgba(16, 185, 129, 0.2);
+    margin-bottom: 0.5rem;
+}
+
+.today-icon-wrapper {
+    background: rgba(245, 158, 11, 0.2);
+}
+
+.maintenance-icon-wrapper {
+    background: rgba(16, 185, 129, 0.2);
+}
+
+/* Pending Badge */
+.pending-badge {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    animation: pulse 2s infinite;
 }
 
 .bookings-card {
@@ -575,8 +622,17 @@
     }
 
     .kpi-grid {
-        grid-template-columns: 1fr;
-        /* Stack cards on mobile */
+        grid-template-columns: repeat(2, 1fr);
+        /* 2x2 Layout on Mobile */
+    }
+
+    .kpi-value {
+        font-size: 1.2rem;
+    }
+
+    .kpi-card {
+        padding: 0.75rem;
+        height: 180px;
     }
 
     .bookings-card {

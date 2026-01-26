@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../core/constants.dart';
+import '../core/constants/constants.dart';
 import '../data/models/models.dart';
 
 class TurfCard extends StatelessWidget {

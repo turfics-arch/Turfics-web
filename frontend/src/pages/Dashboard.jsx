@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, MapPin, Award, Calendar, Wallet, TrendingUp, Users, Activity, Clock, PieChart as PieIcon, ArrowRight, Zap, BarChart2, Check, X, Bell } from 'lucide-react';
+import { LogOut, MapPin, Award, Calendar, Wallet, TrendingUp, Users, Activity, Clock, PieChart as PieIcon, ArrowRight, Zap, BarChart2, Check, X, Bell, Settings } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Navbar from '../components/Navbar';
 import { showConfirm } from '../utils/SwalUtils';
@@ -146,16 +146,18 @@ const Dashboard = () => {
                 {/* KPI ROW */}
                 <div className="dashboard-grid-row kpi-grid">
                     <div className="kpi-card relative-action-card" onClick={() => navigate('/owner/analytics')} style={{ cursor: 'pointer' }}>
-                        <div className="kpi-icon-wrapper" style={{ background: 'rgba(59, 130, 246, 0.2)' }}>
-                            <Wallet size={24} color="#3b82f6" />
-                        </div>
-                        <div className="kpi-label">Revenue (This Month)</div>
-                        <div className="kpi-value">₹{stats.revenue_month?.toLocaleString() || 0}</div>
-                        <div className="kpi-trend trend-up" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-start', marginTop: '0.5rem' }}>
-                            <span><TrendingUp size={14} /> Total: ₹{stats.total_revenue?.toLocaleString()}</span>
-                            <div style={{ fontSize: '0.8rem', color: '#3b82f6', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                                View Analytics <ArrowRight size={14} />
+                        <div>
+                            <div className="kpi-icon-wrapper revenue-icon-wrapper">
+                                <Wallet size={24} color="#3b82f6" />
                             </div>
+                            <div className="kpi-label">Revenue (This Month)</div>
+                            <div className="kpi-value">₹{stats.revenue_month?.toLocaleString() || 0}</div>
+                            <div className="kpi-trend trend-up">
+                                <span><TrendingUp size={14} /> Total: ₹{stats.total_revenue?.toLocaleString()}</span>
+                            </div>
+                        </div>
+                        <div className="kpi-footer-link" style={{ color: '#3b82f6' }}>
+                            View Analytics <ArrowRight size={14} />
                         </div>
                     </div>
 
@@ -170,65 +172,23 @@ const Dashboard = () => {
                             }
                         }}
                     >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <div className="kpi-icon-wrapper" style={{ background: 'rgba(16, 185, 129, 0.2)', marginBottom: '0.5rem' }}>
-                                <Activity size={24} color="#10b981" />
-                            </div>
-                            {/* Pending Badge or Icon */}
-                            {stats.bookings_breakdown?.pending > 0 && (
-                                <div style={{
-                                    background: 'rgba(245, 158, 11, 0.2)',
-                                    color: '#f59e0b',
-                                    padding: '4px 8px',
-                                    borderRadius: '12px',
-                                    fontSize: '0.75rem',
-                                    fontWeight: 'bold',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    border: '1px solid rgba(245, 158, 11, 0.3)',
-                                    animation: 'pulse 2s infinite'
-                                }}>
-                                    <Bell size={12} /> {stats.bookings_breakdown.pending} Review
+                        <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <div className="kpi-icon-wrapper bookings-icon-wrapper">
+                                    <Activity size={24} color="#10b981" />
                                 </div>
-                            )}
+                                {stats.bookings_breakdown?.pending > 0 && (
+                                    <div className="pending-badge">
+                                        <Bell size={12} /> {stats.bookings_breakdown.pending} Review
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="kpi-label">Bookings (Today)</div>
+                            <div className="kpi-value" style={{ marginBottom: '0.5rem' }}>{stats.bookings_today || 0}</div>
                         </div>
 
-                        <div className="kpi-label">Bookings (Today)</div>
-                        <div className="kpi-value" style={{ marginBottom: '0.5rem' }}>{stats.bookings_today || 0}</div>
-
-                        {/* Improved Breakdown Grid */}
-                        {stats.bookings_breakdown && (
-                            <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: '1fr 1fr',
-                                gap: '6px',
-                                background: 'rgba(0,0,0,0.2)',
-                                padding: '8px',
-                                borderRadius: '8px'
-                            }}>
-                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                    Verified
-                                    <div style={{ fontSize: '0.9rem', color: '#10b981', fontWeight: '600' }}>{stats.bookings_breakdown.confirmed}</div>
-                                </div>
-                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                    Pending
-                                    <div style={{ fontSize: '0.9rem', color: stats.bookings_breakdown.pending > 0 ? '#f59e0b' : '#94a3b8', fontWeight: '600' }}>
-                                        {stats.bookings_breakdown.pending}
-                                    </div>
-                                </div>
-                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                    In-App
-                                    <div style={{ fontSize: '0.9rem', color: '#e2e8f0', fontWeight: '600' }}>{stats.bookings_breakdown.online}</div>
-                                </div>
-                                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                                    Manual
-                                    <div style={{ fontSize: '0.9rem', color: '#e2e8f0', fontWeight: '600' }}>{stats.bookings_breakdown.manual}</div>
-                                </div>
-                            </div>
-                        )}
-
-                        <div style={{ fontSize: '0.8rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '0.75rem' }}>
+                        <div className="kpi-footer-link" style={{ color: '#10b981' }}>
                             {stats.bookings_breakdown?.pending > 0 ? 'Review Actions' : 'Manage Bookings'} <ArrowRight size={14} />
                         </div>
                     </div>
@@ -239,35 +199,39 @@ const Dashboard = () => {
                             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }}
                         style={{ cursor: 'pointer' }}>
-                        <div className="kpi-icon-wrapper" style={{ background: 'rgba(245, 158, 11, 0.2)' }}>
-                            <Zap size={24} color="#f59e0b" />
+                        <div>
+                            <div className="kpi-icon-wrapper today-icon-wrapper">
+                                <Zap size={24} color="#f59e0b" />
+                            </div>
+                            <div className="kpi-label">Revenue (Today)</div>
+                            <div className="kpi-value">₹{stats.revenue_today?.toLocaleString() || 0}</div>
+                            <div className="kpi-trend trend-up">
+                                <span style={{ color: '#10b981' }}>Active Now</span>
+                            </div>
                         </div>
-                        <div className="kpi-label">Revenue (Today)</div>
-                        <div className="kpi-value">₹{stats.revenue_today?.toLocaleString() || 0}</div>
-                        <div className="kpi-trend trend-up">
-                            <span style={{ color: '#10b981' }}>Active Now</span>
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '0.75rem' }}>
+                        <div className="kpi-footer-link" style={{ color: '#f59e0b' }}>
                             See Transactions <ArrowRight size={14} />
                         </div>
                     </div>
 
-                    <div className="kpi-card relative-action-card" onClick={() => navigate('/manage-turfs')} style={{
-                        cursor: 'pointer',
-                        borderColor: 'var(--accent-primary)',
-                        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(30, 41, 59, 0.8) 100%)'
+                    <div className="kpi-card relative-action-card" onClick={(() => navigate('/owner/maintenance'))} style={{
+                        cursor: 'pointer'
                     }}>
-                        <div className="kpi-icon-wrapper" style={{ background: '#3b82f6', color: 'white' }}>
-                            <MapPin size={24} />
+                        <div>
+                            <div className="kpi-icon-wrapper maintenance-icon-wrapper">
+                                <Settings size={24} color="#10b981" />
+                            </div>
+                            <div className="kpi-label" style={{ color: '#6ee7b7' }}>Maintenance</div>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white', marginBottom: '0.5rem' }}>
+                                Operations Hub
+                            </div>
                         </div>
-                        <div className="kpi-label" style={{ color: '#93c5fd' }}>Quick Access</div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'white', marginBottom: '0.5rem' }}>
-                            Manage Turfs
-                        </div>
-                        <div style={{ color: '#94a3b8', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            Configure venues & slots <ArrowRight size={14} />
+                        <div className="kpi-footer-link" style={{ color: '#94a3b8' }}>
+                            Asset logs & scheduling <ArrowRight size={14} />
                         </div>
                     </div>
+
+
                 </div>
 
                 {/* CHARTS ROW 1: Revenue Trend & Peak Hours */}
