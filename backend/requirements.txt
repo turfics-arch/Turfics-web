@@ -10,3 +10,5 @@ gunicorn
 requests
 google-generativeai
 pandas
+flask-socketio
+eventlet
