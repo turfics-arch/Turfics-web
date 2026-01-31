@@ -77,7 +77,7 @@ class ApiService {
       // Basic error handling
       try {
         final error = jsonDecode(response.body);
-        throw Exception(error['error'] ?? 'Something went wrong');
+        throw Exception(error['message'] ?? error['error'] ?? 'Something went wrong');
       } catch (e) {
         throw Exception('Server error: ${response.statusCode}');
       }

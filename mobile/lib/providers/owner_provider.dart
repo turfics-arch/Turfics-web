@@ -8,6 +8,14 @@ class OwnerProvider with ChangeNotifier {
 
   List<Turf> _myTurfs = [];
   List<Turf> get myTurfs => _myTurfs;
+  
+  Turf? _selectedTurf;
+  Turf? get selectedTurf => _selectedTurf;
+
+  void selectTurf(Turf? turf) {
+    _selectedTurf = turf;
+    notifyListeners();
+  }
 
   List<StaffMember> _staff = [];
   List<StaffMember> get staff => _staff;
@@ -33,6 +41,8 @@ class OwnerProvider with ChangeNotifier {
   List<MaintenanceAsset> _maintenanceAssets = [];
   List<MaintenanceAsset> get maintenanceAssets => _maintenanceAssets;
 
+
+
   // --- Turfs ---
   Future<void> fetchMyTurfs() async {
     _isLoading = true;
@@ -40,6 +50,11 @@ class OwnerProvider with ChangeNotifier {
     try {
       final res = await ApiService.get('/api/turfs/my-turfs');
       _myTurfs = (res as List).map((t) => Turf.fromJson(t)).toList();
+      
+      // Default select first turf if none selected or not in list
+      if (_myTurfs.isNotEmpty && (_selectedTurf == null || !_myTurfs.any((t) => t.id == _selectedTurf!.id))) {
+        _selectedTurf = _myTurfs.first;
+      }
     } catch (e) {
       print('Error fetching turfs: $e');
     } finally {
@@ -91,11 +106,15 @@ class OwnerProvider with ChangeNotifier {
   }
 
   // --- Bookings ---
-  Future<void> fetchBookings() async {
+  Future<void> fetchBookings([String? turfId]) async {
     _isLoading = true;
     notifyListeners();
     try {
-      final res = await ApiService.get('/api/owner/bookings');
+      final endpoint = turfId != null && turfId.isNotEmpty 
+          ? '/api/owner/bookings?turf_id=$turfId'
+          : '/api/owner/bookings';
+      
+      final res = await ApiService.get(endpoint);
       _bookings = (res as List).map((b) => Booking.fromJson(b)).toList();
       
       final statsRes = await ApiService.get('/api/owner/stats');

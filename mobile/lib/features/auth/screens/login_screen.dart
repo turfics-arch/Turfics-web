@@ -102,7 +102,48 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
       }
     } catch (e) {
       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+         // Custom Error Dialog (SweetAlert Style)
+         showDialog(
+           context: context,
+           builder: (context) => Dialog(
+             backgroundColor: Colors.transparent,
+             child: GlassContainer(
+               padding: const EdgeInsets.all(24),
+               child: Column(
+                 mainAxisSize: MainAxisSize.min,
+                 children: [
+                   Container(
+                     padding: const EdgeInsets.all(16),
+                     decoration: BoxDecoration(color: AppColors.error.withOpacity(0.1), shape: BoxShape.circle),
+                     child: const Icon(Icons.error_outline, color: AppColors.error, size: 40),
+                   ),
+                   const SizedBox(height: 16),
+                   const Text("Login Failed", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                   const SizedBox(height: 8),
+                   Text(
+                     e.toString().replaceAll('Exception: ', ''),
+                     textAlign: TextAlign.center,
+                     style: const TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                   ),
+                   const SizedBox(height: 24),
+                   SizedBox(
+                     width: double.infinity,
+                     child: ElevatedButton(
+                       style: ElevatedButton.styleFrom(
+                         backgroundColor: AppColors.error,
+                         foregroundColor: Colors.white,
+                         padding: const EdgeInsets.symmetric(vertical: 12),
+                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                       ),
+                       onPressed: () => Navigator.pop(context),
+                       child: const Text("Try Again"),
+                     ),
+                   )
+                 ],
+               ),
+             ),
+           ),
+         );
       }
     }
   }
@@ -148,7 +189,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
                   Image.asset(
                     'assets/images/turfics_logo.png',
                     height: 100,
-                  ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.2, end: 0),
+                  ).animate(onPlay: (c) => c.repeat(period: 2500.ms)) // Repeat every 2.5s
+                   .shimmer(duration: 1500.ms, color: Colors.white, angle: 0.8) // Bright White Shine
+                   .animate() // Entrance
+                   .fadeIn(duration: 800.ms)
+                   .slideY(begin: -0.2, end: 0),
 
                   const SizedBox(height: 40),
 

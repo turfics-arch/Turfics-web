@@ -174,6 +174,15 @@ class Turf {
       status: turfJson['status'] ?? 'active',
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Turf && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }
 
 class StaffMember {
