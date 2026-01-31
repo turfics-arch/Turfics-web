@@ -119,6 +119,7 @@ class Turf {
   final double lng;
   final String description;
   final List<TurfGame> games;
+  final String status;
 
   double get price => pricePerHour;
 
@@ -137,6 +138,7 @@ class Turf {
     required this.lng,
     this.description = '',
     this.games = const [],
+    this.status = 'active',
   });
 
   factory Turf.fromJson(Map<String, dynamic> json) {
@@ -147,7 +149,6 @@ class Turf {
       return [];
     }
 
-    // Handle nested format if coming from /full endpoint
     final turfJson = json['turf'] ?? json;
     final gamesJson = json['games'] as List? ?? [];
 
@@ -170,6 +171,161 @@ class Turf {
       lng: double.tryParse(turfJson['longitude']?.toString() ?? '0') ?? 0.0,
       description: turfJson['description'] ?? '',
       games: gamesJson.map((g) => TurfGame.fromJson(g)).toList(),
+      status: turfJson['status'] ?? 'active',
+    );
+  }
+}
+
+class StaffMember {
+  final String id;
+  final String email;
+  final String username;
+  final String role;
+  final String status;
+  final String joinedAt;
+
+  StaffMember({
+    required this.id,
+    required this.email,
+    required this.username,
+    required this.role,
+    required this.status,
+    required this.joinedAt,
+  });
+
+  factory StaffMember.fromJson(Map<String, dynamic> json) {
+    return StaffMember(
+      id: json['id']?.toString() ?? '',
+      email: json['email'] ?? '',
+      username: json['username'] ?? '',
+      role: json['role'] ?? 'manager',
+      status: json['status'] ?? 'active',
+      joinedAt: json['joined_at'] ?? '',
+    );
+  }
+}
+
+class Customer {
+  final String id;
+  final String name;
+  final String email;
+  final String phone;
+  final int totalBookings;
+  final double totalSpend;
+  final String? lastVisit;
+
+  Customer({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.phone,
+    required this.totalBookings,
+    required this.totalSpend,
+    this.lastVisit,
+  });
+
+  factory Customer.fromJson(Map<String, dynamic> json) {
+    return Customer(
+      id: json['id']?.toString() ?? '',
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'] ?? '',
+      totalBookings: json['total_bookings'] ?? 0,
+      totalSpend: double.tryParse(json['total_spend']?.toString() ?? '0') ?? 0.0,
+      lastVisit: json['last_visit'],
+    );
+  }
+}
+
+class Booking {
+  final String id;
+  final String turfName;
+  final String unitName;
+  final String gameType;
+  final String startTime;
+  final String endTime;
+  final double totalPrice;
+  final String status;
+  final String guestName;
+  final String? guestPhone;
+  final String bookingSource;
+
+  Booking({
+    required this.id,
+    required this.turfName,
+    required this.unitName,
+    required this.gameType,
+    required this.startTime,
+    required this.endTime,
+    required this.totalPrice,
+    required this.status,
+    required this.guestName,
+    this.guestPhone,
+    required this.bookingSource,
+  });
+
+  factory Booking.fromJson(Map<String, dynamic> json) {
+    return Booking(
+      id: json['booking_id']?.toString() ?? json['id']?.toString() ?? '',
+      turfName: json['turf_name'] ?? '',
+      unitName: json['unit_name'] ?? '',
+      gameType: json['game_type'] ?? '',
+      startTime: json['start_time'] ?? '',
+      endTime: json['end_time'] ?? '',
+      totalPrice: double.tryParse(json['total_price']?.toString() ?? '0') ?? 0.0,
+      status: json['status'] ?? 'pending',
+      guestName: json['guest_name'] ?? 'Guest',
+      guestPhone: json['guest_phone'],
+      bookingSource: json['booking_source'] ?? 'online',
+    );
+  }
+}
+
+class MaintenanceTask {
+  final String id;
+  final String title;
+  final String scheduledDate;
+  final String priority;
+  final String status;
+
+  MaintenanceTask({
+    required this.id,
+    required this.title,
+    required this.scheduledDate,
+    required this.priority,
+    required this.status,
+  });
+
+  factory MaintenanceTask.fromJson(Map<String, dynamic> json) {
+    return MaintenanceTask(
+      id: json['id']?.toString() ?? '',
+      title: json['title'] ?? '',
+      scheduledDate: json['scheduled_date'] ?? '',
+      priority: json['priority'] ?? 'medium',
+      status: json['status'] ?? 'pending',
+    );
+  }
+}
+
+class MaintenanceAsset {
+  final String id;
+  final String name;
+  final String status;
+  final int currentHours;
+
+  MaintenanceAsset({
+    required this.id,
+    required this.name,
+    required this.status,
+    required this.currentHours,
+  });
+
+  factory MaintenanceAsset.fromJson(Map<String, dynamic> json) {
+    return MaintenanceAsset(
+      id: json['id']?.toString() ?? '',
+      name: json['name'] ?? '',
+      status: json['status'] ?? 'active',
+      currentHours: json['current_hours'] ?? 0,
     );
   }
 }
@@ -263,6 +419,7 @@ class Tournament {
   final int registeredTeams;
   final String imageUrl;
   final String status;
+  final double walletBalance;
 
   Tournament({
     required this.id,
@@ -277,6 +434,7 @@ class Tournament {
     required this.registeredTeams,
     required this.imageUrl,
     required this.status,
+    this.walletBalance = 0,
   });
 
   factory Tournament.fromJson(Map<String, dynamic> json) {
@@ -293,6 +451,7 @@ class Tournament {
       registeredTeams: int.tryParse(json['registered_teams']?.toString() ?? '0') ?? 0,
       imageUrl: json['image_url'] ?? '',
       status: json['status'] ?? 'Open',
+      walletBalance: double.tryParse(json['wallet_balance']?.toString() ?? '0') ?? 0.0,
     );
   }
 }

@@ -5,9 +5,9 @@ class AppConstants {
   // Networking
   static String get baseUrl {
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2:5001/api';
+      return 'http://10.0.2.2:5000/api';
     }
-    return 'http://127.0.0.1:5001/api'; // Windows, iOS Simulator, Web
+    return 'http://127.0.0.1:5000/api'; // Windows, iOS Simulator, Web
   } 
   
   // Padding & Spacing
