@@ -4,10 +4,14 @@ import 'dart:io';
 class AppConstants {
   // Networking
   static String get baseUrl {
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:5000';
-    }
-    return 'http://127.0.0.1:5000'; // Windows, iOS Simulator, Web
+    // Return Production URL
+    return 'https://turfics-web.onrender.com';
+    
+    // Dev Fallback (Uncomment if needed)
+    // if (Platform.isAndroid) {
+    //   return 'http://10.0.2.2:5000';
+    // }
+    // return 'http://127.0.0.1:5000'; 
   } 
   
   // Padding & Spacing
