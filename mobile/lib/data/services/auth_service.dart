@@ -27,7 +27,7 @@ class AuthService {
   Future<Map<String, dynamic>> register(String name, String email, String password, String role) async {
     try {
       final response = await ApiService.post('/api/auth/register', {
-        'name': name,
+        'username': name,
         'email': email,
         'password': password,
         'role': role,

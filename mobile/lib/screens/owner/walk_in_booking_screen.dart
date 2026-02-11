@@ -7,7 +7,9 @@ import '../../core/constants/constants.dart';
 import '../../data/models/models.dart';
 
 class WalkInBookingScreen extends StatefulWidget {
-  const WalkInBookingScreen({super.key});
+  final Map<String, dynamic>? initialParams; // Accept params from navigation
+
+  const WalkInBookingScreen({super.key, this.initialParams});
 
   @override
   State<WalkInBookingScreen> createState() => _WalkInBookingScreenState();
@@ -36,17 +38,49 @@ class _WalkInBookingScreenState extends State<WalkInBookingScreen> {
   Future<void> _loadData() async {
     final owner = Provider.of<OwnerProvider>(context, listen: false);
     await owner.fetchMyTurfs();
-    if (owner.myTurfs.isNotEmpty) {
-      setState(() => _selectedTurfId = owner.myTurfs.first.id);
+    
+    // Apply initial params if present
+    if (widget.initialParams != null) {
+       final params = widget.initialParams!;
+       if (params['turfId'] != null) {
+         _selectedTurfId = params['turfId'].toString();
+       }
+       if (params['unitId'] != null && params['unitId'] != 'all') {
+         _selectedUnitId = params['unitId'].toString();
+       }
+       if (params['startTime'] != null) {
+         final dt = DateTime.parse(params['startTime']);
+         _selectedDate = dt;
+         _selectedTime = TimeOfDay.fromDateTime(dt);
+       }
+    } else {
+        // Default behavior (first turf)
+        if (owner.myTurfs.isNotEmpty && _selectedTurfId == null) {
+          setState(() => _selectedTurfId = owner.myTurfs.first.id.toString());
+        }
+    }
+    if (!mounted) return;
+    setState(() {}); // Refresh UI with params
+    
+    // Ensure games/units are loaded for the selected turf
+    if (_selectedTurfId != null) {
+      final turf = owner.myTurfs.firstWhere((t) => t.id.toString() == _selectedTurfId.toString(), orElse: () => owner.myTurfs.first);
+      if (turf.games.isEmpty) {
+        print("DEBUG: Games empty for turf $_selectedTurfId, fetching...");
+        await owner.fetchGames(_selectedTurfId!);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final owner = Provider.of<OwnerProvider>(context);
-    final turf = _selectedTurfId != null ? owner.myTurfs.firstWhere((t) => t.id == _selectedTurfId) : null;
+    // Ensure accurate matching for turf
+    final turf = _selectedTurfId != null 
+        ? owner.myTurfs.where((t) => t.id.toString() == _selectedTurfId.toString()).firstOrNull 
+        : null;
     final allUnits = turf?.games.flatMap((g) => g.units).toList() ?? [];
-
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(_isBlocking ? 'Block Slot' : 'Walk-In Booking'),
@@ -61,7 +95,7 @@ class _WalkInBookingScreenState extends State<WalkInBookingScreen> {
             _buildLabel('Select Venue'),
             _buildTurfSelector(owner),
             const SizedBox(height: 16),
-            _buildLabel('Select Court / Unit'),
+            _buildLabel('Select Pitch / Court'),
             _buildUnitSelector(allUnits),
             const SizedBox(height: 16),
             Row(
@@ -169,6 +203,14 @@ class _WalkInBookingScreenState extends State<WalkInBookingScreen> {
   }
 
   Widget _buildUnitSelector(List<TurfUnit> units) {
+    // Ensure selected unit exists in the list given to dropdown
+    // If not, reset selection to null or first available to prevent crash
+    if (_selectedUnitId != null && !units.any((u) => u.id == _selectedUnitId)) {
+        // Defer state update to next frame to avoid build error, or just handle display
+        // ideally we should fix state, but for display safely:
+        _selectedUnitId = null; 
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12)),
@@ -176,7 +218,7 @@ class _WalkInBookingScreenState extends State<WalkInBookingScreen> {
         child: DropdownButton<String>(
           value: _selectedUnitId,
           isExpanded: true,
-          hint: const Text('Select Unit'),
+          hint: const Text('Select Pitch / Court'),
           dropdownColor: AppColors.background,
           items: units.map((u) => DropdownMenuItem(value: u.id, child: Text(u.name))).toList(),
           onChanged: (v) => setState(() => _selectedUnitId = v),

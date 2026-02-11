@@ -28,7 +28,12 @@ class _OwnerBookingsScreenState extends State<OwnerBookingsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<OwnerProvider>(context, listen: false).fetchBookings();
+      final provider = Provider.of<OwnerProvider>(context, listen: false);
+      // Calls now use cached data by default
+      provider.fetchBookings();
+      if (provider.selectedTurf != null) {
+        provider.fetchGames(provider.selectedTurf!.id);
+      }
     });
   }
 
@@ -39,12 +44,10 @@ class _OwnerBookingsScreenState extends State<OwnerBookingsScreen> {
 
     // Handle initial selection for filters if turf changes
     if (selectedTurf != null) {
-      if (_selectedGameId == null && selectedTurf.games.isNotEmpty) {
-        _selectedGameId = selectedTurf.games.first.id;
-        if (selectedTurf.games.first.units.isNotEmpty) {
-           _selectedUnitId = selectedTurf.games.first.units.first.id;
-        }
+      if (_selectedUnitId == null) {
+         _selectedUnitId = 'all';
       }
+      // REMOVED: Auto-select first game. We want default to be null aka "All Sports".
     }
 
     return Scaffold(
@@ -83,29 +86,50 @@ class _OwnerBookingsScreenState extends State<OwnerBookingsScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text("Bookings", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          if (selectedTurf != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.primary.withOpacity(0.3))
+          Row(
+            children: [
+              // Added Filter Button
+              IconButton(
+                onPressed: () {
+                   // Show filter bottom sheet (placeholder for now)
+                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Advanced Filters Coming Soon")));
+                },
+                icon: const Icon(Icons.filter_list),
+                tooltip: "Filter",
               ),
-              child: Row(
-                children: [
-                  const Icon(Icons.location_on, size: 14, color: AppColors.primary),
-                  const SizedBox(width: 4),
-                  Text(selectedTurf.name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                ],
-              ),
-            )
+              if (selectedTurf != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.3))
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.location_on, size: 14, color: AppColors.primary),
+                      const SizedBox(width: 4),
+                      Text(selectedTurf.name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                    ],
+                  ),
+                ),
+            ],
+          )
         ],
       ),
     );
   }
 
   Widget _buildFilters(BuildContext context, Turf turf) {
-    if (turf.games.isEmpty) return const SizedBox.shrink();
+    if (turf.games.isEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            "No sports configured. You can still view all bookings below.",
+            style: TextStyle(color: Colors.white.withOpacity(0.5), fontStyle: FontStyle.italic, fontSize: 12)
+          ),
+        );
+    }
 
     // Sport Chips
     return SizedBox(
@@ -119,10 +143,30 @@ class _OwnerBookingsScreenState extends State<OwnerBookingsScreen> {
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
-              itemCount: turf.games.length,
+              itemCount: turf.games.length + 1, // +1 for "All"
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
-                final game = turf.games[index];
+                if (index == 0) {
+                   // "All" Chip
+                   final isSelected = _selectedGameId == null;
+                   return ChoiceChip(
+                      label: const Text("All Sports"),
+                      selected: isSelected,
+                      onSelected: (bool selected) {
+                        if (selected) setState(() { 
+                           _selectedGameId = null; 
+                           _selectedUnitId = 'all'; // Reset unit selection
+                        });
+                      },
+                      selectedColor: AppColors.primary.withOpacity(0.2),
+                      labelStyle: TextStyle(color: isSelected ? AppColors.primary : AppColors.textSecondary),
+                      backgroundColor: Theme.of(context).cardColor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isSelected ? AppColors.primary : Colors.transparent)),
+                      showCheckmark: false,
+                   );
+                }
+
+                final game = turf.games[index - 1]; // Offset index
                 final isSelected = game.id == _selectedGameId;
                 return ChoiceChip(
                   label: Text(game.sportType),
@@ -131,8 +175,10 @@ class _OwnerBookingsScreenState extends State<OwnerBookingsScreen> {
                     if (selected) {
                       setState(() {
                         _selectedGameId = game.id;
-                        // Auto-select first unit
-                        if (game.units.isNotEmpty) _selectedUnitId = game.units.first.id;
+                        // Auto-select first unit or keep 'all'?
+                        // User wants grid for all pitches of selected sport usually.
+                        // Let's default to 'all' so they see the grid view for this sport.
+                        _selectedUnitId = 'all'; 
                       });
                     }
                   },
@@ -150,15 +196,32 @@ class _OwnerBookingsScreenState extends State<OwnerBookingsScreen> {
           if (_selectedGameId != null)
              Builder(builder: (context) {
                 final game = turf.games.firstWhere((g) => g.id == _selectedGameId!);
+                
+                // Add 'All' option
+                final allUnits = [
+                  TurfUnit(
+                    id: 'all', 
+                    name: 'All Pitches', 
+                    unitType: 'ALL', // Correct field name
+                    capacity: 0, 
+                    price: 0,
+                    size: '', 
+                    indoor: false, 
+                    hasLighting: false, 
+                    images: []
+                  ),
+                  ...game.units
+                ];
+
                 return SizedBox(
                   height: 35,
                   child: ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     scrollDirection: Axis.horizontal,
-                    itemCount: game.units.length,
+                    itemCount: allUnits.length,
                     separatorBuilder: (_, __) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
-                      final unit = game.units[index];
+                      final unit = allUnits[index];
                       final isSelected = unit.id == _selectedUnitId;
                       return GestureDetector(
                         onTap: () => setState(() => _selectedUnitId = unit.id),
@@ -251,121 +314,259 @@ class _OwnerBookingsScreenState extends State<OwnerBookingsScreen> {
   }
 
   Widget _buildTimeline(BuildContext context, OwnerProvider provider) {
-    if (_selectedUnitId == null) {
-      return const Center(child: Text("Select a Pitch to view schedule", style: TextStyle(color: AppColors.textSecondary)));
+    // If unit ID is null, we treat it as 'all' by default now
+    final effectiveUnitId = _selectedUnitId ?? 'all';
+
+    // "All" View - Aggregated Grid Logic
+    if (effectiveUnitId == 'all') {
+       // We need to show availability for ALL units in the selected game (or all games if none selected?)
+       // The UI structure implies a Game is selected (tabs above), so we show all units for that game.
+       // If no game selected (rare), we show nothing or everything.
+
+       // 1. Get List of Units to Show
+       // Based on `_selectedGameId`
+       List<TurfUnit> relevantUnits = [];
+       if (_selectedGameId != null) {
+          final game = provider.selectedTurf?.games.where((g) => g.id == _selectedGameId).firstOrNull;
+          if (game != null) relevantUnits = game.units;
+       } else if (provider.selectedTurf != null) {
+          // Flatten all
+          relevantUnits = provider.selectedTurf!.games.expand((g) => g.units).toList();
+       }
+
+       if (relevantUnits.isEmpty) {
+          return Center(child: Text("No Pitches Configured", style: TextStyle(color: Colors.white54)));
+       }
+
+       return ListView.builder(
+         padding: const EdgeInsets.all(16),
+         itemCount: relevantUnits.length,
+         itemBuilder: (context, index) {
+            final unit = relevantUnits[index];
+            
+            // Build a Mini Grid for this Unit
+            // Reuse logic or create simplified horizontal strip? 
+            // User requested "Grid with all booking details".
+            // Let's do a Section Header + Mini Height Grid/Horizontal Strip
+            
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                 Padding(
+                   padding: const EdgeInsets.only(bottom: 8.0, left: 4),
+                   child: Text(unit.name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary)),
+                 ),
+                 SizedBox(
+                   height: 80, // Height for single row or 2 rows of slots
+                   child: ListView.separated(
+                     scrollDirection: Axis.horizontal,
+                     itemCount: 24 - 6, // 6 AM to 12 PM = 18 hours. Let's show hours for now to fit. 
+                     // Or better: Re-use the grid logic but horizontal?
+                     // Let's effectively show a horizontal timeline for each Unit.
+                     separatorBuilder: (_, __) => SizedBox(width: 8),
+                     itemBuilder: (ctx, slotIndex) {
+                        // Logic similar to grid
+                        final startHour = 6;
+                        final hour = startHour + slotIndex;
+                        final dt = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, hour, 0);
+                        
+                        // Check booking for THIS unit + time
+                        bool isBooked = false;
+                        String guest = "";
+                        Booking? bookingRef;
+
+                        for (var b in provider.bookings) {
+                           try {
+                              // Strict Unit match
+                              if (b.turfUnitId != null && b.turfUnitId.toString() != unit.id) continue;
+                              // Fallback if ID missing: Name match? (Risk of collision but okay for now)
+                              if (b.turfUnitId == null && b.unitName != unit.name) continue;
+
+                              final bStart = DateTime.parse(b.startTime);
+                              final bEnd = DateTime.parse(b.endTime);
+                              if (dt.isAtSameMomentAs(bStart) || (dt.isAfter(bStart) && dt.isBefore(bEnd))) {
+                                 isBooked = true;
+                                 guest = b.guestName.isEmpty ? "Booked" : b.guestName;
+                                 bookingRef = b;
+                                 break;
+                              }
+                           } catch (e) {}
+                        }
+
+                        // Render Small Slot Chip
+                        Color bg = isBooked ? AppColors.error.withOpacity(0.2) : AppColors.success.withOpacity(0.1);
+                        Color border = isBooked ? AppColors.error.withOpacity(0.5) : AppColors.success.withOpacity(0.3);
+                        
+                        return GestureDetector(
+                          onTap: () {
+                             if (isBooked && bookingRef != null) {
+                                context.push('/owner/booking-details', extra: bookingRef);
+                             } else if (!isBooked) {
+                                // Walk in
+                                final params = {
+                                  'turfId': provider.selectedTurf?.id,
+                                  'unitId': unit.id,
+                                  'startTime': dt.toIso8601String(),
+                                };
+                                context.push('/owner/walk-in', extra: params);
+                             }
+                          },
+                          child: Container(
+                            width: 70,
+                            decoration: BoxDecoration(
+                              color: bg,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: border)
+                            ),
+                            child: Column(
+                               mainAxisAlignment: MainAxisAlignment.center,
+                               children: [
+                                  Text("${hour}:00", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                                  SizedBox(height: 2),
+                                  Text(isBooked ? guest : "Free", 
+                                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 9, color: isBooked ? AppColors.error : AppColors.success))
+                               ]
+                            ),
+                          ),
+                        );
+                     },
+                   ),
+                 ),
+                 SizedBox(height: 24),
+              ],
+            );
+         },
+       );
     }
+    
+    // Specific Unit View (Slot Grid)
+    
+    // Specific Unit View (Slot Grid)
+    
+    // Define Grid Logic (e.g., 6 AM - 12 AM)
+    const int startHour = 6;
+    const int endHour = 24; // Midnight
+    const int slotsPerHour = 2; // 30 Minute Slots
+    const int totalSlots = (endHour - startHour) * slotsPerHour;
 
-    // Filter bookings for this unit and date
-    // Note: In real app, date comparison should be robust
-    final relevantBookings = provider.bookings.where((b) {
-      // Unit name might not be ID in the booking model, but let's assume filtering logic holds
-      // Ideally backend returns unit_id
-      // For now, let's just mock filter or check if 'unitName' matches selected unit name
-      // This is weak, but we rely on available model data.
-      return true; // Simplify for UI demo
-    }).toList();
-
-    // 30-min slots from 6 AM to 12 AM
-    final startHour = 6;
-    final endHour = 24;
-    final totalSlots = (endHour - startHour) * 2; // 2 slots per hour
-
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      controller: _scrollController,
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3, // 3 columns
+        childAspectRatio: 1.8, // More condensed for 30 min slots
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
       itemCount: totalSlots,
       itemBuilder: (context, index) {
-        final totalMinutes = (startHour * 60) + (index * 30);
-        final slotHour = totalMinutes ~/ 60;
-        final slotMinute = totalMinutes % 60;
+        final hour = startHour + (index ~/ slotsPerHour);
+        final minute = (index % slotsPerHour) * 30;
         
-        final timeStr = "${slotHour > 12 ? slotHour - 12 : slotHour}:${slotMinute.toString().padLeft(2, '0')} ${slotHour >= 12 ? 'PM' : 'AM'}";
+        final dt = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, hour, minute);
+        final timeStr = DateFormat('h:mm a').format(dt);
         
-        // Mock Status Logic
-        // In real app, check intersection with relevantBookings
-        // Mock: 9:00 - 10:00 Booked
-        bool isBooked = (slotHour == 9 || slotHour == 20) && (slotMinute == 0 || slotMinute == 30);
-        bool isBlocked = (slotHour == 14); // 2 PM Blocked
+        // Check availability
+        bool isBooked = false;
+        Booking? slotBooking;
+        
+        for (var b in provider.bookings) {
+          try {
+            final bStart = DateTime.parse(b.startTime);
+            final bEnd = DateTime.parse(b.endTime);
+            
+            // Strict Unit Matching
+            bool sameUnit = true; 
+            if (effectiveUnitId != 'all') {
+               // Use the newly added field usually, or fallback to name if ID missing (rare)
+               if (b.turfUnitId != null) {
+                  sameUnit = b.turfUnitId.toString() == effectiveUnitId;
+               } 
+            }
 
-        return _buildSlotRow(context, timeStr, isBooked, isBlocked, slotHour, slotMinute);
+            if (sameUnit) {
+               // Check overlap: Slot Start < Booking End AND Slot End > Booking Start
+               // Slot End is +30 mins
+               final slotEnd = dt.add(const Duration(minutes: 30));
+               
+               // Booking covers this slot if:
+               // Booking Start is before Slot End AND Booking End is after Slot Start
+               if (bStart.isBefore(slotEnd) && bEnd.isAfter(dt)) {
+                  isBooked = true;
+                  slotBooking = b;
+                  break;
+               }
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        return _buildGridSlot(context, timeStr, isBooked, slotBooking, dt);
       },
     );
   }
 
-  Widget _buildSlotRow(BuildContext context, String timeStr, bool isBooked, bool isBlocked, int hour, int minute) {
-    Color slotColor = Theme.of(context).cardColor;
-    Color borderColor = AppColors.glassBorderDark;
-    String statusText = "Available";
-    Color textColor = AppColors.textSecondary;
-
+  Widget _buildGridSlot(BuildContext context, String timeStr, bool isBooked, Booking? booking, DateTime slotTime) {
+    Color bgColor = isBooked 
+        ? AppColors.error.withOpacity(0.15) 
+        : AppColors.success.withOpacity(0.15);
+    Color borderColor = isBooked
+        ? AppColors.error.withOpacity(0.3)
+        : AppColors.success.withOpacity(0.3);
+    Color textColor = isBooked ? AppColors.error : AppColors.success;
+    
     if (isBooked) {
-      slotColor = AppColors.error.withOpacity(0.1); // Reddish for booked
-      borderColor = AppColors.error.withOpacity(0.3);
-      statusText = "Booked";
-      textColor = AppColors.error;
-    } else if (isBlocked) {
-      slotColor = Colors.grey.withOpacity(0.1);
-      borderColor = Colors.grey.withOpacity(0.3);
-      statusText = "Blocked";
-      textColor = Colors.grey;
-    } else {
-       // Available
-       slotColor = AppColors.success.withOpacity(0.1); // Greenish tint for available
-       borderColor = AppColors.success.withOpacity(0.3);
-       statusText = "Available";
-       textColor = AppColors.success;
+       // Check if Blocked vs Booked if status available
+       if (booking?.status == 'blocked') {
+          bgColor = Colors.grey.withOpacity(0.2);
+          borderColor = Colors.grey.withOpacity(0.4);
+          textColor = Colors.grey;
+       }
     }
 
     return GestureDetector(
       onTap: () {
         if (isBooked) {
-          // Open Detailed Invoice View
-          // In a real app, 'relevantBookings' would contain the booking object for this slot.
-          // For now, we mock passing a booking or use the first one available.
-           final bookings = Provider.of<OwnerProvider>(context, listen: false).bookings;
-           final mockBooking = bookings.isNotEmpty ? bookings.first : Booking(
-             id: "MOCK-123456", 
-             turfName: "Premier Arena",
-             unitName: "Pitch A",
-             gameType: "Football",
-             startTime: DateTime.now().toIso8601String(), 
-             endTime: DateTime.now().add(const Duration(hours: 1)).toIso8601String(),
-             totalPrice: 1200, 
-             status: "confirmed",
-             guestName: "Ramesh",
-             bookingSource: "walk-in"
-           );
-           
-           context.push('/owner/booking-details', extra: mockBooking);
+          // Show details
+          if (booking != null) {
+              context.push('/owner/booking-details', extra: booking);
+          }
         } else {
-           _roundOffAndBook(context, hour, minute);
+           // Go to Walk-in with pre-selected data
+           // Passing params via URL query vars or extra object
+           final params = {
+             'turfId': Provider.of<OwnerProvider>(context, listen: false).selectedTurf?.id,
+             'unitId': _selectedUnitId,
+             'startTime': slotTime.toIso8601String(),
+           };
+           context.push('/owner/walk-in', extra: params);
         }
       },
       child: Container(
-        height: 50,
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: slotColor,
-          borderRadius: BorderRadius.circular(8),
+          color: bgColor,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: borderColor),
         ),
-        child: Row(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 70, 
-              child: Text(timeStr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13))
-            ),
-            Container(width: 1, height: 30, color: borderColor),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                isBooked ? "Ramesh (Football)" : statusText,
-                style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+            Text(timeStr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            const SizedBox(height: 4),
+            Text(
+              isBooked 
+                ? (booking?.guestName ?? "Booked") 
+                : "Available",
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                color: textColor,
+                fontWeight: isBooked ? FontWeight.normal : FontWeight.bold
               ),
             ),
-            if (!isBooked)
-              Icon(Icons.add, size: 16, color: textColor)
           ],
         ),
       ),

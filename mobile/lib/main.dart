@@ -44,6 +44,13 @@ import 'features/discovery/screens/turfs_screen.dart';
 import 'screens/dashboard/my_bookings_screen.dart';
 import 'screens/dashboard/profile_screen.dart';
 import 'screens/dashboard/home_tab.dart';
+import 'screens/owner/onboarding/onboarding_shell.dart';
+import 'screens/owner/onboarding/steps/step1_identity.dart';
+import 'screens/owner/onboarding/steps/step2_hours.dart';
+import 'screens/owner/onboarding/steps/step3_mode.dart';
+import 'screens/owner/onboarding/steps/step4_slots.dart';
+import 'screens/owner/onboarding/steps/step5_success.dart';
+import 'screens/owner/onboarding/onboarding_state.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,7 +83,13 @@ class TurficsApp extends StatelessWidget {
         provider.ChangeNotifierProvider(create: (_) => CoachProvider()),
         provider.ChangeNotifierProvider(create: (_) => MatchProvider()),
         provider.ChangeNotifierProvider(create: (_) => TournamentProvider()),
-        provider.ChangeNotifierProvider(create: (_) => OwnerProvider()),
+
+        provider.ChangeNotifierProxyProvider<AuthProvider, OwnerProvider>(
+          create: (_) => OwnerProvider(),
+          update: (_, auth, owner) => owner!..setAuthProvider(auth),
+        ),
+        // Onboarding State (New)
+        provider.ChangeNotifierProvider(create: (_) => OnboardingState()),
       ],
       child: provider.Consumer2<AuthProvider, ThemeProvider>(
         builder: (context, auth, themeProvider, _) {
@@ -129,6 +142,38 @@ class TurficsApp extends StatelessWidget {
             return const HomeTab();
           },
         ),
+        
+        // Onboarding Flow (Separate Shell)
+        ShellRoute(
+          builder: (context, state, child) => OnboardingShell(child: child),
+          routes: [
+            GoRoute(
+              path: '/owner/onboarding',
+              redirect: (context, state) => '/owner/onboarding/step1',
+            ),
+            GoRoute(
+              path: '/owner/onboarding/step1',
+              builder: (context, state) => const Step1Identity(),
+            ),
+             GoRoute(
+              path: '/owner/onboarding/step2',
+              builder: (context, state) => const Step2Hours(),
+            ),
+             GoRoute(
+              path: '/owner/onboarding/step3',
+              builder: (context, state) => const Step3Mode(),
+            ),
+             GoRoute(
+              path: '/owner/onboarding/step4',
+              builder: (context, state) => const Step4Slots(),
+            ),
+             GoRoute(
+              path: '/owner/onboarding/step5',
+              builder: (context, state) => const Step5Success(),
+            ),
+          ],
+        ),
+
         // Owner Shell Route
         ShellRoute(
           builder: (context, state, child) {
@@ -157,7 +202,13 @@ class TurficsApp extends StatelessWidget {
                      return BookingDetailsScreen(booking: booking);
                   },
                 ),
-                GoRoute(path: 'walk-in', builder: (context, state) => const WalkInBookingScreen()),
+                GoRoute(
+                  path: 'walk-in',
+                  builder: (context, state) {
+                    final params = state.extra as Map<String, dynamic>?;
+                    return WalkInBookingScreen(initialParams: params);
+                  },
+                ),
                 GoRoute(
                   path: 'game-management/:turfId',
                   builder: (context, state) => GameManagementScreen(turfId: state.pathParameters['turfId']!),
@@ -173,6 +224,26 @@ class TurficsApp extends StatelessWidget {
                 ),
                 GoRoute(path: 'promote', builder: (context, state) => const PromoteScreen()),
                 GoRoute(path: 'more', builder: (context, state) => const MoreScreen()),
+                GoRoute(path: 'more', builder: (context, state) => const MoreScreen()),
+              ],
+            ),
+            
+            // Onboarding Flow (Separate Shell)
+            ShellRoute(
+              builder: (context, state, child) => OnboardingShell(child: child),
+              routes: [
+                GoRoute(
+                  path: '/owner/onboarding',
+                  redirect: (context, state) => '/owner/onboarding/step1', // Default to step 1
+                ),
+                GoRoute(
+                  path: '/owner/onboarding/step1',
+                  builder: (context, state) => const Step1Identity(),
+                ),
+                GoRoute(
+                  path: '/owner/onboarding/step2', 
+                  builder: (context, state) => const Scaffold(body: Center(child: Text("Step 2 Placeholder"))), // Temporary
+                ),
               ],
             ),
           ],

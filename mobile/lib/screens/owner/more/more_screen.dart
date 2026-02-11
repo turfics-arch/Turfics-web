@@ -36,7 +36,13 @@ class MoreScreen extends StatelessWidget {
               _buildSettingsTile(context, "Earnings & Payouts", Icons.attach_money, () {}),
               _buildSettingsTile(context, "Operating Hours", Icons.schedule, () {}),
               _buildSettingsTile(context, "Staff & Access", Icons.people_outline, () => context.push('/owner/staff')),
-              _buildSettingsTile(context, "Pricing & Offers", Icons.local_offer_outlined, () {}),
+              _buildSettingsTile(context, "Court & Price Management", Icons.sports_soccer, () {
+                if (selectedTurf != null) {
+                  context.push('/owner/management/games', extra: selectedTurf.id);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please select a turf first")));
+                }
+              }),
 
               const SizedBox(height: 24),
 
@@ -85,7 +91,7 @@ class MoreScreen extends StatelessWidget {
     // Fallback if no turf selected
     final String turfName = turf?.name ?? "No Turf Selected";
     final String location = turf?.location ?? "Add a location";
-    final String imageUrl = turf?.imageUrl ?? "https://via.placeholder.com/150";
+    final String imageUrl = turf?.imageUrl ?? "https://placehold.co/150x150.png";
 
     return GlassContainer(
       padding: const EdgeInsets.all(16),

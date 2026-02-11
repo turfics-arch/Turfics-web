@@ -5,6 +5,7 @@ import Loader from '../components/Loader';
 import { Search, Plus, Users, Radio, Globe, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_URL } from '../utils/api';
 import './Community.css';
 
 const Community = () => {
@@ -31,8 +32,8 @@ const Community = () => {
 
             // Parallel fetch
             const [myRes, publicRes] = await Promise.all([
-                axios.get('http://127.0.0.1:5000/api/communities/my', { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get('http://127.0.0.1:5000/api/communities', { headers: { Authorization: `Bearer ${token}` } })
+                axios.get(`${API_URL}/api/communities/my`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${API_URL}/api/communities`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
 
             setMyCommunities(myRes.data);
@@ -60,7 +61,7 @@ const Community = () => {
         setSearchTerm(e.target.value);
         if (e.target.value.length > 2) {
             try {
-                const res = await axios.get(`http://127.0.0.1:5000/api/communities?q=${e.target.value}`);
+                const res = await axios.get(`${API_URL}/api/communities?q=${e.target.value}`);
                 setPublicCommunities(res.data);
                 if (activeTab !== 'discover') setActiveTab('discover');
             } catch (err) {
@@ -69,7 +70,7 @@ const Community = () => {
         } else if (e.target.value.length === 0) {
             // Reset
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://127.0.0.1:5000/api/communities', { headers: { Authorization: `Bearer ${token}` } });
+            const res = await axios.get(`${API_URL}/api/communities`, { headers: { Authorization: `Bearer ${token}` } });
             setPublicCommunities(res.data);
         }
     };
@@ -93,13 +94,13 @@ const Community = () => {
                 <div className="community-controls">
                     <div className="community-tabs">
                         <button
-                            className={`tab-btn ${activeTab === 'my-communities' ? 'active' : ''}`}
+                            className={`tab - btn ${activeTab === 'my-communities' ? 'active' : ''} `}
                             onClick={() => setActiveTab('my-communities')}
                         >
                             My Communities
                         </button>
                         <button
-                            className={`tab-btn ${activeTab === 'discover' ? 'active' : ''}`}
+                            className={`tab - btn ${activeTab === 'discover' ? 'active' : ''} `}
                             onClick={() => setActiveTab('discover')}
                         >
                             Discover
@@ -132,7 +133,7 @@ const Community = () => {
                                         </div>
                                     ) : (
                                         myCommunities.map(c => (
-                                            <div key={c.id} className="community-card" onClick={() => navigate(`/community/${c.id}`)}>
+                                            <div key={c.id} className="community-card" onClick={() => navigate(`/ community / ${c.id} `)}>
                                                 <div className="card-image-wrapper">
                                                     <div className="card-image" style={{ backgroundImage: `url(${c.image_url || 'https://via.placeholder.com/400x200?text=Community'})` }}></div>
                                                 </div>
@@ -209,7 +210,7 @@ const Community = () => {
                                         </div>
                                     ) : (
                                         publicCommunities.map(c => (
-                                            <div key={c.id} className="community-card" onClick={() => navigate(`/community/${c.id}`)}>
+                                            <div key={c.id} className="community-card" onClick={() => navigate(`/ community / ${c.id} `)}>
                                                 <div className="card-image-wrapper">
                                                     <div className="card-image" style={{ backgroundImage: `url(${c.image_url || 'https://via.placeholder.com/400x200?text=Community'})` }}></div>
                                                 </div>

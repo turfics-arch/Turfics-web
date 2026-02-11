@@ -27,25 +27,30 @@ class ApiService {
     final response = await http.get(
       Uri.parse('${AppConstants.baseUrl}$endpoint'),
       headers: headers,
-    );
+    ).timeout(const Duration(seconds: 90));
     return _handleResponse(response);
   }
 
   // POST Request
   static Future<dynamic> post(String endpoint, dynamic data, {bool auth = true}) async {
     final url = '${AppConstants.baseUrl}$endpoint';
-    print('POST REQUEST TO: $url'); // Debug log
+    print('POST REQUEST TO: $url'); 
+    // Log keys being sent (sanitized)
+    if (data is Map) {
+      print('Payload keys: ${data.keys.toList()}');
+    }
+    
     try {
       final headers = await getHeaders(auth: auth);
       final response = await http.post(
         Uri.parse(url),
         headers: headers,
         body: jsonEncode(data),
-      ).timeout(const Duration(seconds: 10)); // Add timeout
+      ).timeout(const Duration(seconds: 90)); // Increased for Render cold start
       return _handleResponse(response);
     } catch (e) {
-      print('API Error: $e');
-      throw Exception('Connection Failed: Is backend running? $e');
+      print('API Error during $endpoint: $e');
+      rethrow;
     }
   }
 
@@ -74,13 +79,28 @@ class ApiService {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
     } else {
-      // Basic error handling
+      print('API Error Status: ${response.statusCode}');
+      print('API Error Body: ${response.body}');
+      
+      if (response.statusCode == 401) {
+        throw AuthException('Unauthorized');
+      }
+      
+      String message = 'Server error: ${response.statusCode}';
       try {
         final error = jsonDecode(response.body);
-        throw Exception(error['message'] ?? error['error'] ?? 'Something went wrong');
-      } catch (e) {
-        throw Exception('Server error: ${response.statusCode}');
+        message = error['message'] ?? error['error'] ?? message;
+      } catch (_) {
+        // Fallback to default message
       }
+      throw Exception(message);
     }
   }
+}
+
+class AuthException implements Exception {
+  final String message;
+  AuthException(this.message);
+  @override
+  String toString() => message;
 }

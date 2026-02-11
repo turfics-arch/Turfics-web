@@ -76,8 +76,9 @@ except Exception as e:
 
 
 app = Flask(__name__)
-# Allow CORS for all domains for development
-CORS(app, resources={r"/*": {"origins": "*"}})
+# Configuration for CORS
+FRONTEND_URL = os.getenv('FRONTEND_URL', '*')
+CORS(app, resources={r"/*": {"origins": FRONTEND_URL}})
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -124,7 +125,7 @@ jwt = JWTManager(app)
 
 app.register_blueprint(maintenance_bp)
 
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+socketio = SocketIO(app, cors_allowed_origins=os.getenv('FRONTEND_URL', '*'), async_mode='eventlet')
 
 
 @jwt.invalid_token_loader
@@ -251,6 +252,9 @@ def register():
     password = data.get('password')
     role = data.get('role', 'user') 
 
+    if not username or not email or not password:
+         return jsonify({"message": "Username, email, and password are required"}), 400
+
     if User.query.filter_by(username=username).first():
         return jsonify({"message": "Username already exists"}), 400
     if User.query.filter_by(email=email).first():
@@ -323,7 +327,8 @@ def send_otp():
     # Mocking SMS sending
     print(f"DEBUG: Sent OTP {otp} to {phone}")
     
-    return jsonify({"message": "OTP sent successfully", "otp": otp}), 200
+    # SECURITY: Do NOT return the OTP in the response in production.
+    return jsonify({"message": "OTP sent successfully"}), 200
 
 @app.route('/api/auth/otp/verify', methods=['POST'])
 def verify_otp():
@@ -1802,6 +1807,48 @@ def get_owner_stats():
             'amount': booking.total_price
         })
 
+    # 8. Onboarding / New User Logic
+    # Lifetime bookings for this owner
+    lifetime_bookings = db.session.query(db.func.count(Booking.id))\
+        .join(TurfUnit, Booking.turf_unit_id == TurfUnit.id)\
+        .join(TurfGame, TurfUnit.turf_game_id == TurfGame.id)\
+        .join(Turf, TurfGame.turf_id == Turf.id)\
+        .filter(Turf.owner_id == current_user['id'])\
+        .scalar() or 0
+
+    # Turf Setup Status
+    owned_turfs_count = Turf.query.filter_by(owner_id=current_user['id']).count()
+    games_count = db.session.query(db.func.count(TurfGame.id)).join(Turf).filter(Turf.owner_id == current_user['id']).scalar() or 0
+    
+    # Progress Calculation
+    setup_progress = 0
+    blocking_steps = []
+    
+    if owned_turfs_count > 0:
+        setup_progress += 30 # Setup Business
+        
+        # Check Operating Hours (Basic check if not null)
+        turf = Turf.query.filter_by(owner_id=current_user['id']).first()
+        if turf and turf.opening_time:
+             setup_progress += 30 # Set Hours
+        else:
+             blocking_steps.append("Set Operating Hours")
+    else:
+        blocking_steps.append("Add Your Turf")
+
+    if games_count > 0:
+        setup_progress += 30 # Added Slots
+    elif owned_turfs_count > 0:
+         blocking_steps.append("Add First Slot")
+         
+    if lifetime_bookings > 0:
+        setup_progress = 100
+        blocking_steps = []
+    elif setup_progress >= 90:
+        blocking_steps.append("Enable Walk-ins") # Final push
+        
+    is_new_user = (lifetime_bookings == 0)
+
     return jsonify({
         'stats': {
             'revenue_month': revenue_month,
@@ -1809,6 +1856,12 @@ def get_owner_stats():
             'revenue_today': revenue_today,
             'confirmed_bookings': confirmed_count,
             'pending_bookings': pending_count
+        },
+        'onboarding': {
+            'is_new_user': is_new_user,
+            'setup_progress': setup_progress,
+            'blocking_steps': blocking_steps,
+            'lifetime_bookings': lifetime_bookings
         },
         'revenue_trend': trend,
         'sport_stats': sport_data,
@@ -4237,5 +4290,7 @@ def get_advanced_analytics():
 
 if __name__ == '__main__':
     # Use socketio.run instead of app.run
-    print("Starting Turfics Backend with SocketIO...")
-    socketio.run(app, debug=True, port=int(os.getenv("PORT", 5000)))
+    port = int(os.getenv("PORT", 5000))
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    print(f"Starting Turfics Backend on port {port} (debug={debug_mode})...")
+    socketio.run(app, debug=debug_mode, port=port)

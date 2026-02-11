@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Users, MessageSquare, Settings, Lock, Globe, Send, Radio, MoreVertical, Check, X, Shield, ShieldAlert, Link as LinkIcon, Phone, Video, Search } from 'lucide-react';
+import { API_URL } from '../utils/api';
 import axios from 'axios';
 import './ChatWindow.css';
 
@@ -39,7 +40,7 @@ const ChatWindow = ({ communityId, onBack }) => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://127.0.0.1:5000/api/communities/${communityId}`, {
+            const res = await axios.get(`${API_URL}/api/communities/${communityId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setCommunity(res.data);
@@ -53,7 +54,7 @@ const ChatWindow = ({ communityId, onBack }) => {
     const fetchMessages = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://127.0.0.1:5000/api/communities/${communityId}/messages`, {
+            const res = await axios.get(`${API_URL}/api/communities/${communityId}/messages`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMessages(res.data);
@@ -80,7 +81,7 @@ const ChatWindow = ({ communityId, onBack }) => {
             setMessages(prev => [...prev, tempMsg]);
             setNewMessage('');
 
-            await axios.post(`http://127.0.0.1:5000/api/communities/${communityId}/messages`, {
+            await axios.post(`${API_URL}/api/communities/${communityId}/messages`, {
                 content: tempMsg.content,
                 is_broadcast: isBroadcast
             }, {
@@ -95,7 +96,7 @@ const ChatWindow = ({ communityId, onBack }) => {
     const handleJoin = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post(`http://127.0.0.1:5000/api/communities/${communityId}/join`, {}, {
+            const res = await axios.post(`${API_URL}/api/communities/${communityId}/join`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchDetails(); // Refresh

@@ -162,7 +162,7 @@ class Turf {
       imageUrl: turfJson['image_url'] ?? 
                (turfJson['images'] != null && (turfJson['images'] as List).isNotEmpty 
                    ? turfJson['images'][0] 
-                   : 'https://via.placeholder.com/150'),
+                   : 'https://placehold.co/150x150.png'),
       sports: parseList(turfJson['sports']),
       amenities: parseList(turfJson['amenities'] ?? turfJson['facilities']),
       openingTime: turfJson['opening_time'] ?? '06:00',
@@ -258,6 +258,7 @@ class Booking {
   final String guestName;
   final String? guestPhone;
   final String bookingSource;
+  final String? turfUnitId;
 
   Booking({
     required this.id,
@@ -271,6 +272,7 @@ class Booking {
     required this.guestName,
     this.guestPhone,
     required this.bookingSource,
+    this.turfUnitId,
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) {
@@ -286,6 +288,7 @@ class Booking {
       guestName: json['guest_name'] ?? 'Guest',
       guestPhone: json['guest_phone'],
       bookingSource: json['booking_source'] ?? 'online',
+      turfUnitId: json['turf_unit_id']?.toString() ?? json['unit_id']?.toString(),
     );
   }
 }

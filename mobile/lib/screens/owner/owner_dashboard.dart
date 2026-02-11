@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/constants.dart';
-import '../../core/theme/app_theme.dart';
-import '../../core/theme/theme_provider.dart'; // Import ThemeProvider
+import '../../core/theme/theme_provider.dart';
 import '../../widgets/glass_container.dart';
-import '../../features/auth/providers/auth_provider.dart';
 import '../../widgets/skeleton_container.dart';
 import '../../providers/owner_provider.dart';
 import '../../data/models/models.dart';
@@ -23,19 +20,23 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<OwnerProvider>(context, listen: false).fetchMyTurfs();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider = Provider.of<OwnerProvider>(context, listen: false);
+      // Use cached data by default
+      await provider.fetchMyTurfs();
+      if (provider.selectedTurf != null) {
+        await provider.fetchBookings(provider.selectedTurf!.id);
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final ownerProvider = Provider.of<OwnerProvider>(context);
     
     // Mock Data for "Command Center" feel
-    final String greeting = "Good Morning, Owner"; // TODO: Get from User Profile
+    final String greeting = "Good Morning, Owner"; 
     
     return Scaffold(
       body: SafeArea(
@@ -53,11 +54,11 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
               if (ownerProvider.isLoading)
                 _buildStatsSkeleton()
               else
-                _buildStatsRow(context),
+                _buildStatsRow(context, ownerProvider),
 
               const SizedBox(height: 24),
 
-              // 3. Promote Widget (Moved from Nav)
+              // 3. Promote Widget
               if (ownerProvider.isLoading)
                 const SkeletonContainer(width: double.infinity, height: 100, borderRadius: 16)
               else
@@ -78,9 +79,9 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
               if (ownerProvider.isLoading)
                 _buildTimelineSkeleton()
               else
-                _buildTimeline(context),
+                _buildTimeline(context, ownerProvider),
               
-              const SizedBox(height: 80), // Bottom padding for Nav Bar
+              const SizedBox(height: 80), // Bottom padding
             ],
           ),
         ),
@@ -106,30 +107,59 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
               else if (ownerProvider.myTurfs.isEmpty)
                 const Text("No Turfs Found", style: TextStyle(color: AppColors.error))
               else
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<Turf>(
-                    value: ownerProvider.selectedTurf,
-                    icon: const Icon(Icons.arrow_drop_down, color: AppColors.primary),
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600
-                    ),
-                    items: ownerProvider.myTurfs.map((Turf turf) {
-                      return DropdownMenuItem<Turf>(
-                        value: turf,
-                        child: Row(
-                          children: [
-                            const Icon(Icons.location_on, size: 14, color: AppColors.textSecondary),
-                            const SizedBox(width: 4),
-                            Text(turf.name, overflow: TextOverflow.ellipsis),
-                          ],
+                GestureDetector(
+                  onTap: () {
+                     showModalBottomSheet(context: context, backgroundColor: AppColors.darkBackground, builder: (c) {
+                        return Padding(
+                          padding: const EdgeInsets.all(AppConstants.defaultPadding),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text("Select Venue", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                              const SizedBox(height: 16),
+                              ...ownerProvider.myTurfs.map((t) => ListTile(
+                                leading: const Icon(Icons.stadium, color: AppColors.primary),
+                                title: Text(t.name, style: const TextStyle(color: Colors.white)),
+                                trailing: ownerProvider.selectedTurf?.id == t.id ? const Icon(Icons.check, color: AppColors.accent) : null,
+                                onTap: () {
+                                  ownerProvider.selectTurf(t);
+                                  Navigator.pop(context);
+                                },
+                              )),
+                              const Divider(color: Colors.white24),
+                              ListTile(
+                                leading: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                                  child: const Icon(Icons.add, color: Colors.white, size: 20)
+                                ),
+                                title: const Text("Add New Venue", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  context.push('/owner/onboarding');
+                                },
+                              )
+                            ],
+                          ),
+                        );
+                     });
+                  },
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          ownerProvider.selectedTurf?.name ?? "Add Your Turf",
+                          style: const TextStyle(
+                            fontSize: 20, 
+                            fontWeight: FontWeight.bold, 
+                            color: Colors.white
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      );
-                    }).toList(),
-                    onChanged: (Turf? newValue) {
-                      ownerProvider.selectTurf(newValue);
-                    },
+                      ),
+                      const Icon(Icons.keyboard_arrow_down, color: Colors.white54)
+                    ],
                   ),
                 ),
             ],
@@ -137,19 +167,21 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
         ),
         Row(
           children: [
-             // THEME TOGGLE
              IconButton(
                icon: Icon(themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
                onPressed: () => themeProvider.toggleTheme(!themeProvider.isDarkMode),
              ),
-
           ],
         )
       ],
     ).animate().fadeIn().slideY(begin: -0.2);
   }
 
-  Widget _buildStatsRow(BuildContext context) {
+  Widget _buildStatsRow(BuildContext context, OwnerProvider ownerProvider) {
+    if (ownerProvider.myTurfs.isEmpty) {
+      return _buildGettingStartedCard(context, ownerProvider);
+    }
+
     return Row(
       children: [
         Expanded(
@@ -163,33 +195,101 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
     ).animate().fadeIn(delay: 100.ms).slideX();
   }
 
+  Widget _buildGettingStartedCard(BuildContext context, OwnerProvider provider) {
+    int progress = provider.setupProgress;
+    
+    return GestureDetector(
+      onTap: () => context.push('/owner/onboarding'),
+      child: GlassContainer(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Welcome to Turfics 👋", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            const Text("You’re 3 steps away from your first booking", style: TextStyle(color: Colors.white70)),
+            const SizedBox(height: 16),
+            
+            // Progress Bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress / 100,
+                backgroundColor: Colors.white10,
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.greenAccent),
+                minHeight: 8,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text("Setup Progress: $progress%", style: const TextStyle(fontSize: 12, color: Colors.greenAccent)),
+            
+            const SizedBox(height: 20),
+            
+            // Actions
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                 _buildActionButton(context, "Set Operating Hours", Icons.access_time, isDone: progress >= 60),
+                 _buildActionButton(context, "Add First Slot", Icons.calendar_today, isDone: progress >= 90),
+                 _buildActionButton(context, "Enable Walk-ins", Icons.storefront, isDone: progress == 100),
+              ],
+            )
+          ],
+        )
+      ),
+    ).animate().fadeIn().slideY();
+  }
+
+  Widget _buildActionButton(BuildContext context, String label, IconData icon, {bool isDone = false}) {
+     return Opacity(
+       opacity: isDone ? 0.5 : 1.0,
+       child: Container(
+         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+         decoration: BoxDecoration(
+           color: isDone ? Colors.green.withOpacity(0.2) : Colors.white.withOpacity(0.1),
+           borderRadius: BorderRadius.circular(8),
+           border: Border.all(color: isDone ? Colors.green : Colors.white24)
+         ),
+         child: Row(
+           mainAxisSize: MainAxisSize.min,
+           children: [
+             Icon(isDone ? Icons.check : icon, color: isDone ? Colors.green : Colors.white, size: 16),
+             const SizedBox(width: 8),
+             Text(label, style: const TextStyle(fontSize: 12)),
+           ],
+         ),
+       ),
+     );
+  }
+
   Widget _buildStatCard(BuildContext context, String value, String label, IconData icon, Color color, {VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: GlassContainer(
         padding: const EdgeInsets.all(16),
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-               Icon(icon, color: color, size: 20),
-               if (label.contains("Revenue")) 
-                 Container(
-                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                   decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
-                   child: Text("+12%", style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
-                 )
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Rubik')),
-          const SizedBox(height: 4),
-          Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-        ],
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                 Icon(icon, color: color, size: 20),
+                 if (label.contains("Revenue")) 
+                   Container(
+                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                     decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                     child: Text("+12%", style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
+                   )
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, fontFamily: 'Rubik')),
+            const SizedBox(height: 4),
+            Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -201,7 +301,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFF2962FF), Color(0xFF448AFF)], // Blue Thunder Gradient
+            colors: [Color(0xFF2962FF), Color(0xFF448AFF)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -215,7 +315,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
-              child: const Icon(Icons.bolt, color: Colors.white, size: 28), // Thunder Icon
+              child: const Icon(Icons.bolt, color: Colors.white, size: 28),
             ),
             const SizedBox(width: 16),
             const Expanded(
@@ -232,7 +332,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
         ),
       ),
     ).animate(onPlay: (c) => c.repeat(period: 3.seconds))
-     .shimmer(duration: 1200.ms, color: Colors.white.withOpacity(0.8), angle: 0.8) // Thunder Shine
+     .shimmer(duration: 1200.ms, color: Colors.white.withOpacity(0.8), angle: 0.8)
      .fadeIn(duration: 300.ms);
   }
 
@@ -275,6 +375,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
                     decoration: BoxDecoration(
                       color: (action['color'] as Color).withOpacity(0.15),
                       shape: BoxShape.circle,
+                      border: Border.all(color: (action['color'] as Color), width: 1.5),
                     ),
                     child: Icon(action['icon'] as IconData, color: action['color'] as Color, size: 24),
                   ),
@@ -314,19 +415,56 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
     );
   }
 
-  Widget _buildTimeline(BuildContext context) {
-    final schedule = [
-      {"time": "09:00 AM", "status": "Booked", "guest": "Vikram Singh", "sport": "Cricket"},
-      {"time": "10:00 AM", "status": "Available", "guest": "", "sport": ""},
-      {"time": "11:00 AM", "status": "Booked", "guest": "Tech Corp Tourny", "sport": "Football (5v5)"},
-      {"time": "12:00 PM", "status": "Available", "guest": "", "sport": ""},
-    ];
+  Widget _buildTimeline(BuildContext context, OwnerProvider ownerProvider) {
+    // Filter bookings for today
+    final bookings = ownerProvider.bookings.where((b) {
+       final now = DateTime.now();
+       try {
+         final start = DateTime.parse(b.startTime);
+         return start.year == now.year && start.month == now.month && start.day == now.day;
+       } catch (e) {
+         return false;
+       }
+    }).toList();
+    
+    // Sort by time
+    bookings.sort((a, b) {
+      try {
+        return DateTime.parse(a.startTime).compareTo(DateTime.parse(b.startTime));
+      } catch (e) {
+        return 0;
+      }
+    });
+
+    if (bookings.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Icon(Icons.event_busy, color: Colors.white.withOpacity(0.2), size: 40),
+              const SizedBox(height: 8),
+              const Text("No bookings scheduled for today", style: TextStyle(color: Colors.white54)),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Column(
-      children: schedule.asMap().entries.map((entry) {
+      children: bookings.asMap().entries.map((entry) {
         final index = entry.key;
-        final item = entry.value;
-        final isBooked = item['status'] == 'Booked';
+        final booking = entry.value;
+        
+        DateTime start;
+        try {
+          start = DateTime.parse(booking.startTime);
+        } catch (e) {
+          start = DateTime.now();
+        }
+
+        // Format time safely
+        final timeStr = "${start.hour.toString().padLeft(2,'0')}:${start.minute.toString().padLeft(2,'0')}";
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
@@ -334,19 +472,22 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
             children: [
               SizedBox(
                 width: 70,
-                child: Text(item['time']!, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+                child: Text(
+                  timeStr, 
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textSecondary)
+                ),
               ),
               Column(
                 children: [
-                  Container(
+                   Container(
                     width: 12, height: 12,
                     decoration: BoxDecoration(
-                      color: isBooked ? AppColors.primary : AppColors.textSecondary.withOpacity(0.3),
+                      color: AppColors.primary,
                       shape: BoxShape.circle,
                       border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 2),
                     ),
                   ),
-                  if (index != schedule.length - 1)
+                  if (index != bookings.length - 1)
                   Container(width: 2, height: 40, color: AppColors.textSecondary.withOpacity(0.1)),
                 ],
               ),
@@ -356,39 +497,33 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
                   padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isBooked ? item['guest']! : "Available Slot", 
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold, 
-                              color: isBooked ? null : AppColors.success
-                            )
-                          ),
-                          if (isBooked)
-                          Text(item['sport']!, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                        ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              booking.guestName ?? "Guest User", 
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              "${booking.unitName} • ₹${booking.totalPrice}", 
+                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)
+                            ),
+                          ],
+                        ),
                       ),
-                      const Spacer(),
-                      if (!isBooked)
-                         ElevatedButton(
-                           onPressed: () {},
-                           style: ElevatedButton.styleFrom(
-                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                             minimumSize: const Size(0, 32),
-                             backgroundColor: AppColors.primary.withOpacity(0.1),
-                             foregroundColor: AppColors.primary,
-                             elevation: 0,
-                           ),
-                           child: const Text("Promote", style: TextStyle(fontSize: 12)),
-                         )
+                      Container(
+                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                         decoration: BoxDecoration(color: Colors.green.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                         child: Text(booking.status.toUpperCase(), style: const TextStyle(fontSize: 10, color: Colors.green, fontWeight: FontWeight.bold)),
+                      )
                     ],
                   ),
                 ),
               ),
             ],
-          ).animate().fadeIn(delay: (300 + (index * 50)).ms).slideX(begin: 0.1),
+          ).animate().fadeIn(delay: (100 * index).ms).slideX(begin: 0.1),
         );
       }).toList(),
     );

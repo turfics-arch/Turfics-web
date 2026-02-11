@@ -79,11 +79,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
       } else {
         if (_isLogin) {
           await ref.read(authControllerProvider.notifier).login(_usernameController.text, _passwordController.text);
-          // Sync legacy provider for routing
-          // In real migration, we kill legacy provider. For now, we assume main.dart router listens to legacy.
-          // Force legacy provider update IF main.dart not updated to listen to riverpod yet.
-          // Safe bet: Update legacy provider manually to trigger router.
-          if (mounted) legacy_provider.Provider.of<AuthProvider>(context, listen: false).login(_usernameController.text, _passwordController.text); 
+          // Sync legacy provider for routing by reloading from storage
+          if (mounted) await legacy_provider.Provider.of<AuthProvider>(context, listen: false).init();
           
           if (mounted) context.go('/');
         } else {
@@ -93,7 +90,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
             _passwordController.text,
             _selectedRole,
           );
-          if (mounted) legacy_provider.Provider.of<AuthProvider>(context, listen: false).register(_usernameController.text, _emailController.text, _passwordController.text, _selectedRole); // Sync
+          if (mounted) await legacy_provider.Provider.of<AuthProvider>(context, listen: false).init(); // Sync
            if (mounted) {
              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registration Successful! Please login.')));
              setState(() => _isLogin = true);
